@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+   <nav class="navbar">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="SmartPlanner Logo">
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/planner">Planner</a></li>
+        <li><a href="/add_task">Add Task</a></li>
+    </ul>
+
+    <div class="nav-right">
+        <a href="/login" class="login-btn">Login</a>
+    </div>
+</nav>
+
+    <div class="content">
+        <h1>Welcome to Smart Planner</h1>
+    </div>
+
+</body>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+      <h1>Plan Smarter. Focus on What Matters.</h1>
+      <p>Smart Planner helps students optimize study time, tasks, and deadlines.</p>
+      <div class="hero-buttons">
+          <a href="/signup" class="btn primary-btn">Get Started</a>
+          <a href="#demo" class="btn secondary-btn">Watch Demo</a>
+      </div>
+  </div>
+  <div class="hero-image">
+      <img src="{{ url_for('static', filename='planner_mockup.png') }}" alt="Smart Planner Screenshot">
+  </div>
+</section>
