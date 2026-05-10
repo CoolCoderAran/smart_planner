@@ -1,54 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Smart Planner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
 <body>
 
-   <!-- NAVBAR -->
-   <nav class="navbar">
-        <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="SmartPlanner Logo">
-        </div>
+<!-- NAVBAR -->
+<nav class="navbar">
 
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/planner">Planner</a></li>
-            <li><a href="/add_task">Add Task</a></li>
-        </ul>
-
-        <div class="nav-right dropdown">
-    <a href="#" class="login-btn">Account ▾</a>
-
-    <div class="dropdown-menu">
-        <a href="/login">Login</a>
-        <a href="/signup">Sign Up</a>
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="SmartPlanner Logo">
     </div>
-</div>
 
-   <!-- HERO SECTION -->
-   <section class="hero">
-      <div class="hero-content">
-          <h1>Plan Smarter. Focus on What Matters.</h1>
-          <p>Smart Planner helps students optimize study time, tasks, and deadlines.</p>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/planner">Planner</a></li>
+        <li><a href="/add_task">Add Task</a></li>
+    </ul>
 
-          <div class="hero-buttons">
-              <a href="/signup" class="btn primary-btn">Get Started</a>
-              <a href="#demo" class="btn secondary-btn">Watch Demo</a>
-          </div>
-      </div>
+    <div class="nav-right dropdown">
+        <a href="#" class="login-btn">Account ▾</a>
 
-      <div class="hero-image">
-          <img src="{{ url_for('static', filename='planner_mockup.png') }}" alt="Smart Planner Screenshot">
-      </div>
-   </section>
+        <div class="dropdown-menu">
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        </div>
+    </div>
 
- <section class="trust-strip">
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Plan Smarter. Focus on What Matters.</h1>
+        <p>Smart Planner helps students optimize study time, tasks, and deadlines.</p>
+
+        <div class="hero-buttons">
+            <a href="/signup" class="btn primary-btn">Get Started</a>
+            <a href="#demo" class="btn secondary-btn">Watch Demo</a>
+        </div>
+    </div>
+
+    <div class="hero-image">
+        <img src="{{ url_for('static', filename='planner_mockup.png') }}" alt="Smart Planner Screenshot">
+    </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust-strip">
     <p>Built for students who want to study smarter, not harder.</p>
 </section>
 
+<!-- FEATURES -->
 <section class="features">
     <h2>Why Smart Planner Works</h2>
 
@@ -74,7 +72,9 @@
         </div>
     </div>
 </section>
-    <section class="how-it-works">
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
     <h2>How It Works</h2>
 
     <div class="steps">
@@ -83,10 +83,10 @@
         <div class="step">3. Focus and get things done</div>
     </div>
 </section>
+
+<!-- FOOTER -->
 <footer class="footer">
     <p>Smart Planner © 2026</p>
 </footer>
-<a href="/signup" class="btn primary-btn">Get Started</a>
 
 </body>
-</html>
