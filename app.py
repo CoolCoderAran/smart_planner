@@ -76,3 +76,32 @@ def login():
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
+
+import re
+
+COMMON_PATTERNS = [
+    "password", "123456", "qwerty", "admin", "letmein"
+]
+
+def is_secure_password(pw):
+    # length requirement (main driver of entropy)
+    if len(pw) < 12:
+        return False
+
+    # character class checks
+    if not re.search(r"[A-Z]", pw):
+        return False
+    if not re.search(r"[a-z]", pw):
+        return False
+    if not re.search(r"[0-9]", pw):
+        return False
+    if not re.search(r"[^A-Za-z0-9]", pw):
+        return False
+
+    # prevent weak patterns
+    lower_pw = pw.lower()
+    for pattern in COMMON_PATTERNS:
+        if pattern in lower_pw:
+            return False
+
+    return True
