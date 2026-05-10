@@ -15,31 +15,19 @@
             Start organizing your tasks smarter.
         </p>
 
-        <form action="/signup" method="POST" class="auth-form">
+        <form action="/signup" method="POST" class="auth-form" onsubmit="validateForm(event)">
 
             <label>Username</label>
-            <input type="text"
-                   name="username"
-                   placeholder="Choose a username"
-                   required>
+            <input type="text" name="username" placeholder="Choose a username" required>
 
             <label>Email</label>
-            <input type="email"
-                   name="email"
-                   placeholder="Enter your email"
-                   required>
+            <input type="email" name="email" placeholder="Enter your email" required>
 
             <label>Password</label>
-            <input type="password"
-                   name="password"
-                   placeholder="Create password"
-                   required>
+            <input type="password" name="password" id="password" placeholder="Create password" required>
 
             <label>Confirm Password</label>
-            <input type="password"
-                   name="confirm_password"
-                   placeholder="Re-enter password"
-                   required>
+            <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter password" required>
 
             <div class="terms-box">
                 <input type="checkbox" required>
@@ -58,6 +46,37 @@
         </p>
 
     </div>
+
+    <!-- ================= PASSWORD VALIDATION SCRIPT ================= -->
+    <script>
+        function checkPasswordStrength(pw) {
+            let errors = [];
+
+            if (pw.length < 12) errors.push("At least 12 characters");
+            if (!/[A-Z]/.test(pw)) errors.push("1 uppercase letter");
+            if (!/[a-z]/.test(pw)) errors.push("1 lowercase letter");
+            if (!/[0-9]/.test(pw)) errors.push("1 number");
+            if (!/[^A-Za-z0-9]/.test(pw)) errors.push("1 symbol");
+
+            return errors;
+        }
+
+        function validateForm(event) {
+            let pw = document.getElementById("password").value;
+            let confirmPw = document.getElementById("confirm_password").value;
+
+            let errors = checkPasswordStrength(pw);
+
+            if (pw !== confirmPw) {
+                errors.push("Passwords do not match");
+            }
+
+            if (errors.length > 0) {
+                event.preventDefault();
+                alert("Fix the following:\n- " + errors.join("\n- "));
+            }
+        }
+    </script>
 
 </body>
 </html>
