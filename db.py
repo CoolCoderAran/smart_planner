@@ -28,38 +28,3 @@ def init_db():
 
     conn.commit()
     conn.close()
-
-from flask import Flask, render_template, request
-import db
-
-app = Flask(__name__)
-
-db.init_db()  # runs once when server starts
-
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        conn = db.get_db()
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, password)
-            )
-            conn.commit()
-        except:
-            return "Username already exists"
-
-        conn.close()
-        return "Account created"
-
-    return render_template("signup.html")
-
-cursor.execute(
-    "INSERT INTO tasks (username, task) VALUES (?, ?)",
-    (username, task)
-)
