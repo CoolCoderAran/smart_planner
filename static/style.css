@@ -265,3 +265,38 @@ body {
 .auth-footer a:hover {
     text-decoration: underline;
 }
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* hidden menu */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 140px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* links inside dropdown */
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    color: #2a2a72;
+    text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+    background: #f0f0ff;
+}
+
+/* show on hover */
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
