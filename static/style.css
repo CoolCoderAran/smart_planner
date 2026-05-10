@@ -325,3 +325,56 @@ body {
     outline: none;
     box-shadow: 0 0 4px rgba(140,83,255,0.3);
 }
+
+.terms-page {
+    background: #f4f2ff;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: Arial, sans-serif;
+}
+
+.terms-card {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.terms-card h1 {
+    color: #2a2a72;
+    margin-bottom: 10px;
+}
+
+.terms-intro {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.terms-card h2 {
+    margin-top: 25px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.terms-card p {
+    color: #555;
+    line-height: 1.6;
+    margin-top: 5px;
+}
+
+.terms-back-btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 18px;
+    background: #8c53ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.terms-back-btn:hover {
+    background: #6d3de0;
+}
