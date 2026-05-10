@@ -1,18 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import db
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-# =========================
-# DATABASE INIT
-# =========================
 db.init_db()
 
-# =========================
-# PASSWORD SECURITY RULE (~400 entropy equivalent)
-# =========================
 COMMON_PATTERNS = [
     "password", "123456", "qwerty", "admin", "letmein"
 ]
@@ -37,56 +31,14 @@ def is_secure_password(pw):
     return True
 
 
-# =========================
-# ROUTES
-# =========================
-
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# -------------------------
-# SIGNUP (HASHED)
-# -------------------------
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
-
-    if request.method == "POST":
-
-        username = request.form["username"]
-        password = request.form["password"]
-
-        # enforce strong password
-        if not is_secure_password(password):
-            return "Weak password: use 12+ chars with uppercase, lowercase, number, and symbol."
-
-        # 🔐 HASH PASSWORD HERE
-        hashed_password = generate_password_hash(password)
-
-        conn = db.get_db()
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, hashed_password)
-            )
-            conn.commit()
-
-        except:
-            conn.close()
-            return "Username already exists"
-
-        conn.close()
-        return "Account created successfully"
-
-    return render_template("signup.html")
-
-
-# -------------------------
-# LOGIN (HASH CHECK)
-# -------------------------
+# =========================
+# SIGNUP
+# =========================
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 
@@ -116,7 +68,43 @@ def signup():
 
         conn.close()
 
-        # ✅ redirect instead of plain text
         return redirect(url_for("login"))
 
     return render_template("signup.html")
+
+
+# =========================
+# LOGIN
+# =========================
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = db.get_db()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT password FROM users WHERE username=?",
+            (username,)
+        )
+
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[0], password):
+            return "Login successful"
+        else:
+            return "Invalid username or password"
+
+    return render_template("login.html")
+
+
+# =========================
+# RUN
+# =========================
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
