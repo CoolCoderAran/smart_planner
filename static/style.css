@@ -1,66 +1,54 @@
 /* =========================
    GLOBAL RESET
-========================= */
+========================= 
+
+*/======================
+Navbar
+=======================
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: white;
 }
 
-/* =========================
-   NAVBAR
-========================= */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #8c53ff;
-    padding: 12px 20px;
-    color: white;
+
+    padding: 16px 40px;
+
+    background: rgba(140, 83, 255, 0.95);
+
+    backdrop-filter: blur(10px);
+
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
 
-/* logo */
-.logo img {
-    height: 70px;
-    width: auto;
+/* LEFT SIDE */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 40px;
 }
 
-/* nav links */
+/* LINKS */
 .nav-links {
-    list-style: none;
     display: flex;
     gap: 25px;
+
+    list-style: none;
+
     margin: 0;
+    padding: 0;
 }
 
-.nav-links a {
-    text-decoration: none;
-    color: white;
-    font-weight: 500;
+/* RIGHT SIDE */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
-
-.nav-links a:hover {
-    text-decoration: underline;
-}
-
-/* =========================
-   LOGIN BUTTON
-========================= */
-.login-btn {
-    border: 2px solid white;
-    background: transparent;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: 0.2s ease;
-}
-
-.login-btn:hover {
-    background-color: rgba(255,255,255,0.15);
-}
-
 /* =========================
    DROPDOWN MENU
 ========================= */
