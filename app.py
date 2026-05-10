@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import db
 import re
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -45,6 +46,9 @@ def home():
     return render_template("index.html")
 
 
+# -------------------------
+# SIGNUP (HASHED)
+# -------------------------
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 
@@ -57,13 +61,16 @@ def signup():
         if not is_secure_password(password):
             return "Weak password: use 12+ chars with uppercase, lowercase, number, and symbol."
 
+        # 🔐 HASH PASSWORD HERE
+        hashed_password = generate_password_hash(password)
+
         conn = db.get_db()
         cursor = conn.cursor()
 
         try:
             cursor.execute(
                 "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, password)
+                (username, hashed_password)
             )
             conn.commit()
 
@@ -77,6 +84,9 @@ def signup():
     return render_template("signup.html")
 
 
+# -------------------------
+# LOGIN (HASH CHECK)
+# -------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -88,15 +98,17 @@ def login():
         conn = db.get_db()
         cursor = conn.cursor()
 
+        # get stored hashed password
         cursor.execute(
-            "SELECT * FROM users WHERE username=? AND password=?",
-            (username, password)
+            "SELECT password FROM users WHERE username=?",
+            (username,)
         )
 
         user = cursor.fetchone()
         conn.close()
 
-        if user:
+        # verify hash
+        if user and check_password_hash(user[0], password):
             return "Login successful"
         else:
             return "Invalid username or password"
