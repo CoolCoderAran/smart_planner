@@ -1,10 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Planner</title>
+
+    <!-- CSS (MUST be inside head) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
 <body>
 
-    <div style="background:red; color:white; padding:20px;">
-CSS TEST BOX
-</div>
-    
-<!-- NAVBAR -->
+<!-- ================= NAVBAR ================= -->
 <nav class="navbar">
 
     <div class="logo">
@@ -28,8 +34,9 @@ CSS TEST BOX
 
 </nav>
 
-<!-- HERO -->
+<!-- ================= HERO ================= -->
 <section class="hero">
+
     <div class="hero-content">
         <h1>Plan Smarter. Focus on What Matters.</h1>
         <p>Smart Planner helps students optimize study time, tasks, and deadlines.</p>
@@ -43,18 +50,21 @@ CSS TEST BOX
     <div class="hero-image">
         <img src="{{ url_for('static', filename='planner_mockup.png') }}" alt="Smart Planner Screenshot">
     </div>
+
 </section>
 
-<!-- TRUST -->
+<!-- ================= TRUST STRIP ================= -->
 <section class="trust-strip">
     <p>Built for students who want to study smarter, not harder.</p>
 </section>
 
-<!-- FEATURES -->
+<!-- ================= FEATURES ================= -->
 <section class="features">
+
     <h2>Why Smart Planner Works</h2>
 
     <div class="feature-grid">
+
         <div class="feature">
             <h3>Smart Scheduling</h3>
             <p>Automatically organizes your tasks efficiently.</p>
@@ -74,11 +84,14 @@ CSS TEST BOX
             <h3>Task Tracking</h3>
             <p>Never lose track of assignments again.</p>
         </div>
+
     </div>
+
 </section>
 
-<!-- HOW IT WORKS -->
+<!-- ================= HOW IT WORKS ================= -->
 <section class="how-it-works">
+
     <h2>How It Works</h2>
 
     <div class="steps">
@@ -86,11 +99,13 @@ CSS TEST BOX
         <div class="step">2. Let Smart Planner organize them</div>
         <div class="step">3. Focus and get things done</div>
     </div>
+
 </section>
 
-<!-- FOOTER -->
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
     <p>Smart Planner © 2026</p>
 </footer>
 
 </body>
+</html>
