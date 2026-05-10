@@ -44,3 +44,31 @@ def signup():
 # local development
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = db.get_db()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT * FROM users WHERE username=? AND password=?",
+            (username, password)
+        )
+
+        user = cursor.fetchone()
+
+        conn.close()
+
+        if user:
+            return "Login successful"
+
+        else:
+            return "Invalid username or password"
+
+    return render_template("login.html")
