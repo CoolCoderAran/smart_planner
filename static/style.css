@@ -123,3 +123,11 @@ body {
   width: 100%;
   height: auto;
 }
+
+.trust-strip {
+    text-align: center;
+    padding: 20px;
+    font-size: 1rem;
+    color: #555;
+    background: #f7f7ff;
+}
