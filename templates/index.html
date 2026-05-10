@@ -13,30 +13,42 @@
 <!-- ================= NAVBAR ================= -->
 <nav class="navbar">
 
-    <!-- LEFT -->
+    <!-- LEFT SIDE -->
     <div class="nav-left">
 
         <a href="/" class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <img src="{{ url_for('static', filename='logo.png') }}"
+                 alt="SmartPlanner Logo">
         </a>
 
         <ul class="nav-links">
+
             <li><a href="/">Home</a></li>
+
             <li><a href="/planner">Planner</a></li>
+
         </ul>
 
     </div>
 
-    <!-- RIGHT -->
+    <!-- RIGHT SIDE -->
     <div class="nav-right">
 
-        <a href="/login" class="nav-login">
-            Login
-        </a>
+        <div class="dropdown">
 
-        <a href="/signup" class="nav-signup">
-            Get Started
-        </a>
+            <button class="login-btn">
+                Account ▾
+            </button>
+
+            <div class="dropdown-menu">
+
+                <a href="/login">Login</a>
+
+                <a href="/signup">Sign Up</a>
+
+            </div>
+
+        </div>
 
     </div>
 
