@@ -9,23 +9,52 @@
 
     <div class="auth-container">
 
-        <h1 class="auth-title">Create Your Account</h1>
-        <p class="auth-subtitle">Start organizing your work smarter</p>
+        <h1 class="auth-title">Create Account</h1>
+
+        <p class="auth-subtitle">
+            Start organizing your tasks smarter.
+        </p>
 
         <form action="/signup" method="POST" class="auth-form">
 
             <label>Username</label>
-            <input type="text" name="username" placeholder="Enter username" required>
+            <input type="text"
+                   name="username"
+                   placeholder="Choose a username"
+                   required>
+
+            <label>Email</label>
+            <input type="email"
+                   name="email"
+                   placeholder="Enter your email"
+                   required>
 
             <label>Password</label>
-            <input type="password" name="password" placeholder="Create password (6+ chars)" required>
+            <input type="password"
+                   name="password"
+                   placeholder="Create password"
+                   required>
 
-            <button type="submit" class="auth-btn">Sign Up</button>
+            <label>Confirm Password</label>
+            <input type="password"
+                   name="confirm_password"
+                   placeholder="Re-enter password"
+                   required>
+
+            <div class="terms-box">
+                <input type="checkbox" required>
+                <span>I agree to the Terms & Conditions</span>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                Create Account
+            </button>
 
         </form>
 
         <p class="auth-footer">
-            Already have an account? <a href="/login">Login</a>
+            Already have an account?
+            <a href="/login">Login</a>
         </p>
 
     </div>
