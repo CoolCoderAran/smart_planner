@@ -292,3 +292,36 @@ body {
     color: #2a2a72;
     text-decoration: none;
 }
+
+.terms-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.auth-container {
+    width: 400px;
+}
+
+.auth-form label {
+    margin-top: 12px;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.auth-form input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+}
+
+.auth-form input:focus {
+    border-color: #8c53ff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(140,83,255,0.3);
+}
