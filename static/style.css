@@ -131,3 +131,48 @@ body {
     color: #555;
     background: #f7f7ff;
 }
+
+.features {
+    padding: 60px 40px;
+    text-align: center;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.feature {
+    background: #f5f5ff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.how-it-works {
+    padding: 60px 40px;
+    text-align: center;
+}
+
+.steps {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.step {
+    background: #eaeaff;
+    padding: 15px;
+    border-radius: 10px;
+    width: 200px;
+}
+
+.footer {
+    text-align: center;
+    padding: 30px;
+    background: #2a2a72;
+    color: white;
+    margin-top: 50px;
+}
