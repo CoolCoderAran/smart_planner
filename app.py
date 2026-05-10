@@ -1,17 +1,50 @@
 from flask import Flask, render_template, request
 import db
+import re
 
 app = Flask(__name__)
 
-# initialize database
+# =========================
+# DATABASE INIT
+# =========================
 db.init_db()
 
-# home page
+# =========================
+# PASSWORD SECURITY RULE (~400 entropy equivalent)
+# =========================
+COMMON_PATTERNS = [
+    "password", "123456", "qwerty", "admin", "letmein"
+]
+
+def is_secure_password(pw):
+    if len(pw) < 12:
+        return False
+    if not re.search(r"[A-Z]", pw):
+        return False
+    if not re.search(r"[a-z]", pw):
+        return False
+    if not re.search(r"[0-9]", pw):
+        return False
+    if not re.search(r"[^A-Za-z0-9]", pw):
+        return False
+
+    lower_pw = pw.lower()
+    for pattern in COMMON_PATTERNS:
+        if pattern in lower_pw:
+            return False
+
+    return True
+
+
+# =========================
+# ROUTES
+# =========================
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# signup page
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 
@@ -19,6 +52,10 @@ def signup():
 
         username = request.form["username"]
         password = request.form["password"]
+
+        # enforce strong password
+        if not is_secure_password(password):
+            return "Weak password: use 12+ chars with uppercase, lowercase, number, and symbol."
 
         conn = db.get_db()
         cursor = conn.cursor()
@@ -28,7 +65,6 @@ def signup():
                 "INSERT INTO users (username, password) VALUES (?, ?)",
                 (username, password)
             )
-
             conn.commit()
 
         except:
@@ -36,14 +72,10 @@ def signup():
             return "Username already exists"
 
         conn.close()
-
-        return "Account created"
+        return "Account created successfully"
 
     return render_template("signup.html")
 
-# local development
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -62,46 +94,23 @@ def login():
         )
 
         user = cursor.fetchone()
-
         conn.close()
 
         if user:
             return "Login successful"
-
         else:
             return "Invalid username or password"
 
     return render_template("login.html")
 
+
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
 
-import re
 
-COMMON_PATTERNS = [
-    "password", "123456", "qwerty", "admin", "letmein"
-]
-
-def is_secure_password(pw):
-    # length requirement (main driver of entropy)
-    if len(pw) < 12:
-        return False
-
-    # character class checks
-    if not re.search(r"[A-Z]", pw):
-        return False
-    if not re.search(r"[a-z]", pw):
-        return False
-    if not re.search(r"[0-9]", pw):
-        return False
-    if not re.search(r"[^A-Za-z0-9]", pw):
-        return False
-
-    # prevent weak patterns
-    lower_pw = pw.lower()
-    for pattern in COMMON_PATTERNS:
-        if pattern in lower_pw:
-            return False
-
-    return True
+# =========================
+# RUN SERVER
+# =========================
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
