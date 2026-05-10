@@ -87,42 +87,36 @@ def signup():
 # -------------------------
 # LOGIN (HASH CHECK)
 # -------------------------
-@app.route("/login", methods=["GET", "POST"])
-def login():
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
 
     if request.method == "POST":
 
         username = request.form["username"]
         password = request.form["password"]
 
+        if not is_secure_password(password):
+            return "Weak password"
+
+        hashed_password = generate_password_hash(password)
+
         conn = db.get_db()
         cursor = conn.cursor()
 
-        # get stored hashed password
-        cursor.execute(
-            "SELECT password FROM users WHERE username=?",
-            (username,)
-        )
+        try:
+            cursor.execute(
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (username, hashed_password)
+            )
+            conn.commit()
 
-        user = cursor.fetchone()
+        except:
+            conn.close()
+            return "Username already exists"
+
         conn.close()
 
-        # verify hash
-        if user and check_password_hash(user[0], password):
-            return "Login successful"
-        else:
-            return "Invalid username or password"
+        # ✅ redirect instead of plain text
+        return redirect(url_for("login"))
 
-    return render_template("login.html")
-
-
-@app.route("/terms")
-def terms():
-    return render_template("terms.html")
-
-
-# =========================
-# RUN SERVER
-# =========================
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    return render_template("signup.html")
