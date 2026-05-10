@@ -11,25 +11,63 @@
 <body>
 
 <!-- ================= NAVBAR ================= -->
+<!-- ================= NAVBAR ================= -->
 <nav class="navbar">
 
-    <div class="logo">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="SmartPlanner Logo">
+    <!-- LEFT SIDE -->
+    <div class="nav-left">
+
+        <a href="/" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}"
+                 alt="SmartPlanner Logo">
+        </a>
+
     </div>
 
+    <!-- CENTER LINKS -->
     <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/planner">Planner</a></li>
-        <li><a href="/add_task">Add Task</a></li>
+
+        <li>
+            <a href="/">Home</a>
+        </li>
+
+        <li>
+            <a href="/planner">Planner</a>
+        </li>
+
+        <li>
+            <a href="/add_task">Add Task</a>
+        </li>
+
+        <li>
+            <a href="/terms">Terms</a>
+        </li>
+
     </ul>
 
-    <div class="nav-right dropdown">
-        <a href="#" class="login-btn">Account ▾</a>
+    <!-- RIGHT SIDE -->
+    <div class="nav-right">
 
-        <div class="dropdown-menu">
-            <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+        <div class="dropdown">
+
+            <button class="login-btn">
+                Account ▾
+            </button>
+
+            <div class="dropdown-menu">
+
+                <a href="/login">
+                    Login
+                </a>
+
+                <a href="/signup">
+                    Sign Up
+                </a>
+
+            </div>
+
         </div>
+
     </div>
 
 </nav>
