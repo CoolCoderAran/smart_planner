@@ -1,24 +1,31 @@
-/* Reset */
+/* =========================
+   GLOBAL RESET
+========================= */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     background-color: white;
 }
 
-/* Navbar */
+/* =========================
+   NAVBAR
+========================= */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #8c53ff; /* replace with your logo hex */
-    padding: 0px 20px;
+    background-color: #8c53ff;
+    padding: 12px 20px;
     color: white;
 }
 
+/* logo */
 .logo img {
-    height: 100px;
+    height: 70px;
     width: auto;
 }
+
+/* nav links */
 .nav-links {
     list-style: none;
     display: flex;
@@ -36,20 +43,14 @@ body {
     text-decoration: underline;
 }
 
-/* Main Content */
-.content {
-    padding: 40px;
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-}
-
+/* =========================
+   LOGIN BUTTON
+========================= */
 .login-btn {
-    background-color: white;
-    color: #4B5DFF; /* or match your navbar color */
-    padding: 8px 16px;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    padding: 8px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: bold;
@@ -57,81 +58,117 @@ body {
 }
 
 .login-btn:hover {
-    background-color: #f2f2f2;
+    background-color: rgba(255,255,255,0.15);
 }
 
-.login-btn {
-    border: 2px solid white;
-    background: transparent;
-    color: white;
+/* =========================
+   DROPDOWN MENU
+========================= */
+.dropdown {
+    position: relative;
 }
 
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 110%;
+    background: white;
+    min-width: 150px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    overflow: hidden;
+    z-index: 999;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    color: #2a2a72;
+    text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+    background: #f0f0ff;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* =========================
+   HERO SECTION
+========================= */
 .hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 80px 40px;
-  background: linear-gradient(to right, #ffffff, #ffe6e6); /* light red/white */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 80px 40px;
+    background: linear-gradient(to right, #ffffff, #efeaff);
 }
 
 .hero-content {
-  max-width: 50%;
+    max-width: 50%;
 }
 
 .hero-content h1 {
-  font-size: 3rem;
-  color: #2a2a72; /* your purplish-blue */
-  margin-bottom: 20px;
+    font-size: 3rem;
+    color: #2a2a72;
+    margin-bottom: 20px;
 }
 
 .hero-content p {
-  font-size: 1.25rem;
-  margin-bottom: 30px;
-}
-
-.hero-buttons .btn {
-  text-decoration: none;
-  padding: 12px 30px;
-  margin-right: 15px;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: background 0.3s;
-}
-
-.primary-btn {
-  background-color: #2a2a72; /* purplish-blue */
-  color: white;
-}
-
-.primary-btn:hover {
-  background-color: #1d1d4c;
-}
-
-.secondary-btn {
-  background-color: white;
-  color: #2a2a72;
-  border: 2px solid #2a2a72;
-}
-
-.secondary-btn:hover {
-  background-color: #2a2a72;
-  color: white;
+    font-size: 1.25rem;
+    margin-bottom: 30px;
 }
 
 .hero-image img {
-  max-width: 500px;
-  width: 100%;
-  height: auto;
+    max-width: 450px;
+    width: 100%;
 }
 
+/* buttons */
+.hero-buttons .btn {
+    text-decoration: none;
+    padding: 12px 28px;
+    margin-right: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.primary-btn {
+    background-color: #2a2a72;
+    color: white;
+}
+
+.primary-btn:hover {
+    background-color: #1d1d4c;
+}
+
+.secondary-btn {
+    background-color: white;
+    color: #2a2a72;
+    border: 2px solid #2a2a72;
+}
+
+.secondary-btn:hover {
+    background-color: #2a2a72;
+    color: white;
+}
+
+/* =========================
+   TRUST STRIP
+========================= */
 .trust-strip {
     text-align: center;
     padding: 20px;
-    font-size: 1rem;
-    color: #555;
     background: #f7f7ff;
+    color: #555;
 }
 
+/* =========================
+   FEATURES
+========================= */
 .features {
     padding: 60px 40px;
     text-align: center;
@@ -150,6 +187,9 @@ body {
     border-radius: 10px;
 }
 
+/* =========================
+   HOW IT WORKS
+========================= */
 .how-it-works {
     padding: 60px 40px;
     text-align: center;
@@ -169,6 +209,9 @@ body {
     width: 200px;
 }
 
+/* =========================
+   FOOTER
+========================= */
 .footer {
     text-align: center;
     padding: 30px;
@@ -176,17 +219,18 @@ body {
     color: white;
     margin-top: 50px;
 }
-/* ===== AUTH PAGE BACKGROUND ===== */
+
+/* =========================
+   AUTH PAGES (LOGIN/SIGNUP)
+========================= */
 .auth-body {
     background: linear-gradient(135deg, #ffffff, #e9e6ff);
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: Arial, sans-serif;
 }
 
-/* ===== CONTAINER ===== */
 .auth-container {
     background: white;
     padding: 40px;
@@ -196,7 +240,6 @@ body {
     text-align: center;
 }
 
-/* ===== TITLE ===== */
 .auth-title {
     color: #2a2a72;
     margin-bottom: 10px;
@@ -208,33 +251,24 @@ body {
     margin-bottom: 25px;
 }
 
-/* ===== FORM ===== */
 .auth-form {
     display: flex;
     flex-direction: column;
     text-align: left;
 }
 
-.auth-form label {
-    font-size: 0.85rem;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    color: #333;
-}
-
 .auth-form input {
     padding: 10px;
+    margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    outline: none;
-    transition: 0.2s;
 }
 
 .auth-form input:focus {
     border-color: #2a2a72;
+    outline: none;
 }
 
-/* ===== BUTTON ===== */
 .auth-btn {
     margin-top: 20px;
     padding: 12px;
@@ -243,15 +277,12 @@ body {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
 }
 
 .auth-btn:hover {
     background: #1d1d4c;
 }
 
-/* ===== FOOTER LINK ===== */
 .auth-footer {
     margin-top: 15px;
     font-size: 0.85rem;
@@ -260,43 +291,4 @@ body {
 .auth-footer a {
     color: #2a2a72;
     text-decoration: none;
-}
-
-.auth-footer a:hover {
-    text-decoration: underline;
-}
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-/* hidden menu */
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: white;
-    min-width: 140px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-/* links inside dropdown */
-.dropdown-menu a {
-    display: block;
-    padding: 10px;
-    color: #2a2a72;
-    text-decoration: none;
-}
-
-.dropdown-menu a:hover {
-    background: #f0f0ff;
-}
-
-/* show on hover */
-.dropdown:hover .dropdown-menu {
-    display: block;
 }
