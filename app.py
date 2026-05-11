@@ -111,3 +111,20 @@ def about():
 # =========================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
+@app.route("/subscribe", methods=["POST"])
+def subscribe():
+    email = request.form["email"]
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO subscribers (email) VALUES (?)",
+        (email,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/")  # or show a thank-you page
