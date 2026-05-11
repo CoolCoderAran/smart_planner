@@ -110,20 +110,19 @@ body {
    DROPDOWN MENU
 ========================= */
 
+/* parent must be stable hover zone */
 .dropdown {
     position: relative;
+    display: inline-block;
 }
 
+/* menu hidden by default */
 .dropdown-menu {
-    display: none;
-
     position: absolute;
-
     right: 0;
-    top: 120%;
+    top: calc(100% + 8px);
 
     background: white;
-
     min-width: 160px;
 
     border-radius: 10px;
@@ -131,28 +130,33 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 
     overflow: hidden;
-
     z-index: 999;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+
+    transition: all 0.15s ease;
 }
 
+/* show on hover of BOTH button + menu area */
+.dropdown:hover .dropdown-menu,
+.dropdown-menu:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* links */
 .dropdown-menu a {
     display: block;
-
     padding: 12px 14px;
-
     color: #2a2a72;
-
     text-decoration: none;
-
-    transition: background 0.2s ease;
 }
 
 .dropdown-menu a:hover {
     background: #f3efff;
-}
-
-.dropdown:hover .dropdown-menu {
-    display: block;
 }
 
 /* =========================
