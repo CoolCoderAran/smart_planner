@@ -287,11 +287,97 @@ body {
 ========================= */
 
 .footer {
-    text-align: center;
-    padding: 30px;
     background: #2a2a72;
     color: white;
-    margin-top: 50px;
+    padding: 50px 40px 20px;
+}
+
+.footer-container {
+    max-width: 1100px;
+    margin: 0 auto;
+
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    gap: 40px;
+}
+
+.footer-brand h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.footer-brand p {
+    margin-top: 8px;
+    opacity: 0.8;
+    font-size: 0.95rem;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-column h4 {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+}
+
+.footer-column a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.footer-column a:hover {
+    opacity: 1;
+}
+
+.footer-signup p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 6px 0 10px;
+}
+
+.footer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-form input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+.footer-form button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: white;
+    color: #2a2a72;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.footer-form button:hover {
+    transform: translateY(-1px);
+}
+
+.footer-bottom {
+    margin-top: 35px;
+    padding-top: 15px;
+
+    text-align: center;
+    font-size: 0.85rem;
+
+    opacity: 0.7;
+
+    border-top: 1px solid rgba(255,255,255,0.15);
 }
 
 /* =========================
