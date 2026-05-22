@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Smart Planner</title>
 
-    <!-- CSS (MUST be inside head) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
+
+<!-- ================= NAVBAR ================= -->
 
 <nav class="navbar">
 
@@ -17,30 +21,69 @@
 
         <a href="/" class="logo">
             <img src="{{ url_for('static', filename='logo.png') }}"
-                 alt="SmartPlanner Logo">
+                 alt="Smart Planner Logo">
         </a>
 
         <ul class="nav-links">
-            <li><a href="/planner">Planner</a></li>
-            <li><a href="/features">Features</a></li>
-            <li><a href="/about">About</a></li>
+
+            <li>
+                <a href="/planner">
+                    Planner
+                </a>
+            </li>
+
+            <li>
+                <a href="/features">
+                    Features
+                </a>
+            </li>
+
+            <li>
+                <a href="/about">
+                    About
+                </a>
+            </li>
+
         </ul>
 
     </div>
 
-  <div class="nav-right">
+    <!-- RIGHT SIDE -->
+    <div class="nav-right">
 
-    {% if session.get("user") %}
+        {% if session.get("user") %}
 
-        <span class="nav-user">
-            {{ session["user"] }}
-        </span>
+        <div class="account-menu">
 
-        <a href="/logout" class="nav-login">
-            Logout
-        </a>
+            <button class="account-btn">
 
-    {% else %}
+                <span class="account-avatar">
+                    {{ session["user"][0].upper() }}
+                </span>
+
+                <span class="account-name">
+                    {{ session["user"] }}
+                </span>
+
+                ▾
+
+            </button>
+
+            <div class="account-dropdown">
+
+                <a href="/planner">
+                    Dashboard
+                </a>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+        {% else %}
 
         <a href="/login" class="nav-login">
             Login
@@ -50,62 +93,119 @@
             Get Started
         </a>
 
-    {% endif %}
+        {% endif %}
 
-</div>
+    </div>
 
 </nav>
 
 <!-- ================= HERO ================= -->
-<section class="hero">
+
 <section class="hero">
 
     <div class="hero-content">
-        <h1>Plan Smarter. Focus on What Matters.</h1>
-        <p>Smart Planner helps students optimize study time, tasks, and deadlines.</p>
+
+        <h1>
+            Plan Smarter. Focus on What Matters.
+        </h1>
+
+        <p>
+            Smart Planner helps students optimize
+            study time, tasks, and deadlines.
+        </p>
 
         <div class="hero-buttons">
-            <a href="/signup" class="btn primary-btn">Get Started</a>
-            <a href="#demo" class="btn secondary-btn">Watch Demo</a>
+
+            <a href="/signup"
+               class="btn primary-btn">
+                Get Started
+            </a>
+
+            <a href="#demo"
+               class="btn secondary-btn">
+                Watch Demo
+            </a>
+
         </div>
+
     </div>
 
     <div class="hero-image">
-        <img src="{{ url_for('static', filename='planner_mockup.png') }}" alt="Smart Planner Screenshot">
+
+        <img src="{{ url_for('static', filename='planner_mockup.png') }}"
+             alt="Smart Planner Screenshot">
+
     </div>
 
 </section>
 
 <!-- ================= TRUST STRIP ================= -->
+
 <section class="trust-strip">
-    <p>Built for students who want to study smarter, not harder.</p>
+
+    <p>
+        Built for students who want to study smarter,
+        not harder.
+    </p>
+
 </section>
 
 <!-- ================= FEATURES ================= -->
+
 <section class="features">
 
-    <h2>Why Smart Planner Works</h2>
+    <h2>
+        Why Smart Planner Works
+    </h2>
 
     <div class="feature-grid">
 
         <div class="feature">
-            <h3>Smart Scheduling</h3>
-            <p>Automatically organizes your tasks efficiently.</p>
+
+            <h3>
+                Smart Scheduling
+            </h3>
+
+            <p>
+                Automatically organizes your tasks efficiently.
+            </p>
+
         </div>
 
         <div class="feature">
-            <h3>Focus Mode</h3>
-            <p>Removes distractions so you can concentrate.</p>
+
+            <h3>
+                Focus Mode
+            </h3>
+
+            <p>
+                Removes distractions so you can concentrate.
+            </p>
+
         </div>
 
         <div class="feature">
-            <h3>Time Insights</h3>
-            <p>See how your study time is actually spent.</p>
+
+            <h3>
+                Time Insights
+            </h3>
+
+            <p>
+                See how your study time is actually spent.
+            </p>
+
         </div>
 
         <div class="feature">
-            <h3>Task Tracking</h3>
-            <p>Never lose track of assignments again.</p>
+
+            <h3>
+                Task Tracking
+            </h3>
+
+            <p>
+                Never lose track of assignments again.
+            </p>
+
         </div>
 
     </div>
@@ -113,17 +213,32 @@
 </section>
 
 <!-- ================= HOW IT WORKS ================= -->
+
 <section class="how-it-works">
 
-    <h2>How It Works</h2>
+    <h2>
+        How It Works
+    </h2>
 
     <div class="steps">
-        <div class="step">1. Add your tasks</div>
-        <div class="step">2. Let Smart Planner organize them</div>
-        <div class="step">3. Focus and get things done</div>
+
+        <div class="step">
+            1. Add your tasks
+        </div>
+
+        <div class="step">
+            2. Let Smart Planner organize them
+        </div>
+
+        <div class="step">
+            3. Focus and get things done
+        </div>
+
     </div>
 
 </section>
+
+<!-- ================= FOOTER ================= -->
 
 <footer class="footer">
 
@@ -131,47 +246,108 @@
 
         <!-- BRAND -->
         <div class="footer-brand">
-            <h3>Smart Planner</h3>
-            <p>Plan smarter. Focus better.</p>
+
+            <h3>
+                Smart Planner
+            </h3>
+
+            <p>
+                Plan smarter. Focus better.
+            </p>
+
         </div>
 
         <!-- PRODUCT -->
         <div class="footer-column">
-            <h4>Product</h4>
-            <a href="/planner">Planner</a>
-            <a href="/features">Features</a>
-            <a href="/about">About</a>
+
+            <h4>
+                Product
+            </h4>
+
+            <a href="/planner">
+                Planner
+            </a>
+
+            <a href="/features">
+                Features
+            </a>
+
+            <a href="/about">
+                About
+            </a>
+
         </div>
 
         <!-- ACCOUNT -->
         <div class="footer-column">
-            <h4>Account</h4>
-            <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+
+            <h4>
+                Account
+            </h4>
+
+            <a href="/login">
+                Login
+            </a>
+
+            <a href="/signup">
+                Sign Up
+            </a>
+
         </div>
 
         <!-- LEGAL -->
         <div class="footer-column">
-            <h4>Legal</h4>
-            <a href="/terms">Terms</a>
-            <a href="/privacy">Privacy</a>
+
+            <h4>
+                Legal
+            </h4>
+
+            <a href="/terms">
+                Terms
+            </a>
+
+            <a href="/privacy">
+                Privacy
+            </a>
+
         </div>
 
-        <!-- EMAIL SUBSCRIBE -->
+        <!-- EMAIL SIGNUP -->
         <div class="footer-column footer-signup">
-            <h4>Get Updates</h4>
-            <p>New features & improvements.</p>
 
-            <form action="/subscribe" method="POST" class="footer-form">
-                <input type="email" name="email" placeholder="Enter email" required>
-                <button type="submit">Subscribe</button>
+            <h4>
+                Get Updates
+            </h4>
+
+            <p>
+                New features & improvements.
+            </p>
+
+            <form action="/subscribe"
+                  method="POST"
+                  class="footer-form">
+
+                <input type="email"
+                       name="email"
+                       placeholder="Enter email"
+                       required>
+
+                <button type="submit">
+                    Subscribe
+                </button>
+
             </form>
+
         </div>
 
     </div>
 
     <div class="footer-bottom">
-        <p>© 2026 Smart Planner</p>
+
+        <p>
+            © 2026 Smart Planner
+        </p>
+
     </div>
 
 </footer>
