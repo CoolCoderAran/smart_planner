@@ -28,17 +28,31 @@
 
     </div>
 
-    <!-- RIGHT SIDE -->
-    <div class="nav-right">
+  <div class="nav-right">
 
-        <a href="/login" class="nav-login">Log in</a>
+    {% if session.get("user") %}
 
-        <a href="/signup" class="nav-signup">Sign up</a>
+        <span class="nav-user">
+            {{ session["user"] }}
+        </span>
 
-    </div>
+        <a href="/logout" class="nav-login">
+            Logout
+        </a>
 
-</nav>
-<!-- ================= HERO ================= -->
+    {% else %}
+
+        <a href="/login" class="nav-login">
+            Login
+        </a>
+
+        <a href="/signup" class="nav-signup">
+            Get Started
+        </a>
+
+    {% endif %}
+
+</div>======== HERO ================= -->
 <section class="hero">
 
     <div class="hero-content">
