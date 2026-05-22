@@ -1,0 +1,7 @@
+<h1>Welcome, {{ username }}</h1>
+
+<ul>
+    {% for task in tasks %}
+        <li>{{ task[0] }}</li>
+    {% endfor %}
+</ul>
