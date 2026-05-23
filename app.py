@@ -11,16 +11,22 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # =========================
 
 app = Flask(__name__)
-app.secret_key = "replace_with_a_real_secret_key"
+app.secret_key = "replace_with_a_real_secure_key"
 
 db.init_db()
 
 
 # =========================
-# SECURITY RULES
+# PASSWORD RULES
 # =========================
 
-COMMON_PATTERNS = {"password", "123456", "qwerty", "admin", "letmein"}
+COMMON_PATTERNS = {
+    "password",
+    "123456",
+    "qwerty",
+    "admin",
+    "letmein"
+}
 
 
 def is_secure_password(password: str) -> bool:
@@ -36,7 +42,7 @@ def is_secure_password(password: str) -> bool:
         return False
 
     lower = password.lower()
-    return not any(pattern in lower for pattern in COMMON_PATTERNS)
+    return not any(p in lower for p in COMMON_PATTERNS)
 
 
 # =========================
@@ -85,7 +91,8 @@ def signup():
             )
             conn.commit()
 
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            print("SIGNUP ERROR:", e)
             flash("Username already exists")
             return redirect(url_for("signup"))
 
@@ -115,20 +122,32 @@ def login():
         conn = db.get_db()
         cursor = conn.cursor()
 
-        cursor.execute(
-            "SELECT password FROM users WHERE username = ?",
-            (username,)
-        )
+        try:
+            cursor.execute(
+                "SELECT password FROM users WHERE username = ?",
+                (username,)
+            )
+            user = cursor.fetchone()
 
-        user = cursor.fetchone()
+        except Exception as e:
+            conn.close()
+            print("LOGIN DB ERROR:", e)
+            return "Database error"
+
         conn.close()
 
-        if user and check_password_hash(user[0], password):
+        if not user:
+            flash("User not found")
+            return redirect(url_for("login"))
+
+        stored_password = user[0]
+
+        if check_password_hash(stored_password, password):
             session.clear()
             session["user"] = username
             return redirect(url_for("planner"))
 
-        flash("Invalid username or password")
+        flash("Invalid password")
         return redirect(url_for("login"))
 
     return render_template("login.html")
@@ -204,7 +223,7 @@ def add_task():
 
 
 # =========================
-# SUBSCRIBE (EMAIL)
+# SUBSCRIBE EMAIL
 # =========================
 
 @app.route("/subscribe", methods=["POST"])
@@ -225,7 +244,8 @@ def subscribe():
         )
         conn.commit()
 
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as e:
+        print("SUBSCRIBE ERROR:", e)
         flash("Already subscribed")
 
     finally:
@@ -235,7 +255,7 @@ def subscribe():
 
 
 # =========================
-# RUN APP
+# RUN
 # =========================
 
 if __name__ == "__main__":
