@@ -96,6 +96,59 @@ body {
     align-items: center;
 }
 
+/* =========================
+   RIGHT SIDE BUTTONS
+========================= */
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* LOGIN */
+
+.nav-login {
+    color: white;
+
+    text-decoration: none;
+
+    font-weight: 500;
+
+    opacity: 0.92;
+
+    transition: opacity 0.15s ease;
+}
+
+.nav-login:hover {
+    opacity: 1;
+}
+
+/* SIGNUP */
+
+.nav-signup {
+    background: white;
+
+    color: #8c53ff;
+
+    text-decoration: none;
+
+    padding: 9px 16px;
+
+    border-radius: 999px;
+
+    font-weight: 600;
+
+    transition: transform 0.15s ease,
+                box-shadow 0.15s ease;
+}
+
+.nav-signup:hover {
+    transform: translateY(-1px);
+
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
 /* LOGIN / SIGNUP */
 
 .nav-login {
