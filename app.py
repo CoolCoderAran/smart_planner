@@ -1,24 +1,43 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-import re
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash
+)
+
+from datetime import timedelta
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
 import sqlite3
+import re
 import db
 
-from werkzeug.security import generate_password_hash, check_password_hash
 
-
-# =========================
+# =====================================
 # APP SETUP
-# =========================
+# =====================================
 
 app = Flask(__name__)
-app.secret_key = "replace_with_a_real_secure_key"
 
+# CHANGE THIS TO A REAL SECRET KEY
+app.secret_key = "replace_this_with_a_long_secure_secret_key"
+
+# KEEP USERS LOGGED IN
+app.permanent_session_lifetime = timedelta(days=30)
+
+# INITIALIZE DATABASE
 db.init_db()
 
 
-# =========================
-# PASSWORD RULES
-# =========================
+# =====================================
+# PASSWORD SECURITY
+# =====================================
 
 COMMON_PATTERNS = {
     "password",
@@ -29,146 +48,61 @@ COMMON_PATTERNS = {
 }
 
 
-def is_secure_password(password: str) -> bool:
+def is_secure_password(password):
+
     if len(password) < 12:
         return False
+
     if not re.search(r"[A-Z]", password):
         return False
+
     if not re.search(r"[a-z]", password):
         return False
+
     if not re.search(r"[0-9]", password):
         return False
+
     if not re.search(r"[^A-Za-z0-9]", password):
         return False
 
-    lower = password.lower()
-    return not any(p in lower for p in COMMON_PATTERNS)
+    lower_pw = password.lower()
+
+    for pattern in COMMON_PATTERNS:
+        if pattern in lower_pw:
+            return False
+
+    return True
 
 
-# =========================
+# =====================================
 # HOME
-# =========================
+# =====================================
 
 @app.route("/")
 def home():
+
+    # LOGGED-IN USERS GO TO DASHBOARD
+    if "user" in session:
+        return redirect(url_for("dashboard"))
+
     return render_template("index.html")
 
+
+# =====================================
+# ABOUT
+# =====================================
 
 @app.route("/about")
 def about():
     return render_template("about.html")
 
 
-# =========================
-# SIGNUP
-# =========================
+# =====================================
+# DASHBOARD
+# =====================================
 
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
-
-    if request.method == "POST":
-
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-
-        if not username or not password:
-            flash("Missing username or password")
-            return redirect(url_for("signup"))
-
-        if not is_secure_password(password):
-            flash("Password is too weak")
-            return redirect(url_for("signup"))
-
-        hashed = generate_password_hash(password)
-
-        conn = db.get_db()
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, hashed)
-            )
-            conn.commit()
-
-        except sqlite3.IntegrityError as e:
-            print("SIGNUP ERROR:", e)
-            flash("Username already exists")
-            return redirect(url_for("signup"))
-
-        finally:
-            conn.close()
-
-        session.clear()
-        session["user"] = username
-
-        return redirect(url_for("planner"))
-
-    return render_template("signup.html")
-
-
-# =========================
-# LOGIN
-# =========================
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-
-    if request.method == "POST":
-
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-
-        conn = db.get_db()
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute(
-                "SELECT password FROM users WHERE username = ?",
-                (username,)
-            )
-            user = cursor.fetchone()
-
-        except Exception as e:
-            conn.close()
-            print("LOGIN DB ERROR:", e)
-            return "Database error"
-
-        conn.close()
-
-        if not user:
-            flash("User not found")
-            return redirect(url_for("login"))
-
-        stored_password = user[0]
-
-        if check_password_hash(stored_password, password):
-            session.clear()
-            session["user"] = username
-            return redirect(url_for("planner"))
-
-        flash("Invalid password")
-        return redirect(url_for("login"))
-
-    return render_template("login.html")
-
-
-# =========================
-# LOGOUT
-# =========================
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("home"))
-
-
-# =========================
-# PLANNER (PROTECTED)
-# =========================
-
-@app.route("/planner")
-def planner():
+@app.route("/dashboard")
+def dashboard():
 
     if "user" not in session:
         return redirect(url_for("login"))
@@ -179,23 +113,170 @@ def planner():
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT task FROM tasks WHERE username = ?",
+        """
+        SELECT id, task
+        FROM tasks
+        WHERE username = ?
+        ORDER BY id DESC
+        """,
         (username,)
     )
 
     tasks = cursor.fetchall()
+
     conn.close()
 
     return render_template(
-        "planner.html",
-        tasks=tasks,
-        username=username
+        "dashboard.html",
+        username=username,
+        tasks=tasks
     )
 
 
-# =========================
+# =====================================
+# SIGNUP
+# =====================================
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+
+    # BLOCK LOGGED-IN USERS
+    if "user" in session:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        # BASIC VALIDATION
+        if not username or not password:
+            flash("Please fill in all fields.")
+            return redirect(url_for("signup"))
+
+        # PASSWORD VALIDATION
+        if not is_secure_password(password):
+            flash(
+                "Password must contain 12+ characters, uppercase, lowercase, number, and symbol."
+            )
+            return redirect(url_for("signup"))
+
+        hashed_password = generate_password_hash(password)
+
+        conn = db.get_db()
+        cursor = conn.cursor()
+
+        try:
+
+            cursor.execute(
+                """
+                INSERT INTO users (username, password)
+                VALUES (?, ?)
+                """,
+                (username, hashed_password)
+            )
+
+            conn.commit()
+
+        except sqlite3.IntegrityError:
+
+            conn.close()
+
+            flash("Username already exists.")
+            return redirect(url_for("signup"))
+
+        conn.close()
+
+        # AUTO LOGIN
+        session.permanent = True
+        session["user"] = username
+
+        return redirect(url_for("dashboard"))
+
+    return render_template("signup.html")
+
+
+# =====================================
+# LOGIN
+# =====================================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    # BLOCK LOGGED-IN USERS
+    if "user" in session:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        conn = db.get_db()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT password
+            FROM users
+            WHERE username = ?
+            """,
+            (username,)
+        )
+
+        user = cursor.fetchone()
+
+        conn.close()
+
+        # USER DOES NOT EXIST
+        if not user:
+            flash("User not found.")
+            return redirect(url_for("login"))
+
+        stored_password = user[0]
+
+        # PASSWORD CHECK
+        if not check_password_hash(stored_password, password):
+            flash("Incorrect password.")
+            return redirect(url_for("login"))
+
+        # SUCCESSFUL LOGIN
+        session.permanent = True
+        session["user"] = username
+
+        return redirect(url_for("dashboard"))
+
+    return render_template("login.html")
+
+
+# =====================================
+# LOGOUT
+# =====================================
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    return redirect(url_for("home"))
+
+
+# =====================================
+# PLANNER
+# =====================================
+
+@app.route("/planner")
+def planner():
+
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    return redirect(url_for("dashboard"))
+
+
+# =====================================
 # ADD TASK
-# =========================
+# =====================================
 
 @app.route("/add_task", methods=["POST"])
 def add_task():
@@ -205,26 +286,58 @@ def add_task():
 
     task = request.form.get("task", "").strip()
 
+    # EMPTY TASK PROTECTION
     if not task:
-        return redirect(url_for("planner"))
+        return redirect(url_for("dashboard"))
 
     conn = db.get_db()
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT INTO tasks (username, task) VALUES (?, ?)",
+        """
+        INSERT INTO tasks (username, task)
+        VALUES (?, ?)
+        """,
         (session["user"], task)
     )
 
     conn.commit()
     conn.close()
 
-    return redirect(url_for("planner"))
+    return redirect(url_for("dashboard"))
 
 
-# =========================
-# SUBSCRIBE EMAIL
-# =========================
+# =====================================
+# DELETE TASK
+# =====================================
+
+@app.route("/delete_task/<int:task_id>")
+def delete_task(task_id):
+
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM tasks
+        WHERE id = ?
+        AND username = ?
+        """,
+        (task_id, session["user"])
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("dashboard"))
+
+
+# =====================================
+# EMAIL SUBSCRIBE
+# =====================================
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
@@ -238,25 +351,45 @@ def subscribe():
     cursor = conn.cursor()
 
     try:
+
         cursor.execute(
-            "INSERT INTO subscribers (email) VALUES (?)",
+            """
+            INSERT INTO subscribers (email)
+            VALUES (?)
+            """,
             (email,)
         )
+
         conn.commit()
 
-    except sqlite3.IntegrityError as e:
-        print("SUBSCRIBE ERROR:", e)
-        flash("Already subscribed")
+        flash("Successfully subscribed!")
 
-    finally:
-        conn.close()
+    except sqlite3.IntegrityError:
+
+        flash("Email already subscribed.")
+
+    conn.close()
 
     return redirect(url_for("home"))
 
 
-# =========================
-# RUN
-# =========================
+# =====================================
+# ERROR PAGES
+# =====================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("404.html"), 404
+
+
+# =====================================
+# RUN APP
+# =====================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
