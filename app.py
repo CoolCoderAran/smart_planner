@@ -1,66 +1,42 @@
-from flask import (
-    Flask,
-    render_template,
-    request,
-    redirect,
-    url_for,
-    session
-)
-
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import re
+import sqlite3
 import db
 
-from werkzeug.security import (
-    generate_password_hash,
-    check_password_hash
-)
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 # =========================
 # APP SETUP
 # =========================
 
 app = Flask(__name__)
-
-app.secret_key = "replace_this_with_a_long_random_secret"
+app.secret_key = "replace_with_a_real_secret_key"
 
 db.init_db()
 
+
 # =========================
-# PASSWORD SECURITY
+# SECURITY RULES
 # =========================
 
-COMMON_PATTERNS = [
-    "password",
-    "123456",
-    "qwerty",
-    "admin",
-    "letmein"
-]
+COMMON_PATTERNS = {"password", "123456", "qwerty", "admin", "letmein"}
 
-def is_secure_password(password):
 
+def is_secure_password(password: str) -> bool:
     if len(password) < 12:
         return False
-
     if not re.search(r"[A-Z]", password):
         return False
-
     if not re.search(r"[a-z]", password):
         return False
-
     if not re.search(r"[0-9]", password):
         return False
-
     if not re.search(r"[^A-Za-z0-9]", password):
         return False
 
-    lower_pw = password.lower()
-
-    for pattern in COMMON_PATTERNS:
-        if pattern in lower_pw:
-            return False
-
-    return True
+    lower = password.lower()
+    return not any(pattern in lower for pattern in COMMON_PATTERNS)
 
 
 # =========================
@@ -71,10 +47,6 @@ def is_secure_password(password):
 def home():
     return render_template("index.html")
 
-
-# =========================
-# ABOUT
-# =========================
 
 @app.route("/about")
 def about():
@@ -90,39 +62,40 @@ def signup():
 
     if request.method == "POST":
 
-        username = request.form["username"].strip()
-        password = request.form["password"]
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
 
-        # PASSWORD VALIDATION
+        if not username or not password:
+            flash("Missing username or password")
+            return redirect(url_for("signup"))
+
         if not is_secure_password(password):
-            return "Weak password. Use 12+ characters with uppercase, lowercase, number, and symbol."
+            flash("Password is too weak")
+            return redirect(url_for("signup"))
 
-        hashed_password = generate_password_hash(password)
+        hashed = generate_password_hash(password)
 
         conn = db.get_db()
         cursor = conn.cursor()
 
         try:
             cursor.execute(
-                """
-                INSERT INTO users (username, password)
-                VALUES (?, ?)
-                """,
-                (username, hashed_password)
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (username, hashed)
             )
-
             conn.commit()
 
-        except:
+        except sqlite3.IntegrityError:
+            flash("Username already exists")
+            return redirect(url_for("signup"))
+
+        finally:
             conn.close()
-            return "Username already exists"
 
-        conn.close()
-
-        # AUTO LOGIN AFTER SIGNUP
+        session.clear()
         session["user"] = username
 
-        return redirect(url_for("home"))
+        return redirect(url_for("planner"))
 
     return render_template("signup.html")
 
@@ -136,33 +109,27 @@ def login():
 
     if request.method == "POST":
 
-        username = request.form["username"].strip()
-        password = request.form["password"]
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
 
         conn = db.get_db()
         cursor = conn.cursor()
 
         cursor.execute(
-            """
-            SELECT password
-            FROM users
-            WHERE username = ?
-            """,
+            "SELECT password FROM users WHERE username = ?",
             (username,)
         )
 
         user = cursor.fetchone()
-
         conn.close()
 
-        # CHECK PASSWORD HASH
         if user and check_password_hash(user[0], password):
-
+            session.clear()
             session["user"] = username
-
             return redirect(url_for("planner"))
 
-        return "Invalid username or password"
+        flash("Invalid username or password")
+        return redirect(url_for("login"))
 
     return render_template("login.html")
 
@@ -173,20 +140,17 @@ def login():
 
 @app.route("/logout")
 def logout():
-
-    session.pop("user", None)
-
+    session.clear()
     return redirect(url_for("home"))
 
 
 # =========================
-# PLANNER
+# PLANNER (PROTECTED)
 # =========================
 
 @app.route("/planner")
 def planner():
 
-    # BLOCK GUEST ACCESS
     if "user" not in session:
         return redirect(url_for("login"))
 
@@ -196,16 +160,11 @@ def planner():
     cursor = conn.cursor()
 
     cursor.execute(
-        """
-        SELECT task
-        FROM tasks
-        WHERE username = ?
-        """,
+        "SELECT task FROM tasks WHERE username = ?",
         (username,)
     )
 
     tasks = cursor.fetchall()
-
     conn.close()
 
     return render_template(
@@ -225,16 +184,16 @@ def add_task():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    task = request.form["task"]
+    task = request.form.get("task", "").strip()
+
+    if not task:
+        return redirect(url_for("planner"))
 
     conn = db.get_db()
     cursor = conn.cursor()
 
     cursor.execute(
-        """
-        INSERT INTO tasks (username, task)
-        VALUES (?, ?)
-        """,
+        "INSERT INTO tasks (username, task) VALUES (?, ?)",
         (session["user"], task)
     )
 
@@ -245,33 +204,32 @@ def add_task():
 
 
 # =========================
-# EMAIL SUBSCRIBE
+# SUBSCRIBE (EMAIL)
 # =========================
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
 
-    email = request.form["email"].strip()
+    email = request.form.get("email", "").strip()
+
+    if not email:
+        return redirect(url_for("home"))
 
     conn = db.get_db()
     cursor = conn.cursor()
 
     try:
         cursor.execute(
-            """
-            INSERT INTO subscribers (email)
-            VALUES (?)
-            """,
+            "INSERT INTO subscribers (email) VALUES (?)",
             (email,)
         )
-
         conn.commit()
 
-    except:
-        conn.close()
-        return "Email already subscribed"
+    except sqlite3.IntegrityError:
+        flash("Already subscribed")
 
-    conn.close()
+    finally:
+        conn.close()
 
     return redirect(url_for("home"))
 
@@ -281,8 +239,4 @@ def subscribe():
 # =========================
 
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=5000,
-        debug=True
-    )
+    app.run(debug=True)
