@@ -1,32 +1,344 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Dashboard • Smart Planner
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
-<h1>Welcome, {{ username }}</h1>
+<!-- ================= NAVBAR ================= -->
 
-<form action="/add_task" method="POST">
-    <input type="text" name="task" placeholder="Enter task">
-    <button type="submit">Add Task</button>
-</form>
+<nav class="navbar">
 
-<hr>
+    <!-- LEFT -->
+    <div class="nav-left">
 
-<h2>Your Tasks</h2>
+        <a href="/"
+           class="logo">
 
-<ul>
-    {% for task in tasks %}
-        <li>
-            {{ task[1] }}
-            <a href="/delete_task/{{ task[0] }}">Delete</a>
-        </li>
-    {% endfor %}
-</ul>
+            <img src="{{ url_for('static', filename='logo.png') }}"
+                 alt="Smart Planner Logo">
 
-<a href="/logout">Logout</a>
+        </a>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="/planner">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="/calendar">
+                    Calendar
+                </a>
+            </li>
+
+            <li>
+                <a href="/upcoming">
+                    Upcoming
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right">
+
+        <div class="account-menu">
+
+            <button class="account-btn">
+
+                <span class="account-avatar">
+                    {{ username[0].upper() }}
+                </span>
+
+                <span class="account-name">
+                    {{ username }}
+                </span>
+
+                ▾
+
+            </button>
+
+            <div class="account-dropdown">
+
+                <a href="/planner">
+                    Dashboard
+                </a>
+
+                <a href="/upcoming">
+                    Upcoming Tasks
+                </a>
+
+                <a href="/calendar">
+                    Calendar
+                </a>
+
+                <a href="/settings">
+                    Account Settings
+                </a>
+
+                <a href="/upgrade">
+                    Upgrade Plan
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <a href="/logout"
+                   class="logout-link">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+<!-- ================= HERO ================= -->
+
+<section class="dashboard-hero">
+
+    <div class="dashboard-hero-content">
+
+        <h1>
+            Welcome back, {{ username }}
+        </h1>
+
+        <p>
+            Stay organized and focus on what matters today.
+        </p>
+
+    </div>
+
+    <div class="dashboard-stats">
+
+        <div class="stat-card">
+
+            <h2>
+                {{ tasks|length }}
+            </h2>
+
+            <p>
+                Active Tasks
+            </p>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h2>
+                87%
+            </h2>
+
+            <p>
+                Productivity
+            </p>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h2>
+                5
+            </h2>
+
+            <p>
+                Day Streak
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= MAIN GRID ================= -->
+
+<section class="dashboard-grid">
+
+    <!-- TASKS -->
+
+    <div class="dashboard-main">
+
+        <div class="dashboard-section">
+
+            <div class="section-header">
+
+                <h2>
+                    Your Tasks
+                </h2>
+
+            </div>
+
+            <!-- ADD TASK -->
+
+            <form action="/add_task"
+                  method="POST"
+                  class="task-form">
+
+                <input type="text"
+                       name="task"
+                       placeholder="Add a new task..."
+                       required>
+
+                <button type="submit">
+                    Add Task
+                </button>
+
+            </form>
+
+            <!-- TASK LIST -->
+
+            <div class="task-grid">
+
+                {% for task in tasks %}
+
+                <div class="task-card">
+
+                    <div class="task-top">
+
+                        <h3>
+                            {{ task[0] }}
+                        </h3>
+
+                    </div>
+
+                    <div class="task-meta">
+
+                        <span class="task-priority">
+                            Normal Priority
+                        </span>
+
+                    </div>
+
+                    <div class="task-actions">
+
+                        <button class="task-complete">
+                            Complete
+                        </button>
+
+                        <button class="task-delete">
+                            Delete
+                        </button>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+
+    <aside class="dashboard-sidebar">
+
+        <!-- AI PANEL -->
+
+        <div class="sidebar-card">
+
+            <h3>
+                Smart Suggestions
+            </h3>
+
+            <ul>
+
+                <li>
+                    Start with your hardest task first
+                </li>
+
+                <li>
+                    Break large assignments into smaller goals
+                </li>
+
+                <li>
+                    Estimated workload today: 2.1h
+                </li>
+
+            </ul>
+
+        </div>
+
+        <!-- PRODUCTIVITY -->
+
+        <div class="sidebar-card">
+
+            <h3>
+                Productivity
+            </h3>
+
+            <p>
+                You completed 4 tasks this week.
+            </p>
+
+            <p>
+                Current streak: 5 days
+            </p>
+
+        </div>
+
+        <!-- UPGRADE -->
+
+        <div class="sidebar-card upgrade-card">
+
+            <h3>
+                Upgrade to Pro
+            </h3>
+
+            <p>
+                Unlock AI planning, calendars,
+                reminders, and advanced analytics.
+            </p>
+
+            <a href="/upgrade"
+               class="upgrade-btn">
+
+                Upgrade Plan
+
+            </a>
+
+        </div>
+
+    </aside>
+
+</section>
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer">
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 Smart Planner
+        </p>
+
+    </div>
+
+</footer>
 
 </body>
 </html>
