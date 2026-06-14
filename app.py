@@ -393,3 +393,7 @@ if __name__ == "__main__":
         port=5000,
         debug=True
     )
+
+/study
+/save_study_session
+/get_study_stats
