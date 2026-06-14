@@ -36,6 +36,17 @@ def init_db():
         email TEXT UNIQUE NOT NULL
     )
     """)
+# STUDY SESSIONS TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS study_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    task TEXT,
+    minutes INTEGER NOT NULL,
+    completed_at TEXT NOT NULL
+)
+""")
 
     conn.commit()
     conn.close()
