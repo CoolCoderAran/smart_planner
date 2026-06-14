@@ -165,8 +165,74 @@ def study():
         username=session["user"],
         tasks=tasks
     )
-    # =====================================
+
+# =====================================
 # SAVE STUDY SESSION
+# =====================================
+
+@app.route("/save_study_session", methods=["POST"])
+def save_study_session():
+
+    if "user" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Not logged in"
+        })
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "success": False,
+            "message": "No data received"
+        })
+
+    mode = data.get("mode", "Unknown")
+    task = data.get("task", "")
+    minutes = int(data.get("minutes", 0))
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            INSERT INTO study_sessions
+            (
+                username,
+                mode,
+                task,
+                minutes,
+                completed_at
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                session["user"],
+                mode,
+                task,
+                minutes,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+        )
+
+        conn.commit()
+
+    except Exception as e:
+
+        conn.close()
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+    conn.close()
+
+    return jsonify({
+        "success": True
+    })# SAVE STUDY SESSION
 # =====================================
 
 @app.route("/save_study_session", methods=["POST"])
