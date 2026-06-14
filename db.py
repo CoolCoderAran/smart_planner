@@ -29,24 +29,25 @@ def init_db():
     )
     """)
 
-    # EMAIL SUBSCRIBERS TABLE (NEW)
+    # EMAIL SUBSCRIBERS TABLE
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS subscribers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE NOT NULL
     )
     """)
-# STUDY SESSIONS TABLE
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS study_sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    mode TEXT NOT NULL,
-    task TEXT,
-    minutes INTEGER NOT NULL,
-    completed_at TEXT NOT NULL
-)
-""")
+
+    # STUDY SESSIONS TABLE
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS study_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        task TEXT,
+        minutes INTEGER NOT NULL,
+        completed_at TEXT NOT NULL
+    )
+    """)
 
     conn.commit()
     conn.close()
