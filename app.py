@@ -5,10 +5,11 @@ from flask import (
     redirect,
     url_for,
     session,
-    flash
+    flash,
+    jsonify
 )
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
@@ -132,7 +133,130 @@ def dashboard():
         tasks=tasks
     )
 
+# =====================================
+# STUDY MODE
+# =====================================
 
+@app.route("/study")
+def study():
+
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, task
+        FROM tasks
+        WHERE username = ?
+        ORDER BY id DESC
+        """,
+        (session["user"],)
+    )
+
+    tasks = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "study.html",
+        username=session["user"],
+        tasks=tasks
+    )
+    # =====================================
+# SAVE STUDY SESSION
+# =====================================
+
+@app.route("/save_study_session", methods=["POST"])
+def save_study_session():
+
+    if "user" not in session:
+        return jsonify({"success": False})
+
+    data = request.get_json()
+
+    mode = data.get("mode")
+    task = data.get("task")
+    minutes = data.get("minutes")
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO study_sessions
+        (
+            username,
+            mode,
+            task,
+            minutes,
+            completed_at
+        )
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            session["user"],
+            mode,
+            task,
+            minutes,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True})
+
+
+# =====================================
+# GET STUDY STATS
+# =====================================
+
+@app.route("/get_study_stats")
+def get_study_stats():
+
+    if "user" not in session:
+        return jsonify({})
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            COUNT(*),
+            COALESCE(SUM(minutes), 0)
+        FROM study_sessions
+        WHERE username = ?
+        """,
+        (session["user"],)
+    )
+
+    total_sessions, total_minutes = cursor.fetchone()
+
+    cursor.execute(
+        """
+        SELECT
+            COALESCE(SUM(minutes), 0)
+        FROM study_sessions
+        WHERE username = ?
+        AND DATE(completed_at) = DATE('now')
+        """,
+        (session["user"],)
+    )
+
+    today_minutes = cursor.fetchone()[0]
+
+    conn.close()
+
+    return jsonify({
+        "total_sessions": total_sessions,
+        "total_minutes": total_minutes,
+        "today_minutes": today_minutes
+    })
 # =====================================
 # SIGNUP
 # =====================================
