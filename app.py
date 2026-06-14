@@ -518,6 +518,3 @@ if __name__ == "__main__":
         debug=True
     )
 
-/study
-/save_study_session
-/get_study_stats
