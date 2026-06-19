@@ -17,3 +17,16 @@ body{
     Arial,
     sans-serif;
 }
+
+#timerDisplay{
+
+    font-size:140px;
+
+    font-weight:800;
+
+    text-align:center;
+
+    line-height:1;
+
+    letter-spacing:4px;
+}
