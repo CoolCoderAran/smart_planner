@@ -1,117 +1,233 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Mode</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='study.css') }}">
-</head>
 <body>
 
 <nav class="topbar">
+
     <h1>Study Mode</h1>
 
     <a href="/dashboard" class="back-btn">
         Dashboard
     </a>
+
 </nav>
 
-<div class="container">
+<div class="study-page">
 
-    <div class="card">
+    <!-- HERO -->
 
-        <h2>Study Session</h2>
+    <div class="hero">
 
-        <label>Timer Mode</label>
+        <h1>Focus Mode</h1>
 
-        <select id="modeSelect">
-            <option value="pomodoro">Pomodoro (25/5)</option>
-            <option value="deepwork">Deep Work (90/15)</option>
-            <option value="quickburst">Quick Burst (15/3)</option>
-            <option value="examcrunch">Exam Crunch (50/10)</option>
-            <option value="custom">Custom</option>
-        </select>
-
-        <div id="customSettings" style="display:none">
-
-            <label>Focus Minutes</label>
-            <input type="number" id="customFocus" value="30">
-
-            <label>Break Minutes</label>
-            <input type="number" id="customBreak" value="5">
-
-        </div>
-
-        <label>Task</label>
-
-        <select id="taskSelect">
-
-            {% for task in tasks %}
-            <option value="{{ task[1] }}">
-                {{ task[1] }}
-            </option>
-            {% endfor %}
-
-        </select>
+        <p>
+            Eliminate distractions and maximize productivity.
+        </p>
 
     </div>
 
-    <div class="timer-card">
+    <!-- TIMER -->
 
-        <h3 id="phaseLabel">
-            Focus Time
+    <div class="timer-section">
+
+        <div class="timer-card">
+
+            <h3 id="phaseLabel">
+                Focus Time
+            </h3>
+
+            <div class="timer-ring">
+
+                <div id="timerDisplay">
+                    25:00
+                </div>
+
+            </div>
+
+            <div class="controls">
+
+                <button onclick="startTimer()">
+                    Start
+                </button>
+
+                <button onclick="pauseTimer()">
+                    Pause
+                </button>
+
+                <button onclick="resumeTimer()">
+                    Resume
+                </button>
+
+                <button onclick="resetTimer()">
+                    Reset
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SETTINGS -->
+
+    <div class="settings-section">
+
+        <div class="settings-card">
+
+            <h2>
+                Study Session
+            </h2>
+
+            <label>
+                Timer Mode
+            </label>
+
+            <select id="modeSelect">
+
+                <option value="pomodoro">
+                    Pomodoro (25/5)
+                </option>
+
+                <option value="deepwork">
+                    Deep Work (90/15)
+                </option>
+
+                <option value="quickburst">
+                    Quick Burst (15/3)
+                </option>
+
+                <option value="examcrunch">
+                    Exam Crunch (50/10)
+                </option>
+
+                <option value="custom">
+                    Custom
+                </option>
+
+            </select>
+
+            <div id="customSettings" style="display:none">
+
+                <label>
+                    Focus Minutes
+                </label>
+
+                <input
+                    type="number"
+                    id="customFocus"
+                    value="30">
+
+                <label>
+                    Break Minutes
+                </label>
+
+                <input
+                    type="number"
+                    id="customBreak"
+                    value="5">
+
+            </div>
+
+            <label>
+                Task
+            </label>
+
+            <select id="taskSelect">
+
+                {% for task in tasks %}
+
+                <option value="{{ task[1] }}">
+                    {{ task[1] }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <!-- DAILY GOAL -->
+
+    <div class="goal-card">
+
+        <h3>
+            Daily Goal
         </h3>
 
-        <div id="timerDisplay">
-            25:00
-        </div>
+        <div class="goal-bar">
 
-        <div class="controls">
-
-            <button onclick="startTimer()">
-                Start
-            </button>
-
-            <button onclick="pauseTimer()">
-                Pause
-            </button>
-
-            <button onclick="resumeTimer()">
-                Resume
-            </button>
-
-            <button onclick="resetTimer()">
-                Reset
-            </button>
+            <div id="goalFill"></div>
 
         </div>
+
+        <p>
+            <span id="todayGoalMinutes">
+                0
+            </span>
+
+            / 120 minutes
+        </p>
 
     </div>
 
-    <div class="stats-card">
+    <!-- STATISTICS -->
 
-        <h2>Statistics</h2>
+    <div class="stats-section">
 
-        <div class="stat">
-            Today's Minutes:
-            <span id="todayMinutes">0</span>
-        </div>
+        <h2>
+            Statistics
+        </h2>
 
-        <div class="stat">
-            Weekly Minutes:
-            <span id="weeklyMinutes">0</span>
-        </div>
+        <div class="stats-grid">
 
-        <div class="stat">
-            Sessions:
-            <span id="totalSessions">0</span>
-        </div>
+            <div class="stat-card">
 
-        <div class="stat">
-            Total Minutes:
-            <span id="totalMinutes">0</span>
+                <h2 id="todayMinutes">
+                    0
+                </h2>
+
+                <p>
+                    Today
+                </p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h2 id="weeklyMinutes">
+                    0
+                </h2>
+
+                <p>
+                    This Week
+                </p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h2 id="totalSessions">
+                    0
+                </h2>
+
+                <p>
+                    Sessions
+                </p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h2 id="totalMinutes">
+                    0
+                </h2>
+
+                <p>
+                    Total Minutes
+                </p>
+
+            </div>
+
         </div>
 
     </div>
@@ -121,64 +237,3 @@
 <script src="{{ url_for('static', filename='study.js') }}"></script>
 
 </body>
-</html>
-<!--<div class="study-page">
-
-    <div class="hero">
-
-        <h1>Focus Mode</h1>
-
-        <p>
-            Eliminate distractions and
-            maximize productivity.
-        </p>
-
-    </div>
-
-    <div class="timer-section">
-
-          <div class="timer-card">
-
-        <h3 id="phaseLabel">
-            Focus Time
-        </h3>
-
-        <div id="timerDisplay">
-            25:00
-        </div>
-
-        <div class="controls">
-
-            <button onclick="startTimer()">
-                Start
-            </button>
-
-            <button onclick="pauseTimer()">
-                Pause
-            </button>
-
-            <button onclick="resumeTimer()">
-                Resume
-            </button>
-
-            <button onclick="resetTimer()">
-                Reset
-            </button>
-
-        </div>
-
-    </div>
-
-    <div class="settings-section">
-
-        SETTINGS GO HERE
-
-    </div>
-
-    <div class="stats-section">
-
-        STATS GO HERE
-
-    </div>
-
-</div> -->
