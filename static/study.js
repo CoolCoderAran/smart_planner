@@ -1,124 +1,245 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Mode</title>
+const MODES = {
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='study.css') }}">
-</head>
-<body>
+    pomodoro:{
+        focus:25,
+        break:5
+    },
 
-<nav class="topbar">
-    <h1>Study Mode</h1>
+    deepwork:{
+        focus:90,
+        break:15
+    },
 
-    <a href="/dashboard" class="back-btn">
-        Dashboard
-    </a>
-</nav>
+    quickburst:{
+        focus:15,
+        break:3
+    },
 
-<div class="container">
+    examcrunch:{
+        focus:50,
+        break:10
+    }
 
-    <div class="card">
+};
 
-        <h2>Study Session</h2>
+let timer;
+let secondsRemaining;
+let currentMode="pomodoro";
 
-        <label>Timer Mode</label>
+let isBreak=false;
+let isRunning=false;
 
-        <select id="modeSelect">
-            <option value="pomodoro">Pomodoro (25/5)</option>
-            <option value="deepwork">Deep Work (90/15)</option>
-            <option value="quickburst">Quick Burst (15/3)</option>
-            <option value="examcrunch">Exam Crunch (50/10)</option>
-            <option value="custom">Custom</option>
-        </select>
+function loadMode(){
 
-        <div id="customSettings" style="display:none">
+    currentMode =
+        document.getElementById("modeSelect").value;
 
-            <label>Focus Minutes</label>
-            <input type="number" id="customFocus" value="30">
+    if(currentMode==="custom"){
 
-            <label>Break Minutes</label>
-            <input type="number" id="customBreak" value="5">
+        document.getElementById(
+            "customSettings"
+        ).style.display="block";
 
-        </div>
+        secondsRemaining=
+            document.getElementById("customFocus").value*60;
 
-        <label>Task</label>
+    }
 
-        <select id="taskSelect">
+    else{
 
-            {% for task in tasks %}
-            <option value="{{ task[1] }}">
-                {{ task[1] }}
-            </option>
-            {% endfor %}
+        document.getElementById(
+            "customSettings"
+        ).style.display="none";
 
-        </select>
+        secondsRemaining=
+            MODES[currentMode].focus*60;
+    }
 
-    </div>
+    updateDisplay();
+}
 
-    <div class="timer-card">
+function updateDisplay(){
 
-        <h3 id="phaseLabel">
-            Focus Time
-        </h3>
+    let minutes=
+        Math.floor(secondsRemaining/60);
 
-        <div id="timerDisplay">
-            25:00
-        </div>
+    let seconds=
+        secondsRemaining%60;
 
-        <div class="controls">
+    document.getElementById(
+        "timerDisplay"
+    ).innerText=
+        String(minutes).padStart(2,"0")
+        +":"+
+        String(seconds).padStart(2,"0");
+}
 
-            <button onclick="startTimer()">
-                Start
-            </button>
+function startTimer(){
 
-            <button onclick="pauseTimer()">
-                Pause
-            </button>
+    if(isRunning) return;
 
-            <button onclick="resumeTimer()">
-                Resume
-            </button>
+    isRunning=true;
 
-            <button onclick="resetTimer()">
-                Reset
-            </button>
+    timer=setInterval(()=>{
 
-        </div>
+        secondsRemaining--;
 
-    </div>
+        updateDisplay();
 
-    <div class="stats-card">
+        if(secondsRemaining<=0){
 
-        <h2>Statistics</h2>
+            clearInterval(timer);
 
-        <div class="stat">
-            Today's Minutes:
-            <span id="todayMinutes">0</span>
-        </div>
+            isRunning=false;
 
-        <div class="stat">
-            Weekly Minutes:
-            <span id="weeklyMinutes">0</span>
-        </div>
+            sessionFinished();
+        }
 
-        <div class="stat">
-            Sessions:
-            <span id="totalSessions">0</span>
-        </div>
+    },1000);
+}
 
-        <div class="stat">
-            Total Minutes:
-            <span id="totalMinutes">0</span>
-        </div>
+function pauseTimer(){
 
-    </div>
+    clearInterval(timer);
 
-</div>
+    isRunning=false;
+}
 
-<script src="{{ url_for('static', filename='study.js') }}"></script>
+function resumeTimer(){
 
-</body>
-</html>
+    startTimer();
+}
+
+function resetTimer(){
+
+    clearInterval(timer);
+
+    isRunning=false;
+
+    loadMode();
+}
+
+function sessionFinished(){
+
+    let completedMinutes;
+
+    if(currentMode==="custom"){
+
+        completedMinutes=
+            parseInt(
+                document.getElementById("customFocus").value
+            );
+
+    }else{
+
+        completedMinutes=
+            MODES[currentMode].focus;
+    }
+
+    fetch("/save_study_session",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            mode:currentMode,
+
+            task:
+                document.getElementById(
+                    "taskSelect"
+                ).value,
+
+            minutes:completedMinutes
+
+        })
+
+    });
+
+    alert("Focus session complete!");
+
+    switchPhase();
+}
+
+function switchPhase(){
+
+    if(!isBreak){
+
+        document.getElementById(
+            "phaseLabel"
+        ).innerText="Break Time";
+
+        if(currentMode==="custom"){
+
+            secondsRemaining=
+                document.getElementById(
+                    "customBreak"
+                ).value*60;
+
+        }
+
+        else{
+
+            secondsRemaining=
+                MODES[currentMode].break*60;
+        }
+
+        isBreak=true;
+
+    }
+
+    else{
+
+        document.getElementById(
+            "phaseLabel"
+        ).innerText="Focus Time";
+
+        loadMode();
+
+        isBreak=false;
+    }
+
+    updateDisplay();
+}
+
+async function loadStats(){
+
+    const response=
+        await fetch("/get_study_stats");
+
+    const data=
+        await response.json();
+
+    document.getElementById(
+        "todayMinutes"
+    ).innerText=
+        data.today_minutes || 0;
+
+    document.getElementById(
+        "weeklyMinutes"
+    ).innerText=
+        data.weekly_minutes || 0;
+
+    document.getElementById(
+        "totalSessions"
+    ).innerText=
+        data.total_sessions || 0;
+
+    document.getElementById(
+        "totalMinutes"
+    ).innerText=
+        data.total_minutes || 0;
+}
+
+document.getElementById(
+    "modeSelect"
+).addEventListener(
+    "change",
+    loadMode
+);
+
+loadMode();
+loadStats();
