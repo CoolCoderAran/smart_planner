@@ -107,5 +107,39 @@ button:hover{
     text-align:center;
 }
 
+@media (max-width:900px){
+
+    .stats-grid{
+
+        grid-template-columns:
+        repeat(2,1fr);
+
+    }
+
+}
+
+@media (max-width:600px){
+
+    .stats-grid{
+
+        grid-template-columns:
+        1fr;
+
+    }
+
+    #timerDisplay{
+
+        font-size:80px;
+
+    }
+
+    .timer-ring{
+
+        width:250px;
+        height:250px;
+
+    }
+
+}
 
 
