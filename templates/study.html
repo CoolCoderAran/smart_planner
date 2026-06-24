@@ -1,240 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Mode</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='study.css') }}">
+</head>
 <body>
     
-    <link rel="stylesheet"
-      href="{{ url_for('static', filename='study.css') }}">
-
-    <script>study.js
-    
 <nav class="topbar">
-
     <h1>Study Mode</h1>
-
     <a href="/dashboard" class="back-btn">
         Dashboard
     </a>
-
 </nav>
 
 <div class="study-page">
 
-    <!-- HERO -->
-
     <div class="hero">
-
         <h1>Focus Mode</h1>
-
-        <p>
-            Eliminate distractions and maximize productivity.
-        </p>
-
+        <p>Eliminate distractions and maximize productivity.</p>
     </div>
 
-    <!-- TIMER -->
-
     <div class="timer-section">
-
         <div class="timer-card">
-
-            <h3 id="phaseLabel">
-                Focus Time
-            </h3>
-
+            <h3 id="phaseLabel">Focus Time</h3>
             <div class="timer-ring">
-
-                <div id="timerDisplay">
-                    25:00
-                </div>
-
+                <div id="timerDisplay">25:00</div>
             </div>
 
             <div class="controls">
-
-                <button onclick="startTimer()">
-                    Start
-                </button>
-
-                <button onclick="pauseTimer()">
-                    Pause
-                </button>
-
-                <button onclick="resumeTimer()">
-                    Resume
-                </button>
-
-                <button onclick="resetTimer()">
-                    Reset
-                </button>
-
+                <button onclick="startTimer()">Start</button>
+                <button onclick="pauseTimer()">Pause</button>
+                <button onclick="resumeTimer()">Resume</button>
+                <button onclick="resetTimer()">Reset</button>
             </div>
-
         </div>
-
     </div>
 
-    <!-- SETTINGS -->
-
     <div class="settings-section">
-
         <div class="settings-card">
-
-            <h2>
-                Study Session
-            </h2>
-
-            <label>
-                Timer Mode
-            </label>
-
+            <h2>Study Session</h2>
+            
+            <label>Timer Mode</label>
             <select id="modeSelect">
-
-                <option value="pomodoro">
-                    Pomodoro (25/5)
-                </option>
-
-                <option value="deepwork">
-                    Deep Work (90/15)
-                </option>
-
-                <option value="quickburst">
-                    Quick Burst (15/3)
-                </option>
-
-                <option value="examcrunch">
-                    Exam Crunch (50/10)
-                </option>
-
-                <option value="custom">
-                    Custom
-                </option>
-
+                <option value="pomodoro">Pomodoro (25/5)</option>
+                <option value="deepwork">Deep Work (90/15)</option>
+                <option value="quickburst">Quick Burst (15/3)</option>
+                <option value="examcrunch">Exam Crunch (50/10)</option>
+                <option value="custom">Custom</option>
             </select>
 
             <div id="customSettings" style="display:none">
+                <label>Focus Minutes</label>
+                <input type="number" id="customFocus" value="30">
 
-                <label>
-                    Focus Minutes
-                </label>
-
-                <input
-                    type="number"
-                    id="customFocus"
-                    value="30">
-
-                <label>
-                    Break Minutes
-                </label>
-
-                <input
-                    type="number"
-                    id="customBreak"
-                    value="5">
-
+                <label>Break Minutes</label>
+                <input type="number" id="customBreak" value="5">
             </div>
 
-            <label>
-                Task
-            </label>
-
+            <label>Task</label>
             <select id="taskSelect">
-
                 {% for task in tasks %}
-
-                <option value="{{ task[1] }}">
-                    {{ task[1] }}
-                </option>
-
+                <option value="{{ task[1] }}">{{ task[1] }}</option>
                 {% endfor %}
-
             </select>
-
         </div>
-
     </div>
-
-    <!-- DAILY GOAL -->
 
     <div class="goal-card">
-
-        <h3>
-            Daily Goal
-        </h3>
-
+        <h3>Daily Goal</h3>
         <div class="goal-bar">
-
             <div id="goalFill"></div>
-
         </div>
-
         <p>
-            <span id="todayGoalMinutes">
-                0
-            </span>
-
-            / 120 minutes
+            <span id="todayGoalMinutes">0</span> / 120 minutes
         </p>
-
     </div>
 
-    <!-- STATISTICS -->
-
     <div class="stats-section">
-
-        <h2>
-            Statistics
-        </h2>
-
+        <h2>Statistics</h2>
         <div class="stats-grid">
-
             <div class="stat-card">
-
-                <h2 id="todayMinutes">
-                    0
-                </h2>
-
-                <p>
-                    Today
-                </p>
-
+                <h2 id="todayMinutes">0</h2>
+                <p>Today</p>
             </div>
 
             <div class="stat-card">
-
-                <h2 id="weeklyMinutes">
-                    0
-                </h2>
-
-                <p>
-                    This Week
-                </p>
-
+                <h2 id="weeklyMinutes">0</h2>
+                <p>This Week</p>
             </div>
 
             <div class="stat-card">
-
-                <h2 id="totalSessions">
-                    0
-                </h2>
-
-                <p>
-                    Sessions
-                </p>
-
+                <h2 id="totalSessions">0</h2>
+                <p>Sessions</p>
             </div>
 
             <div class="stat-card">
-
-                <h2 id="totalMinutes">
-                    0
-                </h2>
-
-                <p>
-                    Total Minutes
-                </p>
-
+                <h2 id="totalMinutes">0</h2>
+                <p>Total Minutes</p>
             </div>
-
         </div>
-
     </div>
 
 </div>
@@ -242,3 +108,4 @@
 <script src="{{ url_for('static', filename='study.js') }}"></script>
 
 </body>
+</html>
