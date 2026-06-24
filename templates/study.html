@@ -7,7 +7,92 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='study.css') }}">
 </head>
 <body>
-    
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar">
+
+    <!-- LEFT SIDE -->
+    <div class="nav-left">
+
+        <a href="/" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}"
+                 alt="Smart Planner Logo">
+        </a>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="/planner">
+                    Planner
+                </a>
+            </li>
+
+            <li>
+                <a href="/features">
+                    Features
+                </a>
+            </li>
+
+            <li>
+                <a href="/about">
+                    About
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="nav-right">
+
+        {% if session.get("user") %}
+
+        <div class="account-menu">
+
+            <button class="account-btn">
+
+                <span class="account-avatar">
+                    {{ session["user"][0].upper() }}
+                </span>
+
+                <span class="account-name">
+                    {{ session["user"] }}
+                </span>
+
+                ▾
+
+            </button>
+
+            <div class="account-dropdown">
+
+                <a href="/planner">
+                    Dashboard
+                </a>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <a href="/login" class="nav-login">
+            Login
+        </a>
+
+        <a href="/signup" class="nav-signup">
+            Get Started
+        </a>
+
+        {% endif %}
+
+    </div>
+
+</nav>    
 <nav class="topbar">
     <h1>Study Mode</h1>
     <a href="/dashboard" class="back-btn">
