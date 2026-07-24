@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 import sqlite3
 
 DB_NAME = "database.db"
+
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
@@ -49,30 +51,38 @@ def init_db():
     )
     """)
 
-    # Streak TABLE
+    conn.commit()
+    conn.close()
+
+
 def get_streak(username):
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT DISTINCT DATE(completed_at)
         FROM study_sessions
         WHERE username = ?
         ORDER BY DATE(completed_at) DESC
-    """, (username,))
+    """,
+        (username,),
+    )
 
-    dates = cursor.fetchall()
-
+    # SQLite returns a list of tuples like [('2026-03-30',), ('2026-03-29',)]
+    raw_dates = cursor.fetchall()
     conn.close()
 
-    
-    return dates
+    if not raw_dates:
+        return 0  # No study sessions -> streak is 0
 
-get_streak()
-     if not dates:
-        return 0  # No study sessions → streak is 0
+    # Parse raw text dates into datetime.date objects
+    dates = [
+        datetime.strptime(row[0], "%Y-%m-%d").date()
+        for row in raw_dates
+        if row[0]
+    ]
 
-    streak = 0
     today = datetime.now().date()
 
     # If the most recent study date is today, start from today
@@ -84,17 +94,16 @@ get_streak()
         streak = 1
         last_date = today - timedelta(days=1)
     else:
-        return 0  # No streak if last study was before yesterday
+        return 0  # Streak lost if last study was before yesterday
 
-    # Loop through the rest of the dates
+    # Loop through the remaining dates to check for consecutive days
     for date in dates[1:]:
         if date == last_date - timedelta(days=1):
             streak += 1
             last_date = date
+        elif date == last_date:
+            continue  # Ignore multiple entries on the same date
         else:
-            break  # Gap found → streak ends
+            break  # Gap found -> streak ends
 
     return streak
-    
-    conn.commit()
-    conn.close()
