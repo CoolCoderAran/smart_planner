@@ -61,8 +61,8 @@ CREATE TABLE IF NOT EXISTS user_achievements (
     UNIQUE(username, achievement_id)
 )
 """)
-    # STUDY SESSIONS TABLE
-    cursor.execute("""
+# STUDY SESSIONS TABLE
+cursor.execute("""
     CREATE TABLE IF NOT EXISTS study_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL,
