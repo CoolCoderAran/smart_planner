@@ -39,6 +39,28 @@ def init_db():
     )
     """)
 
+    # ACHIEVEMENTS
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS achievements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    description TEXT NOT NULL,
+    icon TEXT,
+    requirement_type TEXT NOT NULL,
+    requirement_value INTEGER NOT NULL
+)
+""")
+
+# USER ACHIEVEMENTS
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS user_achievements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    achievement_id INTEGER NOT NULL,
+    earned_at TEXT NOT NULL,
+    UNIQUE(username, achievement_id)
+)
+""")
     # STUDY SESSIONS TABLE
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS study_sessions (
