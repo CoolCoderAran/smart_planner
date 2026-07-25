@@ -187,7 +187,21 @@
             </div>
         </div>
     </div>
+<div class="streak-card">
 
+    <h3>🔥 Current Streak</h3>
+    <p>
+        {{ streak_data.current_streak }}
+        Days
+    </p>
+
+    <h3>🏆 Best Streak</h3>
+    <p>
+        {{ streak_data.best_streak }}
+        Days
+    </p>
+
+</div>
 </div>
 
 <script src="{{ url_for('static', filename='study.js') }}"></script>
