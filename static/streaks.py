@@ -2,90 +2,144 @@ from datetime import datetime, timedelta
 import db
 
 
-def get_current_streak(username):
+# =====================================
+# GET ALL STUDY DAYS
+# =====================================
+
+def get_study_days(username):
 
     conn = db.get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
-    SELECT DISTINCT DATE(completed_at)
-    FROM study_sessions
-    WHERE username=?
-    ORDER BY DATE(completed_at) DESC
-    """,(username,))
+    cursor.execute(
+        """
+        SELECT DISTINCT DATE(completed_at)
+        FROM study_sessions
+        WHERE username = ?
+        ORDER BY DATE(completed_at) DESC
+        """,
+        (username,)
+    )
 
     rows = cursor.fetchall()
 
     conn.close()
 
-    if not rows:
-        return 0
-
-    dates = [
-        datetime.strptime(r[0],"%Y-%m-%d").date()
-        for r in rows
+    return [
+        datetime.strptime(
+            row[0],
+            "%Y-%m-%d"
+        ).date()
+        for row in rows
+        if row[0]
     ]
+
+
+# =====================================
+# CURRENT STREAK
+# =====================================
+
+def get_current_streak(username):
+
+    dates = get_study_days(username)
+
+    if not dates:
+        return 0
 
     today = datetime.now().date()
 
+    streak = 0
+
+    # Allow studying today or yesterday
     if dates[0] == today:
-        streak = 1
-        last = today
+
+        current_date = today
 
     elif dates[0] == today - timedelta(days=1):
-        streak = 1
-        last = today - timedelta(days=1)
+
+        current_date = today - timedelta(days=1)
 
     else:
+
         return 0
 
-    for d in dates[1:]:
 
-        if d == last - timedelta(days=1):
+    for date in dates:
+
+        if date == current_date:
+
             streak += 1
-            last = d
+
+            current_date -= timedelta(days=1)
 
         else:
+
             break
 
-  def get_best_streak(username):
 
-    conn=db.get_db()
-    cursor=conn.cursor()
+    return streak
 
-    cursor.execute("""
-    SELECT DISTINCT DATE(completed_at)
-    FROM study_sessions
-    WHERE username=?
-    ORDER BY DATE(completed_at)
-    """,(username,))
 
-    rows=cursor.fetchall()
 
-    conn.close()
+# =====================================
+# BEST STREAK EVER
+# =====================================
 
-    if not rows:
+def get_best_streak(username):
+
+    dates = get_study_days(username)
+
+    if not dates:
         return 0
 
-    dates=[
-        datetime.strptime(r[0],"%Y-%m-%d").date()
-        for r in rows
-    ]
 
-    best=1
-    current=1
+    # Reverse into chronological order
 
-    for i in range(1,len(dates)):
+    dates = sorted(dates)
 
-        if dates[i]==dates[i-1]+timedelta(days=1):
 
-            current+=1
+    best = 1
+    current = 1
 
-            best=max(best,current)
+
+    for i in range(1, len(dates)):
+
+        difference = (
+            dates[i] -
+            dates[i-1]
+        ).days
+
+
+        if difference == 1:
+
+            current += 1
 
         else:
 
-            current=1
+            current = 1
+
+
+        if current > best:
+
+            best = current
+
 
     return best
-    return streak
+
+
+
+# =====================================
+# GET BOTH STREAK VALUES
+# =====================================
+
+def get_streak_data(username):
+
+    return {
+
+        "current_streak":
+            get_current_streak(username),
+
+        "best_streak":
+            get_best_streak(username)
+
+    }
