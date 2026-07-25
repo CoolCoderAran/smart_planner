@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import sqlite3
+
 
 DB_NAME = "database.db"
 
@@ -10,122 +10,332 @@ def get_db():
 
 
 def init_db():
+
     conn = get_db()
     cursor = conn.cursor()
 
-    # USERS TABLE
+
+    # =====================================
+    # USERS
+    # =====================================
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+
         username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
+
+        password TEXT NOT NULL,
+
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+
     )
     """)
 
-    # TASKS TABLE
+
+
+    # =====================================
+    # TASKS
+    # =====================================
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS tasks (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+
         username TEXT NOT NULL,
+
         task TEXT NOT NULL
+
     )
     """)
 
-    # EMAIL SUBSCRIBERS TABLE
+
+
+    # =====================================
+    # SUBSCRIBERS
+    # =====================================
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS subscribers (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+
         email TEXT UNIQUE NOT NULL
+
     )
     """)
 
-    # ACHIEVEMENTS
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS achievements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    description TEXT NOT NULL,
-    icon TEXT,
-    requirement_type TEXT NOT NULL,
-    requirement_value INTEGER NOT NULL
-)
-""")
 
-# USER ACHIEVEMENTS
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS user_achievements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    achievement_id INTEGER NOT NULL,
-    earned_at TEXT NOT NULL,
-    UNIQUE(username, achievement_id)
-)
-""")
-# STUDY SESSIONS TABLE
-cursor.execute("""
+
+    # =====================================
+    # STUDY SESSIONS
+    # =====================================
+
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS study_sessions (
+
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+
         username TEXT NOT NULL,
+
         mode TEXT NOT NULL,
+
         task TEXT,
+
         minutes INTEGER NOT NULL,
+
         completed_at TEXT NOT NULL
+
     )
     """)
+
+
+
+    # =====================================
+    # ACHIEVEMENTS
+    # =====================================
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS achievements (
+
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        name TEXT UNIQUE NOT NULL,
+
+        description TEXT NOT NULL,
+
+        icon TEXT,
+
+        requirement_type TEXT NOT NULL,
+
+        requirement_value INTEGER NOT NULL
+
+    )
+    """)
+
+
+
+    # =====================================
+    # USER ACHIEVEMENTS
+    # =====================================
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_achievements (
+
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        username TEXT NOT NULL,
+
+        achievement_id INTEGER NOT NULL,
+
+        earned_at TEXT NOT NULL,
+
+        UNIQUE(username, achievement_id)
+
+    )
+    """)
+
+
+
+    insert_achievements(cursor)
+
 
     conn.commit()
     conn.close()
 
 
-def get_streak(username):
-    conn = get_db()
-    cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT DISTINCT DATE(completed_at)
-        FROM study_sessions
-        WHERE username = ?
-        ORDER BY DATE(completed_at) DESC
-    """,
-        (username,),
-    )
+# =====================================
+# DEFAULT ACHIEVEMENTS
+# =====================================
 
-    # SQLite returns a list of tuples like [('2026-03-30',), ('2026-03-29',)]
-    raw_dates = cursor.fetchall()
-    conn.close()
+def insert_achievements(cursor):
 
-    if not raw_dates:
-        return 0  # No study sessions -> streak is 0
 
-    # Parse raw text dates into datetime.date objects
-    dates = [
-        datetime.strptime(row[0], "%Y-%m-%d").date()
-        for row in raw_dates
-        if row[0]
+    ACHIEVEMENTS = [
+
+
+        # Sessions
+
+        (
+            "First Session",
+            "Complete your first study session",
+            "🎉",
+            "sessions",
+            1
+        ),
+
+        (
+            "Getting Started",
+            "Complete 5 study sessions",
+            "📘",
+            "sessions",
+            5
+        ),
+
+        (
+            "Dedicated",
+            "Complete 25 study sessions",
+            "📗",
+            "sessions",
+            25
+        ),
+
+        (
+            "Scholar",
+            "Complete 50 study sessions",
+            "📚",
+            "sessions",
+            50
+        ),
+
+
+        (
+            "Master Student",
+            "Complete 100 study sessions",
+            "🏆",
+            "sessions",
+            100
+        ),
+
+
+
+        # Minutes
+
+
+        (
+            "100 Minutes",
+            "Study 100 total minutes",
+            "⏱",
+            "minutes",
+            100
+        ),
+
+        (
+            "500 Minutes",
+            "Study 500 total minutes",
+            "⌚",
+            "minutes",
+            500
+        ),
+
+        (
+            "1000 Minutes",
+            "Study 1000 total minutes",
+            "🕒",
+            "minutes",
+            1000
+        ),
+
+
+
+        # Streaks
+
+
+        (
+            "2 Day Streak",
+            "Study 2 days in a row",
+            "🔥",
+            "streak",
+            2
+        ),
+
+        (
+            "7 Day Streak",
+            "Study 7 days in a row",
+            "🔥",
+            "streak",
+            7
+        ),
+
+        (
+            "30 Day Streak",
+            "Study 30 days in a row",
+            "🔥",
+            "streak",
+            30
+        ),
+
+
+
+        # Modes
+
+
+        (
+            "Pomodoro Beginner",
+            "Complete 10 Pomodoro sessions",
+            "🍅",
+            "pomodoro",
+            10
+        ),
+
+        (
+            "Deep Thinker",
+            "Complete 10 Deep Work sessions",
+            "🧠",
+            "deepwork",
+            10
+        ),
+
+        (
+            "Speed Learner",
+            "Complete 20 Quick Burst sessions",
+            "⚡",
+            "quickburst",
+            20
+        ),
+
+        (
+            "Exam Warrior",
+            "Complete 20 Exam Crunch sessions",
+            "📖",
+            "examcrunch",
+            20
+        ),
+
+
+
+        # Daily
+
+
+        (
+            "Hour of Power",
+            "Study 60 minutes in one day",
+            "💪",
+            "dailyminutes",
+            60
+        ),
+
+        (
+            "Marathon",
+            "Study 180 minutes in one day",
+            "🏃",
+            "dailyminutes",
+            180
+        )
+
+
     ]
 
-    today = datetime.now().date()
 
-    # If the most recent study date is today, start from today
-    # If it's yesterday, start from yesterday
-    if dates[0] == today:
-        streak = 1
-        last_date = today
-    elif dates[0] == today - timedelta(days=1):
-        streak = 1
-        last_date = today - timedelta(days=1)
-    else:
-        return 0  # Streak lost if last study was before yesterday
+    cursor.executemany(
 
-    # Loop through the remaining dates to check for consecutive days
-    for date in dates[1:]:
-        if date == last_date - timedelta(days=1):
-            streak += 1
-            last_date = date
-        elif date == last_date:
-            continue  # Ignore multiple entries on the same date
-        else:
-            break  # Gap found -> streak ends
+        """
+        INSERT OR IGNORE INTO achievements
+        (
+            name,
+            description,
+            icon,
+            requirement_type,
+            requirement_value
+        )
 
-    return streak
+        VALUES (?,?,?,?,?)
+
+        """,
+
+        ACHIEVEMENTS
+
+    )
