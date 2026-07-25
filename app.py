@@ -18,7 +18,7 @@ from werkzeug.security import (
 import sqlite3
 import re
 import db
-
+import streaks
 
 # =====================================
 # APP SETUP
@@ -112,7 +112,8 @@ def dashboard():
 
     conn = db.get_db()
     cursor = conn.cursor()
-
+    streak_data = streaks.get_streak_data(session["user"])
+    
     cursor.execute(
         """
         SELECT id, task
@@ -131,6 +132,7 @@ def dashboard():
         "dashboard.html",
         username=username,
         tasks=tasks
+        streak_data=streak_data
     )
 
 # =====================================
