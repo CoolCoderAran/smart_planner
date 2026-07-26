@@ -19,6 +19,7 @@ import sqlite3
 import re
 import db
 import streaks
+import achievements
 
 # =====================================
 # APP SETUP
@@ -105,15 +106,17 @@ def about():
 @app.route("/dashboard")
 def dashboard():
 
-    if "user" not in session:
+    username = session.get("user")  # [Change 9]: Use session.get()
+    if username is None:
         return redirect(url_for("login"))
 
-    username = session["user"]
+    # [Change 3]: Load streak data & achievement data
+    streak_data = streaks.get_streak_data(username)
+    achievement_data = achievements.get_user_achievements(username)
 
     conn = db.get_db()
     cursor = conn.cursor()
-    streak_data = streaks.get_streak_data(session["user"])
-    
+
     cursor.execute(
         """
         SELECT id, task
@@ -125,15 +128,17 @@ def dashboard():
     )
 
     tasks = cursor.fetchall()
-
     conn.close()
 
+    # [Change 1 & 3]: Added missing comma & passed achievements template variable
     return render_template(
         "dashboard.html",
         username=username,
-        tasks=tasks
-        streak_data=streak_data
+        tasks=tasks,
+        streak_data=streak_data,
+        achievements=achievement_data
     )
+
 
 # =====================================
 # STUDY MODE
@@ -142,7 +147,8 @@ def dashboard():
 @app.route("/study")
 def study():
 
-    if "user" not in session:
+    username = session.get("user")  # [Change 9]: Use session.get()
+    if username is None:
         return redirect(url_for("login"))
 
     conn = db.get_db()
@@ -155,27 +161,30 @@ def study():
         WHERE username = ?
         ORDER BY id DESC
         """,
-        (session["user"],)
+        (username,)
     )
 
     tasks = cursor.fetchall()
-
     conn.close()
 
+    # [Change 4]: Pass streak_data to study template
     return render_template(
         "study.html",
-        username=session["user"],
-        tasks=tasks
+        username=username,
+        tasks=tasks,
+        streak_data=streaks.get_streak_data(username)
     )
 
+
 # =====================================
-# SAVE STUDY SESSION (Fixed Duplication & Error Handling)
+# SAVE STUDY SESSION
 # =====================================
 
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
 
-    if "user" not in session:
+    username = session.get("user")  # [Change 9]: Use session.get()
+    if username is None:
         return jsonify({
             "success": False,
             "message": "Not logged in"
@@ -191,15 +200,35 @@ def save_study_session():
 
     mode = data.get("mode", "Unknown")
     task = data.get("task", "")
-    
-    # Safely convert to integer to prevent DB crashes
+
+    # [Change 6]: Prevent negative study times
     try:
-        minutes = int(data.get("minutes", 0))
+        minutes = max(0, int(data.get("minutes", 0)))
     except (ValueError, TypeError):
         minutes = 0
 
+    # [Change 11]: Reject invalid study times <= 0
+    if minutes <= 0:
+        return jsonify({
+            "success": False,
+            "message": "Invalid study time."
+        }), 400
+
     conn = db.get_db()
     cursor = conn.cursor()
+
+    # [Change 7]: Verify task actually exists
+    cursor.execute(
+        """
+        SELECT 1
+        FROM tasks
+        WHERE username = ?
+        AND task = ?
+        """,
+        (username, task)
+    )
+    if cursor.fetchone() is None:
+        task = ""
 
     try:
         cursor.execute(
@@ -215,7 +244,7 @@ def save_study_session():
             VALUES (?, ?, ?, ?, ?)
             """,
             (
-                session["user"],
+                username,
                 mode,
                 task,
                 minutes,
@@ -232,7 +261,9 @@ def save_study_session():
             "error": str(e)
         }), 500
 
+    # [Change 5]: Close db conn BEFORE checking achievements to prevent dangling connections
     conn.close()
+    achievements.check_achievements(username)
 
     return jsonify({
         "success": True
@@ -246,12 +277,25 @@ def save_study_session():
 @app.route("/get_study_stats")
 def get_study_stats():
 
-    if "user" not in session:
-        return jsonify({})
+    username = session.get("user")  # [Change 9]: Use session.get()
+
+    # [Change 8]: Return structured default values when not logged in
+    if username is None:
+        return jsonify({
+            "today_minutes": 0,
+            "weekly_minutes": 0,
+            "total_sessions": 0,
+            "total_minutes": 0,
+            "today_sessions": 0,
+            "current_streak": 0,
+            "best_streak": 0,
+            "achievement_count": 0
+        })
 
     conn = db.get_db()
     cursor = conn.cursor()
 
+    # Total Stats
     cursor.execute(
         """
         SELECT
@@ -260,11 +304,11 @@ def get_study_stats():
         FROM study_sessions
         WHERE username = ?
         """,
-        (session["user"],)
+        (username,)
     )
-
     total_sessions, total_minutes = cursor.fetchone()
 
+    # Today's Minutes
     cursor.execute(
         """
         SELECT
@@ -273,18 +317,52 @@ def get_study_stats():
         WHERE username = ?
         AND DATE(completed_at) = DATE('now')
         """,
-        (session["user"],)
+        (username,)
     )
-
     today_minutes = cursor.fetchone()[0]
+
+    # [Change 2]: Calculate weekly minutes
+    cursor.execute(
+        """
+        SELECT COALESCE(SUM(minutes), 0)
+        FROM study_sessions
+        WHERE username = ?
+        AND DATE(completed_at) >= DATE('now', '-6 days')
+        """,
+        (username,)
+    )
+    weekly_minutes = cursor.fetchone()[0]
+
+    # [Change 13]: Add today's session count
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM study_sessions
+        WHERE username = ?
+        AND DATE(completed_at) = DATE('now')
+        """,
+        (username,)
+    )
+    today_sessions = cursor.fetchone()[0]
 
     conn.close()
 
+    # [Change 14 & 15]: Fetch streak and achievement count
+    streak_data = streaks.get_streak_data(username)
+    achievement_count = achievements.get_count(username)
+
+    # [Change 2, 13, 14, 15]: Updated return payload
     return jsonify({
+        "today_minutes": today_minutes,
+        "weekly_minutes": weekly_minutes,
         "total_sessions": total_sessions,
         "total_minutes": total_minutes,
-        "today_minutes": today_minutes
+        "today_sessions": today_sessions,
+        "current_streak": streak_data["current"],
+        "best_streak": streak_data["best"],
+        "achievement_count": achievement_count
     })
+
 
 # =====================================
 # SIGNUP
@@ -300,7 +378,7 @@ def signup():
     if request.method == "POST":
 
         username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        password = request.form.get("password", "")  # [Change 10]: Password spaces kept unstripped
 
         # BASIC VALIDATION
         if not username or not password:
@@ -320,7 +398,6 @@ def signup():
         cursor = conn.cursor()
 
         try:
-
             cursor.execute(
                 """
                 INSERT INTO users (username, password)
@@ -328,13 +405,10 @@ def signup():
                 """,
                 (username, hashed_password)
             )
-
             conn.commit()
 
         except sqlite3.IntegrityError:
-
             conn.close()
-
             flash("Username already exists.")
             return redirect(url_for("signup"))
 
@@ -363,7 +437,7 @@ def login():
     if request.method == "POST":
 
         username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        password = request.form.get("password", "")  # [Change 10]: Password spaces kept unstripped
 
         conn = db.get_db()
         cursor = conn.cursor()
@@ -378,7 +452,6 @@ def login():
         )
 
         user = cursor.fetchone()
-
         conn.close()
 
         # USER DOES NOT EXIST
@@ -421,7 +494,7 @@ def logout():
 @app.route("/planner")
 def planner():
 
-    if "user" not in session:
+    if session.get("user") is None:  # [Change 9]: Use session.get()
         return redirect(url_for("login"))
 
     return redirect(url_for("dashboard"))
@@ -434,7 +507,8 @@ def planner():
 @app.route("/add_task", methods=["POST"])
 def add_task():
 
-    if "user" not in session:
+    username = session.get("user")  # [Change 9]: Use session.get()
+    if username is None:
         return redirect(url_for("login"))
 
     task = request.form.get("task", "").strip()
@@ -451,7 +525,7 @@ def add_task():
         INSERT INTO tasks (username, task)
         VALUES (?, ?)
         """,
-        (session["user"], task)
+        (username, task)
     )
 
     conn.commit()
@@ -467,7 +541,8 @@ def add_task():
 @app.route("/delete_task/<int:task_id>")
 def delete_task(task_id):
 
-    if "user" not in session:
+    username = session.get("user")  # [Change 9]: Use session.get()
+    if username is None:
         return redirect(url_for("login"))
 
     conn = db.get_db()
@@ -479,7 +554,7 @@ def delete_task(task_id):
         WHERE id = ?
         AND username = ?
         """,
-        (task_id, session["user"])
+        (task_id, username)
     )
 
     conn.commit()
