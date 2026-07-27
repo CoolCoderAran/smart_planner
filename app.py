@@ -464,7 +464,7 @@ def login():
         # PASSWORD CHECK
         if not check_password_hash(stored_password, password):
             flash("Incorrect password.")
-            return redirect(url_for("login"))
+            print("Wrong Password")
 
         # SUCCESSFUL LOGIN
         session.permanent = True
