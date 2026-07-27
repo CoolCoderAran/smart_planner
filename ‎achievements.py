@@ -334,3 +334,4 @@ def check_achievements(username):
             )
 
     conn.close()
+#Copyright Aran Rath 2026
