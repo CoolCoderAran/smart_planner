@@ -203,6 +203,9 @@ function switchPhase(){
     }
 
     updateDisplay();
+    
+    // Automatically start the next phase
+    startTimer();
 }
 
 async function loadStats(){
