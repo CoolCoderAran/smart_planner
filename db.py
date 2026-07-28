@@ -146,7 +146,22 @@ def init_db():
     conn.close()
 
 
-
+def delete_task(task_id: int):
+    """
+    Deletes a specific task by its unique ID.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+        conn.commit()
+        print(f"Successfully deleted task with ID {task_id}.")
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"An error occurred while deleting the task: {e}")
+    finally:
+        conn.close()
 # =====================================
 # DEFAULT ACHIEVEMENTS
 # =====================================
