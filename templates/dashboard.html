@@ -299,7 +299,12 @@
             </p>
 
         </div>
-
+        {% for achievement in achievement_data %}
+        <div class="achievement-card">
+        <span>{{ achievement.icon }}</span>
+        <strong>{{ achievement.name }}</strong>
+</div>
+{% endfor %}
         <!-- UPGRADE -->
 
         <div class="sidebar-card upgrade-card">
