@@ -91,7 +91,27 @@ def init_db():
     )
     """)
 
+    # =====================================
+    # PLANNER TABLE
+    # =====================================
 
+   
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS planner_tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        title TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        description TEXT,
+        priority TEXT NOT NULL,
+        difficulty TEXT NOT NULL,
+        estimated_minutes INTEGER NOT NULL,
+        due_date TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TEXT NOT NULL,
+        completed_at TEXT
+        )
+    """)
 
     # =====================================
     # ACHIEVEMENTS
