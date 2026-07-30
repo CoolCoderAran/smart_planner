@@ -491,27 +491,42 @@ def logout():
 @app.route("/planner")
 def planner():
 
-    if session.get("user") is None:  
+    username = session.get("user")
+    if username is None:
         return redirect(url_for("login"))
 
-     conn = db.get_db()
-     cursor = conn.cursor()
+    conn = db.get_db()
+    cursor = conn.cursor()
 
-cursor.execute("""
-    SELECT *
-    FROM Planner_tasks
-    WHERE username=?
-    ORDER BY due_date
-    """,(Session["user"],))
+    cursor.execute("""
+        SELECT
+            id,
+            title,
+            subject,
+            due_date,
+            estimated_minutes,
+            priority,
+            completed
+        FROM planner_tasks
+        WHERE username = ?
+        ORDER BY
+            completed ASC,
+            due_date ASC,
+            priority DESC
+    """, (username,))
 
-tasks=cursor.fetchall()
-conn. close
-    return render_template
+    planner_tasks = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
         "planner.html",
-        tasks=tasks
+        username=username,
+        planner_tasks=planner_tasks
+    )
 
 # =====================================
-# ADD TASK
+# ADD TASK DBOARD
 # =====================================
 
 @app.route("/add_task", methods=["POST"])
@@ -543,7 +558,75 @@ def add_task():
 
     return redirect(url_for("dashboard"))
 
+# =====================================
+# ADD PLANNER TASK
+# =====================================
 
+@app.route("/planner/add", methods=["POST"])
+def add_planner_task():
+
+    username = session.get("user")
+
+    if username is None:
+        return redirect(url_for("login"))
+
+    title = request.form.get("title", "").strip()
+
+    subject = request.form.get("subject", "").strip()
+
+    due_date = request.form.get("due_date", "").strip()
+
+    priority = request.form.get("priority", "Medium").strip()
+
+    estimated_minutes = request.form.get("estimated_minutes", "30")
+
+    if not title:
+        flash("Task title is required.")
+        return redirect(url_for("planner"))
+
+    try:
+        estimated_minutes = int(estimated_minutes)
+    except ValueError:
+        estimated_minutes = 30
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO planner_tasks
+        (
+            username,
+            title,
+            subject,
+            due_date,
+            estimated_minutes,
+            priority,
+            completed,
+            created_at
+        )
+
+        VALUES
+        (
+            ?, ?, ?, ?, ?, ?, 0, ?
+        )
+    """, (
+
+        username,
+        title,
+        subject,
+        due_date,
+        estimated_minutes,
+        priority,
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    ))
+
+    conn.commit()
+    conn.close()
+
+    flash("Planner task added!")
+
+    return redirect(url_for("planner"))
 # =====================================
 # DELETE TASK
 # =====================================
