@@ -144,7 +144,7 @@ def dashboard():
 @app.route("/study")
 def study():
 
-    username = session.get("user")  # [Change 9]: Use session.get()
+    username = session.get("user") 
     if username is None:
         return redirect(url_for("login"))
 
@@ -164,7 +164,7 @@ def study():
     tasks = cursor.fetchall()
     conn.close()
 
-    # [Change 4]: Pass streak_data to study template
+ 
     return render_template(
         "study.html",
         username=username,
@@ -180,7 +180,7 @@ def study():
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
 
-    username = session.get("user")  # [Change 9]: Use session.get()
+    username = session.get("user") 
     if username is None:
         return jsonify({
             "success": False,
@@ -258,7 +258,7 @@ def save_study_session():
             "error": str(e)
         }), 500
 
-    # [Change 5]: Close db conn BEFORE checking achievements to prevent dangling connections
+  
     conn.close()
     achievements.check_achievements(username)
 
@@ -274,9 +274,9 @@ def save_study_session():
 @app.route("/get_study_stats")
 def get_study_stats():
 
-    username = session.get("user")  # [Change 9]: Use session.get()
+    username = session.get("user") 
 
-    # [Change 8]: Return structured default values when not logged in
+   
     if username is None:
         return jsonify({
             "today_minutes": 0,
@@ -318,7 +318,7 @@ def get_study_stats():
     )
     today_minutes = cursor.fetchone()[0]
 
-    # [Change 2]: Calculate weekly minutes
+ 
     cursor.execute(
         """
         SELECT COALESCE(SUM(minutes), 0)
@@ -330,7 +330,7 @@ def get_study_stats():
     )
     weekly_minutes = cursor.fetchone()[0]
 
-    # [Change 13]: Add today's session count
+ 
     cursor.execute(
         """
         SELECT COUNT(*)
@@ -344,11 +344,11 @@ def get_study_stats():
 
     conn.close()
 
-    # [Change 14 & 15]: Fetch streak and achievement count
+    
     streak_data = streaks.get_streak_data(username)
     achievement_count = achievements.get_count(username)
 
-    # [Change 2, 13, 14, 15]: Updated return payload
+ 
     return jsonify({
         "today_minutes": today_minutes,
         "weekly_minutes": weekly_minutes,
@@ -491,11 +491,24 @@ def logout():
 @app.route("/planner")
 def planner():
 
-    if session.get("user") is None:  # [Change 9]: Use session.get()
+    if session.get("user") is None:  
         return redirect(url_for("login"))
 
-    return redirect(url_for("dashboard"))
+     conn = db.get_db()
+     cursor = conn.cursor()
 
+cursor.execute("""
+    SELECT *
+    FROM Planner_tasks
+    WHERE username=?
+    ORDER BY due_date
+    """,(Session["user"],))
+
+tasks=cursor.fetchall()
+conn. close
+    return render_template
+        "planner.html",
+        tasks=tasks
 
 # =====================================
 # ADD TASK
@@ -504,7 +517,7 @@ def planner():
 @app.route("/add_task", methods=["POST"])
 def add_task():
 
-    username = session.get("user")  # [Change 9]: Use session.get()
+    username = session.get("user")  
     if username is None:
         return redirect(url_for("login"))
 
