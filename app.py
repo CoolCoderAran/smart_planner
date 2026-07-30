@@ -27,13 +27,11 @@ import achievements
 
 app = Flask(__name__)
 
-# CHANGE THIS TO A REAL SECRET KEY
+
 app.secret_key = "replace_this_with_a_long_secure_secret_key"
 
-# KEEP USERS LOGGED IN
 app.permanent_session_lifetime = timedelta(days=30)
 
-# INITIALIZE DATABASE
 db.init_db()
 
 
@@ -83,7 +81,6 @@ def is_secure_password(password):
 @app.route("/")
 def home():
 
-    # LOGGED-IN USERS GO TO DASHBOARD
     if "user" in session:
         return redirect(url_for("dashboard"))
 
@@ -106,11 +103,11 @@ def about():
 @app.route("/dashboard")
 def dashboard():
 
-    username = session.get("user")  # [Change 9]: Use session.get()
+    username = session.get("user") 
     if username is None:
         return redirect(url_for("login"))
 
-    # [Change 3]: Load streak data & achievement data
+    
     streak_data = streaks.get_streak_data(username)
     achievement_data = achievements.get_user_achievements(username)
 
@@ -130,7 +127,7 @@ def dashboard():
     tasks = cursor.fetchall()
     conn.close()
 
-    # [Change 1 & 3]: Added missing comma & passed achievements template variable
+    
     return render_template(
         "dashboard.html",
         username=username,
