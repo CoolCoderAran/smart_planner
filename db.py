@@ -15,9 +15,8 @@ def init_db():
     cursor = conn.cursor()
 
 
-    # =====================================
-    # USERS
-    # =====================================
+
+    # Table of Users
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
@@ -35,9 +34,9 @@ def init_db():
 
 
 
-    # =====================================
-    # TASKS
-    # =====================================
+    
+    # Table of tasks.
+    
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS tasks (
@@ -53,9 +52,9 @@ def init_db():
 
 
 
-    # =====================================
-    # SUBSCRIBERS
-    # =====================================
+
+    # Table of Subscriibers(those who entered their email in)
+
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS subscribers (
@@ -69,9 +68,8 @@ def init_db():
 
 
 
-    # =====================================
-    # STUDY SESSIONS
-    # =====================================
+    # Study Sessions Table
+
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS study_sessions (
@@ -91,9 +89,9 @@ def init_db():
     )
     """)
 
-    # =====================================
-    # PLANNER TABLE
-    # =====================================
+    
+    # Planner Table
+
 
    
     cursor.execute("""
@@ -113,9 +111,8 @@ def init_db():
         )
     """)
 
-    # =====================================
-    # ACHIEVEMENTS
-    # =====================================
+    # Table of Acheivments.
+   
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS achievements (
@@ -136,10 +133,8 @@ def init_db():
     """)
 
 
+    # User Acheivments Tables
 
-    # =====================================
-    # USER ACHIEVEMENTS
-    # =====================================
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS user_achievements (
@@ -182,9 +177,9 @@ def delete_task(task_id: int):
         print(f"An error occurred while deleting the task: {e}")
     finally:
         conn.close()
-# =====================================
-# DEFAULT ACHIEVEMENTS
-# =====================================
+
+# The 50 Default Acheivments.
+
 
 def insert_achievements(cursor):
 
