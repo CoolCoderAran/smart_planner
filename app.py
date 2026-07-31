@@ -21,28 +21,29 @@ import db
 import streaks
 import achievements
 
-# APP SETUP
+# Flask and App Setup.
 
 app = Flask(__name__)
 
 
-app.secret_key = "replace_this_with_a_long_secure_secret_key"
+app.secret_key = "long_secure_secret_key"
 
 app.permanent_session_lifetime = timedelta(days=30)
 
 db.init_db()
  
-# PASSWORD SECURITY
+# Password Security
+# Prevents common patterns
 
-COMMON_PATTERNS = {
+Common_Patterns = {
     "password",
     "123456",
     "qwerty",
     "admin",
-    "letmein"
+    "@123"
 }
 
-
+# Ensures password safety
 def is_secure_password(password):
 
     if len(password) < 12:
@@ -62,13 +63,13 @@ def is_secure_password(password):
 
     lower_pw = password.lower()
 
-    for pattern in COMMON_PATTERNS:
+    for pattern in Common_Patterns:
         if pattern in lower_pw:
             return False
 
     return True
 
-# HOME
+# Routes User to homepage.
 
 @app.route("/")
 def home():
@@ -78,13 +79,13 @@ def home():
 
     return render_template("index.html")
 
-# ABOUT
+# Takes user to explanation page about app.
 
 @app.route("/about")
 def about():
     return render_template("about.html")
 
-# DASHBOARD
+# Directs user to dashboard
 
 @app.route("/dashboard")
 def dashboard():
@@ -122,7 +123,8 @@ def dashboard():
         achievements=achievement_data
     )
 
-# STUDY MODE
+# Routes user to study mode
+
  
 @app.route("/study")
 def study():
@@ -133,6 +135,8 @@ def study():
 
     conn = db.get_db()
     cursor = conn.cursor()
+
+# Selects and orders tasks
 
     cursor.execute(
         """
@@ -157,7 +161,7 @@ def study():
 
 
  
-# SAVE STUDY SESSION
+# Saving Study Session Route(# saves_study_session)
  
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
@@ -173,7 +177,7 @@ def save_study_session():
 
     if not data:
         return jsonify({
-            "success": False,
+            "sucess": False,
             "message": "No data received"
         }), 400
 
@@ -247,7 +251,7 @@ def save_study_session():
         "success": True
     })
 
-# GET STUDY STATS
+# Fetches Study Stats from JSONIFY
 
 @app.route("/get_study_stats")
 def get_study_stats():
@@ -341,7 +345,7 @@ def get_study_stats():
     })
 
 
-# SIGNUP
+# Signup route and preventing resignups.
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -397,7 +401,7 @@ def signup():
 
     return render_template("signup.html")
 
-# LOGIN
+# Logging in route
  
 
 @app.route("/login", methods=["GET", "POST"])
@@ -447,7 +451,7 @@ def login():
 
     return render_template("login.html")
  
-# LOGOUT
+# Logout Route
 
 @app.route("/logout")
 def logout():
@@ -457,7 +461,7 @@ def logout():
     return redirect(url_for("home"))
 
 
-# PLANNER
+# Planner
 
 @app.route("/planner")
 def planner():
@@ -527,7 +531,7 @@ def add_task():
 
     return redirect(url_for("dashboard"))
  
-# ADD PLANNER TASK
+# ADD Planner Task Route
  
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task():
@@ -657,7 +661,7 @@ def subscribe():
 
     return redirect(url_for("home"))
 
-# Error Pages(404)
+# Error Pages (404)
 
 @app.errorhandler(404)
 def page_not_found(error):
