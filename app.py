@@ -31,11 +31,8 @@ app.secret_key = "replace_this_with_a_long_secure_secret_key"
 app.permanent_session_lifetime = timedelta(days=30)
 
 db.init_db()
-
-
  
 # PASSWORD SECURITY
- 
 
 COMMON_PATTERNS = {
     "password",
@@ -72,7 +69,6 @@ def is_secure_password(password):
     return True
 
 # HOME
-# ------------------------
 
 @app.route("/")
 def home():
@@ -89,7 +85,7 @@ def about():
     return render_template("about.html")
 
 # DASHBOARD
- 
+
 @app.route("/dashboard")
 def dashboard():
 
@@ -126,15 +122,13 @@ def dashboard():
         achievements=achievement_data
     )
 
-
- 
 # STUDY MODE
  
 @app.route("/study")
 def study():
 
     username = session.get("user") 
-    if not Username:
+    if not username:
         return redirect(url_for("login"))
 
     conn = db.get_db()
@@ -165,7 +159,6 @@ def study():
  
 # SAVE STUDY SESSION
  
-
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
 
@@ -254,10 +247,7 @@ def save_study_session():
         "success": True
     })
 
-
- 
 # GET STUDY STATS
- 
 
 @app.route("/get_study_stats")
 def get_study_stats():
@@ -281,6 +271,7 @@ def get_study_stats():
     cursor = conn.cursor()
 
     # Total Stats
+    
     cursor.execute(
         """
         SELECT
@@ -294,6 +285,7 @@ def get_study_stats():
     total_sessions, total_minutes = cursor.fetchone()
 
     # Today's Minutes
+    
     cursor.execute(
         """
         SELECT
@@ -349,9 +341,7 @@ def get_study_stats():
     })
 
 
- 
 # SIGNUP
- 
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -407,8 +397,6 @@ def signup():
 
     return render_template("signup.html")
 
-
- 
 # LOGIN
  
 
@@ -422,7 +410,7 @@ def login():
     if request.method == "POST":
 
         username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")  # [Change 10]: Password spaces kept unstripped
+        password = request.form.get("password", "")  
 
         conn = db.get_db()
         cursor = conn.cursor()
@@ -458,11 +446,8 @@ def login():
         return redirect(url_for("dashboard"))
 
     return render_template("login.html")
-
-
  
 # LOGOUT
- 
 
 @app.route("/logout")
 def logout():
@@ -472,9 +457,7 @@ def logout():
     return redirect(url_for("home"))
 
 
- 
 # PLANNER
- 
 
 @app.route("/planner")
 def planner():
@@ -512,11 +495,9 @@ def planner():
         username=username,
         planner_tasks=planner_tasks
     )
-
  
 # ADD Dashboard Task
  
-
 @app.route("/add_task", methods=["POST"])
 def add_task():
 
@@ -545,11 +526,9 @@ def add_task():
     conn.close()
 
     return redirect(url_for("dashboard"))
-
  
 # ADD PLANNER TASK
  
-
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task():
 
@@ -622,7 +601,7 @@ def add_planner_task():
 @app.route("/delete_task/<int:task_id>")
 def delete_task(task_id):
 
-    username = session.get("user")  # [Change 9]: Use session.get()
+    username = session.get("user") 
     if username is None:
         return redirect(url_for("login"))
 
@@ -643,10 +622,7 @@ def delete_task(task_id):
 
     return redirect(url_for("dashboard"))
 
-
- 
 # Subscribe
- 
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
@@ -681,20 +657,14 @@ def subscribe():
 
     return redirect(url_for("home"))
 
-
- 
 # Error Pages(404)
- 
 
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template("404.html"), 404
 
-
- 
 # Run App
  
-
 if __name__ == "__main__":
 
     app.run(
