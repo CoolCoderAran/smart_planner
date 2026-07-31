@@ -21,9 +21,7 @@ import db
 import streaks
 import achievements
 
-# =====================================
 # APP SETUP
-# =====================================
 
 app = Flask(__name__)
 
@@ -35,9 +33,9 @@ app.permanent_session_lifetime = timedelta(days=30)
 db.init_db()
 
 
-# =====================================
+ 
 # PASSWORD SECURITY
-# =====================================
+ 
 
 COMMON_PATTERNS = {
     "password",
@@ -73,10 +71,8 @@ def is_secure_password(password):
 
     return True
 
-
-# =====================================
 # HOME
-# =====================================
+# ------------------------
 
 @app.route("/")
 def home():
@@ -86,20 +82,14 @@ def home():
 
     return render_template("index.html")
 
-
-# =====================================
 # ABOUT
-# =====================================
 
 @app.route("/about")
 def about():
     return render_template("about.html")
 
-
-# =====================================
 # DASHBOARD
-# =====================================
-
+ 
 @app.route("/dashboard")
 def dashboard():
 
@@ -114,11 +104,11 @@ def dashboard():
     conn = db.get_db()
     cursor = conn.cursor()
 
-    cursor.execute(
+    cursor. execute(
         """
         SELECT id, task
         FROM tasks
-        WHERE username = ?
+        WHERE username =?
         ORDER BY id DESC
         """,
         (username,)
@@ -137,15 +127,14 @@ def dashboard():
     )
 
 
-# =====================================
+ 
 # STUDY MODE
-# =====================================
-
+ 
 @app.route("/study")
 def study():
 
     username = session.get("user") 
-    if username is None:
+    if not Username:
         return redirect(url_for("login"))
 
     conn = db.get_db()
@@ -173,9 +162,9 @@ def study():
     )
 
 
-# =====================================
+ 
 # SAVE STUDY SESSION
-# =====================================
+ 
 
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
@@ -198,13 +187,12 @@ def save_study_session():
     mode = data.get("mode", "Unknown")
     task = data.get("task", "")
 
-    # [Change 6]: Prevent negative study times
     try:
         minutes = max(0, int(data.get("minutes", 0)))
     except (ValueError, TypeError):
         minutes = 0
 
-    # [Change 11]: Reject invalid study times <= 0
+    
     if minutes <= 0:
         return jsonify({
             "success": False,
@@ -214,7 +202,7 @@ def save_study_session():
     conn = db.get_db()
     cursor = conn.cursor()
 
-    # [Change 7]: Verify task actually exists
+  
     cursor.execute(
         """
         SELECT 1
@@ -267,9 +255,9 @@ def save_study_session():
     })
 
 
-# =====================================
+ 
 # GET STUDY STATS
-# =====================================
+ 
 
 @app.route("/get_study_stats")
 def get_study_stats():
@@ -361,21 +349,21 @@ def get_study_stats():
     })
 
 
-# =====================================
+ 
 # SIGNUP
-# =====================================
+ 
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 
-    # BLOCK LOGGED-IN USERS
+    # Prevent logged in users from entering.
     if "user" in session:
         return redirect(url_for("dashboard"))
 
     if request.method == "POST":
 
         username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")  # [Change 10]: Password spaces kept unstripped
+        password = request.form.get("password", "") 
 
         # BASIC VALIDATION
         if not username or not password:
@@ -420,14 +408,14 @@ def signup():
     return render_template("signup.html")
 
 
-# =====================================
+ 
 # LOGIN
-# =====================================
+ 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
-    # BLOCK LOGGED-IN USERS
+    # Prevents logged in users from logging back in.
     if "user" in session:
         return redirect(url_for("dashboard"))
 
@@ -451,7 +439,7 @@ def login():
         user = cursor.fetchone()
         conn.close()
 
-        # USER DOES NOT EXIST
+        # If user does not exist:
         if not user:
             flash("User not found.")
             return redirect(url_for("login"))
@@ -472,9 +460,9 @@ def login():
     return render_template("login.html")
 
 
-# =====================================
+ 
 # LOGOUT
-# =====================================
+ 
 
 @app.route("/logout")
 def logout():
@@ -484,9 +472,9 @@ def logout():
     return redirect(url_for("home"))
 
 
-# =====================================
+ 
 # PLANNER
-# =====================================
+ 
 
 @app.route("/planner")
 def planner():
@@ -525,20 +513,20 @@ def planner():
         planner_tasks=planner_tasks
     )
 
-# =====================================
-# ADD TASK DBOARD
-# =====================================
+ 
+# ADD Dashboard Task
+ 
 
 @app.route("/add_task", methods=["POST"])
 def add_task():
 
     username = session.get("user")  
-    if username is None:
+    if not username:
         return redirect(url_for("login"))
 
     task = request.form.get("task", "").strip()
 
-    # EMPTY TASK PROTECTION
+    # Prevents Empty Tasks
     if not task:
         return redirect(url_for("dashboard"))
 
@@ -558,9 +546,9 @@ def add_task():
 
     return redirect(url_for("dashboard"))
 
-# =====================================
+ 
 # ADD PLANNER TASK
-# =====================================
+ 
 
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task():
@@ -627,9 +615,9 @@ def add_planner_task():
     flash("Planner task added!")
 
     return redirect(url_for("planner"))
-# =====================================
-# DELETE TASK
-# =====================================
+ 
+# Remove task
+ 
 
 @app.route("/delete_task/<int:task_id>")
 def delete_task(task_id):
@@ -656,9 +644,9 @@ def delete_task(task_id):
     return redirect(url_for("dashboard"))
 
 
-# =====================================
-# EMAIL SUBSCRIBE
-# =====================================
+ 
+# Subscribe
+ 
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
@@ -694,18 +682,18 @@ def subscribe():
     return redirect(url_for("home"))
 
 
-# =====================================
-# ERROR PAGES
-# =====================================
+ 
+# Error Pages(404)
+ 
 
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template("404.html"), 404
 
 
-# =====================================
-# RUN APP
-# =====================================
+ 
+# Run App
+ 
 
 if __name__ == "__main__":
 
