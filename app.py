@@ -44,7 +44,7 @@ Common_Patterns = {
 }
 
 # Ensures password safety
-def is_secure_password(password):
+def secure_password(password):
 
     if len(password) < 12:
         return False
@@ -365,7 +365,7 @@ def signup():
             return redirect(url_for("signup"))
 
         # PASSWORD VALIDATION
-        if not is_secure_password(password):
+        if not secure_password(password):
             flash(
                 "Password must contain 12+ characters, uppercase, lowercase, number, and symbol."
             )
