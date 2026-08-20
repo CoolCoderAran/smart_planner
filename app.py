@@ -464,40 +464,40 @@ def logout():
 # Planner
 
 @app.route("/planner")
-#""" def planner():
+def planner():
 
-#    username = session.get("user")
- #   if username is None:
-  #      return redirect(url_for("login"))
+    username = session.get("user")
+    if username is None:
+        return redirect(url_for("login"))
 
-#    conn = db.get_db()
-#    cursor = conn.cursor()
-#
-#    cursor.execute("""
-#        SELECT
-#            id,
-#            title,
-#            subject,
-#            due_date,
-#            estimated_minutes,
-#            priority,
-#            completed
-#        FROM planner_tasks
-#        WHERE username = ?
-#        ORDER BY
- #           completed ASC,
- #           due_date ASC,
-  #          priority DESC
-  #  """, (username,))
+    conn = db.get_db()
+    cursor = conn.cursor()
 
-   # planner_tasks = cursor.fetchall()
+    cursor.execute("""
+        SELECT
+            id,
+            title,
+            subject,
+            due_date,
+            estimated_minutes,
+            priority,
+            completed
+        FROM planner_tasks
+        WHERE username = ?
+        ORDER BY
+            completed ASC,
+            due_date ASC,
+            priority DESC
+    """, (username,))
 
-   # conn.close()"""
+    planner_tasks = cursor.fetchall()
+
+    conn.close()
 
     return render_template(
         "planner.html",
         username=username,
-     #   planner_tasks=planner_tasks
+        planner_tasks=planner_tasks
     )
  
 # ADD Dashboard Task
@@ -533,8 +533,8 @@ def add_task():
  
 # ADD Planner Task Route
  
-#@app.route("/planner/add", methods=["POST"])
-#def add_planner_task():
+@app.route("/planner/add", methods=["POST"])
+def add_planner_task():
 
     username = session.get("user")
 
