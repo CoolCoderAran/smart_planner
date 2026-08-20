@@ -464,7 +464,7 @@ def logout():
 # Planner
 
 @app.route("/planner")
-def planner():
+""" def planner():
 
     username = session.get("user")
     if username is None:
@@ -492,7 +492,7 @@ def planner():
 
     planner_tasks = cursor.fetchall()
 
-    conn.close()
+    conn.close()"""
 
     return render_template(
         "planner.html",
@@ -533,8 +533,8 @@ def add_task():
  
 # ADD Planner Task Route
  
-@app.route("/planner/add", methods=["POST"])
-def add_planner_task():
+#@app.route("/planner/add", methods=["POST"])
+#def add_planner_task():
 
     username = session.get("user")
 
