@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intelligent Task Organizer</title>
-    <link rel="stylesheet" href="planner.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='planner.css') }}">
 </head>
 <body>
 
@@ -12,7 +12,7 @@
     <nav class="navbar">
         <div class="nav-left">
             <a href="/" class="logo">
-                <img src="Insert Here" alt="Smart Planner Logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner Logo">
             </a>
             <ul class="nav-links">
                 <li><a href="/planner">Planner</a></li>
@@ -23,11 +23,28 @@
 
         
         <div class="nav-right">
-            <!-- Insert Here: Auth / Session Links -->
+            {% if session.get("user") %}
+            <div class="account-menu">
+                <button class="account-btn">
+                    <span class="account-avatar">
+                        {{ session["user"][0].upper() }}
+                    </span>
+                    <span class="account-name">
+                        {{ session["user"] }}
+                    </span>
+                    ▾
+                </button>
+                <div class="account-dropdown">
+                    <a href="/planner">Dashboard</a>
+                    <a href="/logout">Logout</a>
+                </div>
+            </div>
+            {% else %}
             <a href="/login" class="nav-login">Login</a>
             <a href="/signup" class="nav-signup">Get Started</a>
+            {% endif %}
         </div>
-    </nav>    
+    </nav>   
 
     <!-- TOPBAR -->
     <nav class="topbar">
@@ -81,7 +98,9 @@
 
                 <label for="taskSelect">Task</label>
                 <select id="taskSelect">
-                    <!-- Insert Here: Dynamic Task Options -->
+                    {% for task in tasks %}
+                    <option value="{{ task[1] }}">{{ task[1] }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -123,14 +142,14 @@
 
         <div class="streak-card">
             <h3>🔥 Current Streak</h3>
-            <p>Insert Here Days</p>
+            <p>{{ streak_data.current_streak if streak_data else 0 }} Days</p>
 
             <h3>🏆 Best Streak</h3>
-            <p>Insert Here Days</p>
+            <p>{{ streak_data.best_streak if streak_data else 0 }} Days</p>
         </div>
 
     </div>
 
-    <script src="planner.js"></script>
+    <script src="{{ url_for('static', filename='planner.js') }}"></script>
 </body>
 </html>
