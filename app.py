@@ -464,40 +464,40 @@ def logout():
 # Planner
 
 @app.route("/planner")
-""" def planner():
+#""" def planner():
 
-    username = session.get("user")
-    if username is None:
-        return redirect(url_for("login"))
+#    username = session.get("user")
+ #   if username is None:
+  #      return redirect(url_for("login"))
 
-    conn = db.get_db()
-    cursor = conn.cursor()
+#    conn = db.get_db()
+#    cursor = conn.cursor()
+#
+#    cursor.execute("""
+#        SELECT
+#            id,
+#            title,
+#            subject,
+#            due_date,
+#            estimated_minutes,
+#            priority,
+#            completed
+#        FROM planner_tasks
+#        WHERE username = ?
+#        ORDER BY
+ #           completed ASC,
+ #           due_date ASC,
+  #          priority DESC
+  #  """, (username,))
 
-    cursor.execute("""
-        SELECT
-            id,
-            title,
-            subject,
-            due_date,
-            estimated_minutes,
-            priority,
-            completed
-        FROM planner_tasks
-        WHERE username = ?
-        ORDER BY
-            completed ASC,
-            due_date ASC,
-            priority DESC
-    """, (username,))
+   # planner_tasks = cursor.fetchall()
 
-    planner_tasks = cursor.fetchall()
-
-    conn.close()"""
+   # conn.close()"""
 
     return render_template(
         "planner.html",
         username=username,
-        planner_tasks=planner_tasks
+     #   planner_tasks=planner_tasks
     )
  
 # ADD Dashboard Task
