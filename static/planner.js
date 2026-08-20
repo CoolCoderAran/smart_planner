@@ -246,4 +246,3 @@ document.getElementById(
 
 loadMode();
 loadStats();
-
