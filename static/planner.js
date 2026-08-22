@@ -115,7 +115,20 @@ function renderTasks() {
         } else {
             upcoming.appendChild(card);
         }
+    showEmptyState(today, "📋 No tasks for today");
+showEmptyState(upcoming, "📅 No upcoming tasks");
+showEmptyState(completed, "✅ No completed tasks yet");
     });
+}
+
+function showEmptyState(container, message) {
+    if (container.children.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                ${message}
+            </div>
+        `;
+    }
 }
 // =========================
 // 4. TASK ACTIONS
