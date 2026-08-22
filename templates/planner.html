@@ -80,35 +80,23 @@
 <main class="container">
     <div class="search-display"></div>
     <div class="posts-container"></div>
-</main>
+
     
-                <div id="customSettings" style="display:none">
-                    <label for="customFocus">Focus Minutes</label>
-                    <input type="number" id="customFocus" value="30">
+<!-- Bottom Row: Filter Tabs -->
+    <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="today">Today</button>
+        <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+        <button class="filter-btn" data-filter="overdue">Overdue</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+    </div>
+</header>
 
-                    <label for="customBreak">Break Minutes</label>
-                    <input type="number" id="customBreak" value="5">
-                </div>
-
-                <label for="taskSelect">Task</label>
-                <select id="taskSelect">
-                    {% for task in tasks %}
-                    <option value="{{ task[1] }}">{{ task[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="goal-card">
-            <h3>Daily Goal</h3>
-            <div class="goal-bar">
-                <div id="goalFill"></div>
-            </div>
-            <p>
-                <span id="todayGoalMinutes">0</span> / 120 minutes
-            </p>
-        </div>
-
+<main class="container">
+    <div class="search-display"></div>
+    <div class="posts-container"></div>
+</main>
+              
         <div class="stats-section">
             <h2>Statistics</h2>
             <div class="stats-grid">
