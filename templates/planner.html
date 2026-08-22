@@ -69,19 +69,9 @@
                 <div class="search-bar">
                     <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
                 </div>
-                <button class="add-task-btn" onclick="openAddTaskModal()">+ Add Task</button>
-                
+                <button class="add-task-btn" onclick="openModal()">+ Add Task</button>
             </div>
-<div class="modal-overlay" id="task-modal">
-  <div class="modal-content">
-    <span class="close-btn" id="close-modal">&times;</span>
-    <h2>Create New Task</h2>
-    <form id="task-form">
-      <input type="text" id="task-input" placeholder="Enter task name..." required>
-      <button type="submit" class="save-btn">Save Task</button>
-    </form>
-  </div>
-</div>
+
             <!-- Filter Tabs -->
             <div class="filter-bar">
                 <button class="filter-btn active" data-filter="all">All</button>
@@ -111,6 +101,28 @@
         </main>
     </div>
 
+    <!-- MODAL OVERLAY & WINDOW -->
+    <div id="taskModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            
+            <h2>Add New Task</h2>
+            
+            <form id="addTaskForm" onsubmit="handleTaskSubmit(event)">
+                <label for="modalTaskTitle">Task Title</label>
+                <input type="text" id="modalTaskTitle" placeholder="e.g. Complete Math Homework" required />
+
+                <label for="modalDueDate">Due Date</label>
+                <input type="date" id="modalDueDate" required />
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT -->
     <script>
         // Inject current date
@@ -126,9 +138,35 @@
             mainContent.classList.toggle("shifted");
         }
 
-        // Placeholder for Add Task Modal/Menu
-        function openAddTaskModal() {
-            console.log("Add task menu opened");
+        // Opens the modal
+        function openModal() {
+            document.getElementById("taskModal").style.display = "flex";
+        }
+
+        // Closes the modal
+        function closeModal() {
+            document.getElementById("taskModal").style.display = "none";
+        }
+
+        // Close modal when clicking outside the window
+        window.onclick = function(event) {
+            const modal = document.getElementById("taskModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Handle Form Submission
+        function handleTaskSubmit(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById("modalTaskTitle").value;
+            const dueDate = document.getElementById("modalDueDate").value;
+
+            console.log("New Task Created:", { title, dueDate });
+
+            document.getElementById("addTaskForm").reset();
+            closeModal();
         }
     </script>
 </body>
