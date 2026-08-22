@@ -102,26 +102,63 @@
     </div>
 
     <!-- MODAL OVERLAY & WINDOW -->
-    <div id="taskModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            
-            <h2>Add New Task</h2>
-            
-            <form id="addTaskForm" onsubmit="handleTaskSubmit(event)">
-                <label for="modalTaskTitle">Task Title</label>
-                <input type="text" id="modalTaskTitle" placeholder="e.g. Complete Math Homework" required />
+    <!-- Modal Overlay & Box -->
+<div id="taskModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2>Add New Task</h2>
+        
+        <form id="addTaskForm">
+            <!-- 1. Task Name -->
+            <div class="form-group">
+                <label for="modalTaskName">Task Name</label>
+                <input type="text" id="modalTaskName" placeholder="e.g., Read Chapter 4 & take notes" required />
+            </div>
 
-                <label for="modalDueDate">Due Date</label>
-                <input type="date" id="modalDueDate" required />
+            <!-- 2. Subject / Course -->
+            <div class="form-group">
+                <label for="modalSubject">Subject / Course</label>
+                <input type="text" id="modalSubject" placeholder="e.g., AP Computer Science / MATH 101" required />
+            </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-submit">Save Task</button>
+            <!-- Row 1: Due Date & Specific Deadline Time -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalDueDate">Due Date</label>
+                    <input type="date" id="modalDueDate" required />
                 </div>
-            </form>
-        </div>
+
+                <div class="form-group">
+                    <label for="modalDeadline">Deadline (Time)</label>
+                    <input type="time" id="modalDeadline" required />
+                </div>
+            </div>
+
+            <!-- Row 2: Estimated Time & Priority -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modalEstMinutes">Est. Minutes</label>
+                    <input type="number" id="modalEstMinutes" min="5" step="5" placeholder="30" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="modalPriority">Priority</label>
+                    <select id="modalPriority" required>
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-submit">Save Task</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- JAVASCRIPT -->
     <script>
