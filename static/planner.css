@@ -396,36 +396,89 @@ body {
     color: white;
 }
 
-/* =========================
-   STATISTICS & TIMER
-========================= */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-.stat-card {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 25px;
-    text-align: center;
-}
-
-.timer-ring {
-    width: 320px;
-    height: 320px;
-    margin: 30px auto;
-    border-radius: 50%;
-    border: 12px solid #6366f1;
-    display: flex;
+/* Dark semi-transparent background overlay */
+.modal-overlay {
+    display: none; /* Hidden until openModal() runs */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     justify-content: center;
     align-items: center;
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+    z-index: 2000;
 }
 
+/* Glassmorphism Modal Card */
+.modal-content {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 450px;
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #94a3b8;
+}
+
+.modal-close:hover {
+    color: #ffffff;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 14px;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    box-sizing: border-box;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-submit {
+    background: #6366f1;
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
 /* =========================
    MEDIA QUERIES
 ========================= */
