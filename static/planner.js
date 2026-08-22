@@ -39,6 +39,56 @@ const tasks = [
     }
 ];
 
+/**
+ * Opens the task modal by updating its CSS display property.
+ */
+function openModal() {
+    const modal = document.getElementById("taskModal");
+    if (modal) {
+        modal.style.display = "flex";
+    }
+}
+
+/**
+ * Closes the task modal.
+ */
+function closeModal() {
+    const modal = document.getElementById("taskModal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+/**
+ * Close modal automatically when clicking outside the content container.
+ */
+window.addEventListener("click", function(event) {
+    const modal = document.getElementById("taskModal");
+    if (event.target === modal) {
+        closeModal();
+    }
+});
+
+/**
+ * Handle form submission without reloading the page.
+ */
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("addTaskForm");
+    if (form) {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById("modalTaskTitle").value;
+            const dueDate = document.getElementById("modalDueDate").value;
+
+            console.log("New Task Data:", { title, dueDate });
+
+            // Reset form fields and close modal
+            form.reset();
+            closeModal();
+        });
+    }
+});
 
 function getPriorityIcon(priority) {
     if (priority === "high") return "🔴";
