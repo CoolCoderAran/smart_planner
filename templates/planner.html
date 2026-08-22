@@ -21,7 +21,6 @@
             </ul>
         </div>
 
-        
         <div class="nav-right">
             {% if session.get("user") %}
             <div class="account-menu">
@@ -44,84 +43,83 @@
             <a href="/signup" class="nav-signup">Get Started</a>
             {% endif %}
         </div>
-    </nav>   
+    </nav>    
 
     <!-- TOPBAR -->
     <nav class="topbar">
-        <center><h1>Intelligent Task Planner<h1></center>
+        <h1>Intelligent Task Planner</h1>
     </nav>
 
     <!-- SIDEBAR -->
-            <div id="sidebar" class="sidebar">
+    <div id="sidebar" class="sidebar">
         <button class="close-btn" onclick="toggleSidebar()">&times;</button>
-        <a href="#">Dashboard</a>
+        <a href="/planner">Dashboard</a>
         <a href="#">Profile</a>
         <a href="#">Settings</a>
         <a href="#">Contact</a>
     </div>
 
-        <!-- Main Sidebar Content Area -->
-        <div id="mainContent" class="main-content">
-        <button class="open-btn" onclick="toggleSidebar()">&#9776; Open Menu</button>
-        <h1 style="margin-top:20px;">Welcome to the Site</h1>
-        <p>This layout uses CSS and JavaScript to dynamically open and close the sidebar layout.</p>
+    <!-- MAIN PAGE CONTENT -->
+    <div id="mainContent" class="main-content">
+        
+        <!-- HEADER / CONTROLS -->
+        <header class="planner-header">
+            <div class="search-wrapper">
+                <button class="open-btn" onclick="toggleSidebar()">&#9776; Menu</button>
+                <div class="search-bar">
+                    <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
+                </div>
+                <button class="add-task-btn" onclick="openAddTaskModal()">+ Add Task</button>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="today">Today</button>
+                <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                <button class="filter-btn" data-filter="overdue">Overdue</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+        </header>
+
+        <main class="container">
+            <p class="date-display">Today's Date: <span id="current-date"></span></p>
+
+            <section class="task-section">
+                <h2>Today</h2>
+                <div id="today-tasks" class="task-list">
+                    <!-- JavaScript populates task cards here -->
+                </div>
+            </section>
+
+            <section class="task-section">
+                <h2>Upcoming</h2>
+                <div id="upcoming-tasks" class="task-list">
+                    <!-- JavaScript populates task cards here -->
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- MAIN CONTAINER -->
-<header>
-    <div class="search-wrapper">
-        <div class="search-bar">
-            <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
-        </div>
-        <button class="open-btn" onclick="openMenu()">&#9776;+ Add Task</button>
-    </div>
-</header>
+    <!-- JAVASCRIPT -->
+    <script>
+        // Inject current date
+        const today = new Date().toLocaleDateString();
+        document.getElementById("current-date").textContent = today;
 
-<main class="container">
-    <div class="search-display"></div>
-    <div class="posts-container"></div>
+        // Toggle Sidebar Function
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.getElementById("mainContent");
+            
+            sidebar.classList.toggle("open");
+            mainContent.classList.toggle("shifted");
+        }
 
-    
-<!-- Bottom Row: Filter Tabs -->
-    <div class="filter-bar">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="today">Today</button>
-        <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-        <button class="filter-btn" data-filter="overdue">Overdue</button>
-        <button class="filter-btn" data-filter="completed">Completed</button>
-    </div>
-</header>
-
-<main class="container">
-    <div class="search-display"></div>
-    <div class="posts-container"></div>
-</main>
-              
-
-<h3>Today's Date: <span id="current-date"></span></h3>
-
-<script>
-  // Get today's local date string
-  const today = new Date().toLocaleDateString();
-  
-  // Inject the date string directly into the HTML span
-  document.getElementById("current-date").textContent = today;
-</script>
-
-<h5>————————————————————————————————————————————————————————————————</h5>    
-
-<section class="task-section">
-    <h2>Today</h2>
-
-    <div id="today-tasks" class="task-list">
-        <!-- JavaScript will put cards here -->
-    </div>
-</section>
-
-<section class="task-section">
-    <h2>Upcoming</h2>
-
-    <div id="upcoming-tasks" class="task-list">
-        <!-- JavaScript will put cards here -->
-    </div>
-</section>
+        // Placeholder for Add Task Modal/Menu
+        function openAddTaskModal() {
+            console.log("Add task menu opened");
+        }
+    </script>
+</body>
+</html>
