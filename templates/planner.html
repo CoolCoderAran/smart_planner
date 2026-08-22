@@ -68,25 +68,20 @@
     </div>
 
     <!-- MAIN CONTAINER -->
-   <header>
-    <div class="search-bar">
-      <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
+<header>
+    <div class="search-wrapper">
+        <div class="search-bar">
+            <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
+        </div>
+        <button class="open-btn" onclick="openMenu()">&#9776; Add Task</button>
     </div>
 </header>
+
 <main class="container">
-    <div class="search-display"></div><button class="open-btn" onclick="openMenu()">&#9776; Add Task</button>
+    <div class="search-display"></div>
     <div class="posts-container"></div>
 </main>
-                
-                <label for="modeSelect">Timer Mode</label>
-                <select id="modeSelect">
-                    <option value="pomodoro">Pomodoro (25/5)</option>
-                    <option value="deepwork">Deep Work (90/15)</option>
-                    <option value="quickburst">Quick Burst (15/3)</option>
-                    <option value="examcrunch">Exam Crunch (50/10)</option>
-                    <option value="custom">Custom</option>
-                </select>
-
+    
                 <div id="customSettings" style="display:none">
                     <label for="customFocus">Focus Minutes</label>
                     <input type="number" id="customFocus" value="30">
