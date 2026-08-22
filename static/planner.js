@@ -76,6 +76,27 @@ function getPriorityIcon(priority) {
 // 3. RENDER FUNCTION
 // =========================
 function renderTasks() {
+    tasks.sort((a, b) => {
+
+    const priority = {
+        high: 1,
+        medium: 2,
+        low: 3
+    };
+
+    // Completed tasks go last
+    if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+    }
+
+    // Higher priority first
+    if (priority[a.priority] !== priority[b.priority]) {
+        return priority[a.priority] - priority[b.priority];
+    }
+
+    // Earlier due date first
+    return new Date(a.due) - new Date(b.due);
+});
     const today = document.getElementById("today-tasks");
     const upcoming = document.getElementById("upcoming-tasks");
     const completed = document.getElementById("completed-tasks");
