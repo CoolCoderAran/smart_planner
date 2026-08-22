@@ -34,13 +34,13 @@ let tasks = [
 let editingTaskId = null;
 
 // =========================
-// 2. UI TOGGLES & MODAL
+// 2. UI TOGGLES & HELPERS
 // =========================
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.getElementById("mainContent");
     
-    if (sidebar) sidebar.classList.toggle("active");
+    if (sidebar) sidebar.classList.toggle("open");
     if (mainContent) mainContent.classList.toggle("shifted");
 }
 
@@ -55,10 +55,10 @@ function closeModal() {
     
     if (modal) modal.style.display = "none";
     if (form) form.reset();
-    editingTaskId = null; // Clear edit mode on close
+    editingTaskId = null; // Clear edit mode
 }
 
-// Close modal when clicking on background overlay
+// Close modal when clicking background overlay
 window.addEventListener("click", function(event) {
     const modal = document.getElementById("taskModal");
     if (event.target === modal) {
@@ -72,57 +72,8 @@ function getPriorityIcon(priority) {
     return "🟢";
 }
 
-// =========================
-// 3. RENDER FUNCTION
-// =========================
-function renderTasks() {
-    tasks.sort((a, b) => {
-
-    const priority = {
-        high: 1,
-        medium: 2,
-        low: 3
-    };
-
-    // Completed tasks go last
-    if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
-    }
-
-    // Higher priority first
-    if (priority[a.priority] !== priority[b.priority]) {
-        return priority[a.priority] - priority[b.priority];
-    }
-
-    // Earlier due date first
-    return new Date(a.due) - new Date(b.due);
-});
-    const today = document.getElementById("today-tasks");
-    const upcoming = document.getElementById("upcoming-tasks");
-    const completed = document.getElementById("completed-tasks");
-
-    today.innerHTML = "";
-    upcoming.innerHTML = "";
-    completed.innerHTML = "";
-
-    tasks.forEach(task => {
-        const card = createTaskCard(task);
-
-        if (task.completed) {
-            completed.appendChild(card);
-        } else if (task.due === "Today") {
-            today.appendChild(card);
-        } else {
-            upcoming.appendChild(card);
-        }
-    showEmptyState(today, "📋 No tasks for today");
-showEmptyState(upcoming, "📅 No upcoming tasks");
-showEmptyState(completed, "✅ No completed tasks yet");
-    });
-}
-
 function showEmptyState(container, message) {
-    if (container.children.length === 0) {
+    if (container && container.children.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 ${message}
@@ -130,6 +81,69 @@ function showEmptyState(container, message) {
         `;
     }
 }
+
+// =========================
+// 3. RENDER FUNCTION
+// =========================
+function renderTasks() {
+    const todayContainer = document.getElementById("today-tasks");
+    const upcomingContainer = document.getElementById("upcoming-tasks");
+    const completedContainer = document.getElementById("completed-tasks");
+
+    if (!todayContainer || !upcomingContainer) return;
+
+    // Reset container contents
+    todayContainer.innerHTML = "";
+    upcomingContainer.innerHTML = "";
+    if (completedContainer) completedContainer.innerHTML = "";
+
+    // Sort tasks: Active first, then by priority (High -> Low)
+    tasks.sort((a, b) => {
+        const priorityScore = { high: 1, medium: 2, low: 3 };
+
+        if (a.completed !== b.completed) {
+            return a.completed ? 1 : -1;
+        }
+        return priorityScore[a.priority] - priorityScore[b.priority];
+    });
+
+    tasks.forEach(task => {
+        const card = document.createElement("div");
+        card.className = `task-card ${task.completed ? "is-completed" : ""}`;
+
+        card.innerHTML = `
+            <div class="task-info">
+                <div class="task-title">
+                    ${getPriorityIcon(task.priority)} ${task.title}
+                </div>
+                <div class="task-subject">${task.subject}</div>
+                <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
+            </div>
+            <div class="task-actions">
+                ${!task.completed 
+                    ? `<button class="task-button complete-button" onclick="completeTask(${task.id})">✓ Complete</button>` 
+                    : ''}
+                <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
+                <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
+            </div>
+        `;
+
+        // Route card to the corresponding section
+        if (task.completed && completedContainer) {
+            completedContainer.appendChild(card);
+        } else if (task.due === "Today") {
+            todayContainer.appendChild(card);
+        } else {
+            upcomingContainer.appendChild(card);
+        }
+    });
+
+    // Display empty placeholder messages if lists are empty
+    showEmptyState(todayContainer, "📋 No tasks for today");
+    showEmptyState(upcomingContainer, "📅 No upcoming tasks");
+    if (completedContainer) showEmptyState(completedContainer, "✅ No completed tasks yet");
+}
+
 // =========================
 // 4. TASK ACTIONS
 // =========================
@@ -150,7 +164,6 @@ function editTask(id) {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
-    // Populate modal form fields for editing
     document.getElementById("modalTaskName").value = task.title;
     document.getElementById("modalSubject").value = task.subject;
     document.getElementById("modalEstMinutes").value = task.minutes;
@@ -161,7 +174,7 @@ function editTask(id) {
 }
 
 // =========================
-// 5. FORM SUBMISSION
+// 5. INITIALIZATION & FORM SUBMIT
 // =========================
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("addTaskForm");
@@ -174,15 +187,15 @@ document.addEventListener("DOMContentLoaded", function() {
             const subject = document.getElementById("modalSubject").value.trim();
             const minutes = parseInt(document.getElementById("modalEstMinutes").value, 10);
             const priority = document.getElementById("modalPriority").value;
-            const dueDate = document.getElementById("modalDueDate")?.value || "Today";
+            const dueDateInput = document.getElementById("modalDueDate")?.value;
 
             if (!title) {
-                alert("Please enter a task title.");
+                alert("Please enter a task name.");
                 return;
             }
 
             if (editingTaskId !== null) {
-                // Editing existing task
+                // Update existing task
                 const task = tasks.find(t => t.id === editingTaskId);
                 if (task) {
                     task.title = title;
@@ -191,14 +204,14 @@ document.addEventListener("DOMContentLoaded", function() {
                     task.priority = priority;
                 }
             } else {
-                // Creating new task
+                // Create new task
                 tasks.push({
                     id: Date.now(),
                     title: title,
                     subject: subject,
                     minutes: minutes,
                     priority: priority,
-                    due: dueDate === new Date().toISOString().split('T')[0] ? "Today" : dueDate,
+                    due: dueDateInput || "Today",
                     completed: false
                 });
             }
@@ -208,167 +221,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Initial render on page load
+    // Initial render on load
     renderTasks();
-});            const dueDate = document.getElementById("modalDueDate").value;
-
-            console.log("New Task Data:", { title, dueDate });
-
-            // Reset form fields and close modal
-            form.reset();
-            closeModal();
-        });
-    }
 });
-
-function getPriorityIcon(priority) {
-    if (priority === "high") return "🔴";
-    if (priority === "medium") return "🟡";
-    return "🟢";
-}
-
-taskForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const title = titleInput.value.trim();
-    const minutes = Number(minutesInput.value);
-
-    if (!title) {
-        alert("Please enter a task name.");
-        return;
-    }
-
-    if (!Number.isFinite(minutes) || minutes <= 0) {
-        alert("Enter a valid number of minutes.");
-        return;
-    }
-
-    if (editingTaskId !== null) {
-        const task = tasks.find(t => t.id === editingTaskId);
-
-        if (task) {
-            task.title = title;
-            task.subject = subjectInput.value.trim();
-            task.minutes = minutes;
-            task.priority = priorityInput.value;
-        }
-    } else {
-        tasks.push({
-            id: Date.now(),
-            title: title,
-            subject: subjectInput.value.trim(),
-            minutes: minutes,
-            priority: priorityInput.value,
-            due: "Today",
-            completed: false
-        });
-    }
-
-    renderTasks();
-    taskModal.classList.remove("open");
-    editingTaskId = null;
-});
-
-function renderTasks() {
-
-    const todayContainer = document.getElementById("today-tasks");
-    const upcomingContainer = document.getElementById("upcoming-tasks");
-
-    todayContainer.innerHTML = "";
-    upcomingContainer.innerHTML = "";
-
-    tasks.forEach(task => {
-
-        const card = document.createElement("div");
-        card.className = "task-card";
-
-        card.innerHTML = `
-            <div class="task-info">
-
-                <div class="task-title">
-                    ${getPriorityIcon(task.priority)}
-                    ${task.title}
-                </div>
-
-                <div class="task-subject">
-                    ${task.subject}
-                </div>
-
-                <div class="task-meta">
-                    ${task.minutes} min · Due ${task.due}
-                </div>
-
-            </div>
-
-            <div class="task-actions">
-
-                <button
-                    class="task-button complete-button"
-                    onclick="completeTask(${task.id})">
-                    ✓ Complete
-                </button>
-
-                <button
-                    class="task-button edit-button"
-                    onclick="editTask(${task.id})">
-                    ✏ Edit
-                </button>
-
-                <button
-                    class="task-button delete-button"
-                    onclick="deleteTask(${task.id})">
-                    🗑 Delete
-                </button>
-
-            </div>
-        `;
-
-        if (task.due === "Today") {
-            todayContainer.appendChild(card);
-        } else {
-            upcomingContainer.appendChild(card);
-        }
-    });
-}
-
-
-function completeTask(id) {
-
-    const task = tasks.find(task => task.id === id);
-
-    if (!task) return;
-
-    task.completed = true;
-
-    renderTasks();
-}
-
-
-function deleteTask(id) {
-
-    const index = tasks.findIndex(task => task.id === id);
-
-    if (index === -1) return;
-
-    tasks.splice(index, 1);
-
-    renderTasks();
-}
-
-
-function editTask(id) {
-
-    const task = tasks.find(task => task.id === id);
-
-    if (!task) return;
-
-    const newTitle = prompt("Task name:", task.title);
-
-    if (newTitle && newTitle.trim()) {
-        task.title = newTitle.trim();
-        renderTasks();
-    }
-}
-
-
-renderTasks();
