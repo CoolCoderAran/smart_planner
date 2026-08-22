@@ -424,6 +424,78 @@ button:hover{
     text-align:center;
 }
 
+.task-section {
+    margin-top: 30px;
+}
+
+.task-section h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.task-info {
+    flex: 1;
+}
+
+.task-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.task-subject {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.task-meta {
+    font-size: 13px;
+    color: #888;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.task-button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.complete-button {
+    background: #e8f7ed;
+}
+
+.edit-button {
+    background: #eef2ff;
+}
+
+.delete-button {
+    background: #feecec;
+}
 @media (max-width:900px){
 
     .stats-grid{
