@@ -76,41 +76,26 @@ function getPriorityIcon(priority) {
 // 3. RENDER FUNCTION
 // =========================
 function renderTasks() {
-    const todayContainer = document.getElementById("today-tasks");
-    const upcomingContainer = document.getElementById("upcoming-tasks");
+    const today = document.getElementById("today-tasks");
+    const upcoming = document.getElementById("upcoming-tasks");
+    const completed = document.getElementById("completed-tasks");
 
-    if (!todayContainer || !upcomingContainer) return;
+    today.innerHTML = "";
+    upcoming.innerHTML = "";
+    completed.innerHTML = "";
 
-    todayContainer.innerHTML = "";
-    upcomingContainer.innerHTML = "";
+    tasks.forEach(task => {
+        const card = createTaskCard(task);
 
-    tasks.filter(t => !t.completed).forEach(task => {
-        const card = document.createElement("div");
-        card.className = "task-card";
-
-        card.innerHTML = `
-            <div class="task-info">
-                <div class="task-title">
-                    ${getPriorityIcon(task.priority)} ${task.title}
-                </div>
-                <div class="task-subject">${task.subject || 'General'}</div>
-                <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
-            </div>
-            <div class="task-actions">
-                <button class="task-button complete-button" onclick="completeTask(${task.id})">✓ Complete</button>
-                <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
-                <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
-            </div>
-        `;
-
-        if (task.due === "Today") {
-            todayContainer.appendChild(card);
+        if (task.completed) {
+            completed.appendChild(card);
+        } else if (task.due === "Today") {
+            today.appendChild(card);
         } else {
-            upcomingContainer.appendChild(card);
+            upcoming.appendChild(card);
         }
     });
 }
-
 // =========================
 // 4. TASK ACTIONS
 // =========================
