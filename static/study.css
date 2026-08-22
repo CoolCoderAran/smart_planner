@@ -245,41 +245,87 @@ body{
     background: #f3efff;
 }
 
-#timerDisplay{
+ /* Base styles reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
 
-    font-size:140px;
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f4f9;
+            overflow-x: hidden;
+        }
 
-    font-weight:800;
+        /* Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px; /* Hidden offscreen by default */
+            width: 250px;
+            height: 100%;
+            background-color: #1e1e24;
+            color: #fff;
+            padding-top: 60px;
+            transition: left 0.3s ease; /* Smooth sliding transition */
+            z-index: 1000;
+        }
 
-    text-align:center;
+        /* Active class to slide the sidebar in */
+        .sidebar.active {
+            left: 0;
+        }
 
-    line-height:1;
+        .sidebar a {
+            display: block;
+            padding: 15px 25px;
+            color: #b3b3b3;
+            text-decoration: none;
+            transition: 0.2s;
+        }
 
-    letter-spacing:4px;
-}
+        .sidebar a:hover {
+            color: #fff;
+            background-color: #2a2a35;
+        }
 
+        /* Close Button inside the sidebar */
+        .sidebar .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #fff;
+        }
 
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            transition: margin-left 0.3s ease;
+        }
 
-.timer-ring{
+        /* Shift content when sidebar is active (Optional) */
+        .main-content.shifted {
+            margin-left: 250px;
+        }
 
-    width:350px;
-    height:350px;
-
-    margin:auto;
-
-    border-radius:50%;
-
-    border:12px solid #8b5cf6;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    box-shadow:
-    0 0 40px rgba(139,92,246,.4);
-}
+        /* Open Button */
+        .open-btn {
+            font-size: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #1e1e24;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
 
 
 button{
