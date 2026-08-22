@@ -82,24 +82,25 @@
             </div>
         </header>
 
-        <main class="container">
-            <p class="date-display">Today's Date: <span id="current-date"></span></p>
+       <main class="container">
+    <p class="date-display">Today's Date: <span id="current-date"></span></p>
 
-            <section class="task-section">
-                <h2>Today</h2>
-                <div id="today-tasks" class="task-list">
-                    <!-- JavaScript populates task cards here -->
-                </div>
-            </section>
+    <section class="task-section">
+        <h2>Today</h2>
+        <div id="today-tasks" class="task-list"></div>
+    </section>
 
-            <section class="task-section">
-                <h2>Upcoming</h2>
-                <div id="upcoming-tasks" class="task-list">
-                    <!-- JavaScript populates task cards here -->
-                </div>
-            </section>
-        </main>
-    </div>
+    <section class="task-section">
+        <h2>Upcoming</h2>
+        <div id="upcoming-tasks" class="task-list"></div>
+    </section>
+
+    <!-- NEW COMPLETED SECTION -->
+    <section class="task-section">
+        <h2>Completed</h2>
+        <div id="completed-tasks" class="task-list"></div>
+    </section>
+</main>
 
     <!-- MODAL OVERLAY & WINDOW -->
     <div id="taskModal" class="modal-overlay">
@@ -237,7 +238,7 @@
         }
 
         // Render tasks dynamically into HTML containers
-        function renderTasks() {
+        {
             const todayContainer = document.getElementById("today-tasks");
             const upcomingContainer = document.getElementById("upcoming-tasks");
 
