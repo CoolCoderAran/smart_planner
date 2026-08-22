@@ -264,6 +264,50 @@ body{
 .search-bar [list]::-webkit-calendar-picker-indicator {
   display: none !important;
 }
+
+/* Container that places input and button side-by-side */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centers the controls horizontally */
+    gap: 12px;               /* Space between the search bar and button */
+    margin: 20px auto;
+    max-width: 600px;        /* Limits width on larger screens */
+    padding: 0 16px;
+}
+
+/* Flex-grow allows search bar to expand and take up remaining space */
+.search-bar {
+    flex: 1;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Stylized Add Task button */
+.open-btn {
+    padding: 10px 16px;
+    font-size: 1rem;
+    background-color: #4A90E2;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;     /* Prevents button text from wrapping */
+    transition: background-color 0.2s ease;
+}
+
+.open-btn:hover {
+    background-color: #357ABD;
+}
+
 #timerDisplay{
 
     font-size:140px;
