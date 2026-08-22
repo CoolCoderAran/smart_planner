@@ -97,7 +97,20 @@
     <div class="posts-container"></div>
 </main>
               
-        <div class="stats-section">
+
+<p>Today's Date: <span id="current-date"></span></p>
+
+<script>
+  // Get today's local date string
+  const today = new Date().toLocaleDateString();
+  
+  // Inject the date string directly into the HTML span
+  document.getElementById("current-date").textContent = today;
+</script>
+
+    
+    
+    <div class="stats-section">
             <h2>Statistics</h2>
             <div class="stats-grid">
                 <div class="stat-card">
