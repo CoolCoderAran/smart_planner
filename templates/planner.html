@@ -70,8 +70,18 @@
                     <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
                 </div>
                 <button class="add-task-btn" onclick="openAddTaskModal()">+ Add Task</button>
+                
             </div>
-
+<div class="modal-overlay" id="task-modal">
+  <div class="modal-content">
+    <span class="close-btn" id="close-modal">&times;</span>
+    <h2>Create New Task</h2>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Enter task name..." required>
+      <button type="submit" class="save-btn">Save Task</button>
+    </form>
+  </div>
+</div>
             <!-- Filter Tabs -->
             <div class="filter-bar">
                 <button class="filter-btn active" data-filter="all">All</button>
