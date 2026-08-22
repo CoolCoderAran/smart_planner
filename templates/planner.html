@@ -68,32 +68,16 @@
     </div>
 
     <!-- MAIN CONTAINER -->
-    <div class="study-page">
-
-        <div class="hero">
-          
-            <center><p>Organize work and stay ahead.</p></center>
-        </div>
-
-        <div class="timer-section">
-            <div class="timer-card">
-                <h3 id="phaseLabel">Focus Time</h3>
-                <div class="timer-ring">
-                    <div id="timerDisplay">25:00</div>
-                </div>
-
-                <div class="controls">
-                    <button onclick="startTimer()">Start</button>
-                    <button onclick="pauseTimer()">Pause</button>
-                    <button onclick="resumeTimer()">Resume</button>
-                    <button onclick="resetTimer()">Reset</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <div class="settings-card">
-                <h2>Study Session</h2>
+   <header>
+    <div class="search-bar">
+      <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
+    </div>
+</header>
+<main class="container">
+    <div class="search-display"></div>
+    
+    <div class="posts-container"></div>
+</main>
                 
                 <label for="modeSelect">Timer Mode</label>
                 <select id="modeSelect">
