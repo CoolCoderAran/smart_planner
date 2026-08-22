@@ -1,15 +1,7 @@
-   function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            const mainContent = document.getElementById("mainContent");
-            
-            // Toggle the 'active' class on the sidebar
-            sidebar.classList.toggle("active");
-            
-            // Optional: Toggle 'shifted' class to push main content
-            mainContent.classList.toggle("shifted");
-        }
-
-const tasks = [
+// =========================
+// 1. STATE & DATA
+// =========================
+let tasks = [
     {
         id: 1,
         title: "Math Test",
@@ -31,7 +23,7 @@ const tasks = [
     {
         id: 3,
         title: "History Essay",
-        subject: "English",
+        subject: "History",
         minutes: 60,
         due: "Monday",
         priority: "low",
@@ -39,29 +31,34 @@ const tasks = [
     }
 ];
 
-/**
- * Opens the task modal by updating its CSS display property.
- */
+let editingTaskId = null;
+
+// =========================
+// 2. UI TOGGLES & MODAL
+// =========================
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("mainContent");
+    
+    if (sidebar) sidebar.classList.toggle("active");
+    if (mainContent) mainContent.classList.toggle("shifted");
+}
+
 function openModal() {
     const modal = document.getElementById("taskModal");
-    if (modal) {
-        modal.style.display = "flex";
-    }
+    if (modal) modal.style.display = "flex";
 }
 
-/**
- * Closes the task modal.
- */
 function closeModal() {
     const modal = document.getElementById("taskModal");
-    if (modal) {
-        modal.style.display = "none";
-    }
+    const form = document.getElementById("addTaskForm");
+    
+    if (modal) modal.style.display = "none";
+    if (form) form.reset();
+    editingTaskId = null; // Clear edit mode on close
 }
 
-/**
- * Close modal automatically when clicking outside the content container.
- */
+// Close modal when clicking on background overlay
 window.addEventListener("click", function(event) {
     const modal = document.getElementById("taskModal");
     if (event.target === modal) {
@@ -69,17 +66,132 @@ window.addEventListener("click", function(event) {
     }
 });
 
-/**
- * Handle form submission without reloading the page.
- */
+function getPriorityIcon(priority) {
+    if (priority === "high") return "🔴";
+    if (priority === "medium") return "🟡";
+    return "🟢";
+}
+
+// =========================
+// 3. RENDER FUNCTION
+// =========================
+function renderTasks() {
+    const todayContainer = document.getElementById("today-tasks");
+    const upcomingContainer = document.getElementById("upcoming-tasks");
+
+    if (!todayContainer || !upcomingContainer) return;
+
+    todayContainer.innerHTML = "";
+    upcomingContainer.innerHTML = "";
+
+    tasks.filter(t => !t.completed).forEach(task => {
+        const card = document.createElement("div");
+        card.className = "task-card";
+
+        card.innerHTML = `
+            <div class="task-info">
+                <div class="task-title">
+                    ${getPriorityIcon(task.priority)} ${task.title}
+                </div>
+                <div class="task-subject">${task.subject || 'General'}</div>
+                <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
+            </div>
+            <div class="task-actions">
+                <button class="task-button complete-button" onclick="completeTask(${task.id})">✓ Complete</button>
+                <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
+                <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
+            </div>
+        `;
+
+        if (task.due === "Today") {
+            todayContainer.appendChild(card);
+        } else {
+            upcomingContainer.appendChild(card);
+        }
+    });
+}
+
+// =========================
+// 4. TASK ACTIONS
+// =========================
+function completeTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+        task.completed = true;
+        renderTasks();
+    }
+}
+
+function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    renderTasks();
+}
+
+function editTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    // Populate modal form fields for editing
+    document.getElementById("modalTaskName").value = task.title;
+    document.getElementById("modalSubject").value = task.subject;
+    document.getElementById("modalEstMinutes").value = task.minutes;
+    document.getElementById("modalPriority").value = task.priority;
+
+    editingTaskId = id;
+    openModal();
+}
+
+// =========================
+// 5. FORM SUBMISSION
+// =========================
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("addTaskForm");
+
     if (form) {
         form.addEventListener("submit", function(event) {
             event.preventDefault();
-            
-            const title = document.getElementById("modalTaskTitle").value;
-            const dueDate = document.getElementById("modalDueDate").value;
+
+            const title = document.getElementById("modalTaskName").value.trim();
+            const subject = document.getElementById("modalSubject").value.trim();
+            const minutes = parseInt(document.getElementById("modalEstMinutes").value, 10);
+            const priority = document.getElementById("modalPriority").value;
+            const dueDate = document.getElementById("modalDueDate")?.value || "Today";
+
+            if (!title) {
+                alert("Please enter a task title.");
+                return;
+            }
+
+            if (editingTaskId !== null) {
+                // Editing existing task
+                const task = tasks.find(t => t.id === editingTaskId);
+                if (task) {
+                    task.title = title;
+                    task.subject = subject;
+                    task.minutes = minutes;
+                    task.priority = priority;
+                }
+            } else {
+                // Creating new task
+                tasks.push({
+                    id: Date.now(),
+                    title: title,
+                    subject: subject,
+                    minutes: minutes,
+                    priority: priority,
+                    due: dueDate === new Date().toISOString().split('T')[0] ? "Today" : dueDate,
+                    completed: false
+                });
+            }
+
+            renderTasks();
+            closeModal();
+        });
+    }
+
+    // Initial render on page load
+    renderTasks();
+});            const dueDate = document.getElementById("modalDueDate").value;
 
             console.log("New Task Data:", { title, dueDate });
 
