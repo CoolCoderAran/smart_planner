@@ -108,43 +108,5 @@
   document.getElementById("current-date").textContent = today;
 </script>
 
-<h5>----------------------------------------</h5>    
-    
-    <div class="stats-section">
-            <h2>Statistics</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h2 id="todayMinutes">0</h2>
-                    <p>Today</p>
-                </div>
-
-                <div class="stat-card">
-                    <h2 id="weeklyMinutes">0</h2>
-                    <p>This Week</p>
-                </div>
-
-                <div class="stat-card">
-                    <h2 id="totalSessions">0</h2>
-                    <p>Sessions</p>
-                </div>
-
-                <div class="stat-card">
-                    <h2 id="totalMinutes">0</h2>
-                    <p>Total Minutes</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="streak-card">
-            <h3>🔥 Current Streak</h3>
-            <p>{{ streak_data.current_streak if streak_data else 0 }} Days</p>
-
-            <h3>🏆 Best Streak</h3>
-            <p>{{ streak_data.best_streak if streak_data else 0 }} Days</p>
-        </div>
-
-    </div>
-
-    <script src="{{ url_for('static', filename='planner.js') }}"></script>
-</body>
-</html>
+<h5>————————————————————————————————————————————————————————————————</h5>    
+  
