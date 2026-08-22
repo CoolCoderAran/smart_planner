@@ -308,17 +308,44 @@ body{
     background-color: #357ABD;
 }
 
-#timerDisplay{
+/* Bottom Row Layout: Filter Bar */
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    overflow-x: auto; /* Enables smooth horizontal scrolling on mobile screens */
+    padding-bottom: 4px;
+}
 
-    font-size:140px;
+/* Individual Filter Button Styles */
+.filter-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    background-color: #f0f2f5;
+    border: 1px solid #dcdfe6;
+    border-radius: 20px; /* Pill shape */
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    transition: all 0.2s ease;
+}
 
-    font-weight:800;
+.filter-btn:hover {
+    background-color: #e4e7ed;
+    color: #333;
+}
 
-    text-align:center;
-
-    line-height:1;
-
-    letter-spacing:4px;
+/* Active Selected Filter Tab Style */
+.filter-btn.active {
+    background-color: #4A90E2;
+    color: #ffffff;
+    border-color: #4A90E2;
+}
 }
 
 
