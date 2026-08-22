@@ -96,6 +96,47 @@ function getPriorityIcon(priority) {
     return "🟢";
 }
 
+taskForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const title = titleInput.value.trim();
+    const minutes = Number(minutesInput.value);
+
+    if (!title) {
+        alert("Please enter a task name.");
+        return;
+    }
+
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+        alert("Enter a valid number of minutes.");
+        return;
+    }
+
+    if (editingTaskId !== null) {
+        const task = tasks.find(t => t.id === editingTaskId);
+
+        if (task) {
+            task.title = title;
+            task.subject = subjectInput.value.trim();
+            task.minutes = minutes;
+            task.priority = priorityInput.value;
+        }
+    } else {
+        tasks.push({
+            id: Date.now(),
+            title: title,
+            subject: subjectInput.value.trim(),
+            minutes: minutes,
+            priority: priorityInput.value,
+            due: "Today",
+            completed: false
+        });
+    }
+
+    renderTasks();
+    taskModal.classList.remove("open");
+    editingTaskId = null;
+});
 
 function renderTasks() {
 
