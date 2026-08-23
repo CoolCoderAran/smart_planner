@@ -369,3 +369,17 @@ def insert_achievements(cursor):
         ACHIEVEMENTS
 
     )
+#Planner_tasks
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS planner_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    title TEXT NOT NULL,
+    subject TEXT,
+    due_date TEXT,
+    estimated_minutes INTEGER NOT NULL DEFAULT 30,
+    priority TEXT NOT NULL DEFAULT 'Medium',
+    completed INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+)
+""")
