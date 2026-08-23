@@ -303,3 +303,22 @@ def get_user_achievements(username):
         return achievements_list
     finally:
         conn.close()
+
+def get_count(username):
+    """Returns the total number of achievements unlocked by the user."""
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM user_achievements
+            WHERE username = ?
+            """,
+            (username,)
+        )
+        count = cursor.fetchone()[0]
+        return count
+    finally:
+        conn.close()
