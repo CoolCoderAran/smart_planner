@@ -20,6 +20,7 @@ import re
 import db
 import streaks
 import achievements
+import planner
 
 # Flask and App Setup.
 
@@ -503,70 +504,41 @@ def add_task():
 # ADD Planner Task Route
  
 @app.route("/planner/add", methods=["POST"])
-def add_planner_task():
-
-    username = session.get("user")
-
-    if username is None:
-        return redirect(url_for("login"))
-
-    title = request.form.get("title", "").strip()
-
-    subject = request.form.get("subject", "").strip()
-
-    due_date = request.form.get("due_date", "").strip()
-
-    priority = request.form.get("priority", "Medium").strip()
-
-    estimated_minutes = request.form.get("estimated_minutes", "30")
-
-    if not title:
-        flash("Task title is required.")
-        return redirect(url_for("planner"))
+def planner_add():
+    # 1. Security Check: Ensure user is logged in
+    if "user" not in session:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
 
     try:
-        estimated_minutes = int(estimated_minutes)
-    except ValueError:
-        estimated_minutes = 30
+        # 2. Extract parameters from Form data (or JSON depending on how JS sends it)
+        # Using request.form for standard HTML forms/FormData objects
+        title = request.form.get("title") or request.form.get("modalTaskName")
+        subject = request.form.get("subject") or request.form.get("modalSubject")
+        due_date = request.form.get("due_date") or request.form.get("modalDueDate")
+        estimated_minutes = request.form.get("estimated_minutes") or request.form.get("modalEstMinutes") or 30
+        priority = request.form.get("priority") or request.form.get("modalPriority") or "Medium"
 
-    conn = db.get_db()
-    cursor = conn.cursor()
+        # Validate required fields
+        if not title:
+            return jsonify({"success": False, "error": "Task title is required"}), 400
 
-    cursor.execute("""
-        INSERT INTO planner_tasks
-        (
-            username,
-            title,
-            subject,
-            due_date,
-            estimated_minutes,
-            priority,
-            completed,
-            created_at
+        # 3. Pass data to your data access layer in planner.py
+        planner.add_planner_task(
+            username=session["user"],
+            title=title,
+            subject=subject,
+            due_date=due_date,
+            estimated_minutes=int(estimated_minutes),
+            priority=priority
         )
 
-        VALUES
-        (
-            ?, ?, ?, ?, ?, ?, 0, ?
-        )
-    """, (
+        # 4. Return success response to the frontend
+        return jsonify({"success": True, "message": "Task created successfully"})
 
-        username,
-        title,
-        subject,
-        due_date,
-        estimated_minutes,
-        priority,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    ))
-
-    conn.commit()
-    conn.close()
-
-    flash("Planner task added!")
-
-    return redirect(url_for("planner"))
+    except Exception as e:
+        # Log error and return HTTP 500
+        print(f"Error adding task: {e}")
+        return jsonify({"success": False, "error": "Internal server error"}), 500
  
 # Remove task
  
