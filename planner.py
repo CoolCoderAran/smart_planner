@@ -1,5 +1,6 @@
 from datetime import datetime
-import db  # Import db directly to keep function calls consistent with app.py
+import db
+import sqlite3
 conn.row_factory = sqlite3.Row
 
 def add_planner_task(username, title, subject, due_date, estimated_minutes, priority):
