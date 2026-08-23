@@ -365,66 +365,81 @@ def logout():
     return redirect(url_for("home"))
 
 
-# Planner Page Route
-@app.route("/planner")
-def planner_view():
+@app.route("/get_study_stats")
+def get_study_stats():
     username = session.get("user")
+
     if username is None:
-        return redirect(url_for("login"))
+        return jsonify({
+            "today_minutes": 0,
+            "weekly_minutes": 0,
+            "total_sessions": 0,
+            "total_minutes": 0,
+            "today_sessions": 0,
+            "current_streak": 0,
+            "best_streak": 0,
+            "achievement_count": 0
+        })
 
     conn = db.get_db()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        SELECT id, title, subject, due_date, estimated_minutes, priority, completed
-        FROM planner_tasks
+        SELECT COUNT(*), COALESCE(SUM(minutes), 0)
+        FROM study_sessions
         WHERE username = ?
-        ORDER BY completed ASC, due_date ASC, priority DESC
         """,
         (username,)
     )
-
-    planner_tasks = cursor.fetchall()
-    conn.close()
-
-    return render_template(
-        "planner.html",
-        username=username,
-        planner_tasks=planner_tasks
-    )
-
-
-# Add Dashboard Task Route
-@app.route("/add_task", methods=["POST"])
-def add_task():
-    username = session.get("user")
-    if not username:
-        return redirect(url_for("login"))
-
-    task = request.form.get("task", "").strip()
-
-    if not task:
-        return redirect(url_for("dashboard"))
-
-    conn = db.get_db()
-    cursor = conn.cursor()
+    total_sessions, total_minutes = cursor.fetchone()
 
     cursor.execute(
         """
-        INSERT INTO tasks (username, task)
-        VALUES (?, ?)
+        SELECT COALESCE(SUM(minutes), 0)
+        FROM study_sessions
+        WHERE username = ? AND DATE(completed_at) = DATE('now')
         """,
-        (username, task)
+        (username,)
     )
+    today_minutes = cursor.fetchone()[0]
 
-    conn.commit()
+    cursor.execute(
+        """
+        SELECT COALESCE(SUM(minutes), 0)
+        FROM study_sessions
+        WHERE username = ? AND DATE(completed_at) >= DATE('now', '-6 days')
+        """,
+        (username,)
+    )
+    weekly_minutes = cursor.fetchone()[0]
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM study_sessions
+        WHERE username = ? AND DATE(completed_at) = DATE('now')
+        """,
+        (username,)
+    )
+    today_sessions = cursor.fetchone()[0]
+
     conn.close()
 
-    return redirect(url_for("dashboard"))
+    streak_data = streaks.get_streak_data(username)
+    achievement_count = achievements.get_count(username)
 
+    return jsonify({
+        "today_minutes": today_minutes,
+        "weekly_minutes": weekly_minutes,
+        "total_sessions": total_sessions,
+        "total_minutes": total_minutes,
+        "today_sessions": today_sessions,
+        "current_streak": streak_data["current_streak"],
+        "best_streak": streak_data["best_streak"],
+        "achievement_count": achievement_count
+    })
 
-# Add Planner Task Route
 @app.route("/planner/add", methods=["POST"])
 def planner_add():
     if "user" not in session:
@@ -434,8 +449,13 @@ def planner_add():
         title = request.form.get("title") or request.form.get("modalTaskName")
         subject = request.form.get("subject") or request.form.get("modalSubject")
         due_date = request.form.get("due_date") or request.form.get("modalDueDate")
-        estimated_minutes = request.form.get("estimated_minutes") or request.form.get("modalEstMinutes") or 30
+        raw_minutes = request.form.get("estimated_minutes") or request.form.get("modalEstMinutes") or 30
         priority = request.form.get("priority") or request.form.get("modalPriority") or "Medium"
+
+        try:
+            estimated_minutes = int(raw_minutes)
+        except (ValueError, TypeError):
+            estimated_minutes = 30
 
         if not title:
             return jsonify({"success": False, "error": "Task title is required"}), 400
@@ -445,40 +465,36 @@ def planner_add():
             title=title,
             subject=subject,
             due_date=due_date,
-            estimated_minutes=int(estimated_minutes),
+            estimated_minutes=estimated_minutes,
             priority=priority
         )
 
         return jsonify({"success": True, "message": "Task created successfully"})
 
     except Exception as e:
-        print(f"Error adding task: {e}")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
-
-# Delete Dashboard Task Route
-@app.route("/delete_task/<int:task_id>")
-def delete_task(task_id):
+@app.route("/planner/toggle/<int:task_id>", methods=["POST"])
+def planner_toggle(task_id):
     username = session.get("user")
-    if username is None:
-        return redirect(url_for("login"))
+    if not username:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    conn = db.get_db()
-    cursor = conn.cursor()
+    changed = planner.toggle_planner_task(username, task_id)
+    if changed:
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Task not found"}), 404
 
-    cursor.execute(
-        """
-        DELETE FROM tasks
-        WHERE id = ? AND username = ?
-        """,
-        (task_id, username)
-    )
+@app.route("/planner/delete/<int:task_id>", methods=["POST"])
+def planner_delete(task_id):
+    username = session.get("user")
+    if not username:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    conn.commit()
-    conn.close()
-
-    return redirect(url_for("dashboard"))
-
+    deleted = planner.delete_planner_task(username, task_id)
+    if deleted:
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Task not found"}), 404
 
 # Subscribe Route
 @app.route("/subscribe", methods=["POST"])
