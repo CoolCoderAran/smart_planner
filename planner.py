@@ -31,3 +31,77 @@ def get_planner_tasks(username):
     conn.close()
     
     return [dict(row) for row in rows]
+    
+def update_planner_task(
+    username,
+    task_id,
+    title,
+    subject,
+    due_date,
+    estimated_minutes,
+    priority
+):
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE planner_tasks
+        SET
+            title = ?,
+            subject = ?,
+            due_date = ?,
+            estimated_minutes = ?,
+            priority = ?
+        WHERE id = ?
+        AND username = ?
+    """, (
+        title,
+        subject,
+        due_date,
+        estimated_minutes,
+        priority,
+        task_id,
+        username
+    ))
+
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+
+    return changed
+def toggle_planner_task(username, task_id):
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE planner_tasks
+        SET completed = CASE
+            WHEN completed = 0 THEN 1
+            ELSE 0
+        END
+        WHERE id = ?
+        AND username = ?
+    """, (task_id, username))
+
+    conn.commit()
+    changed = cursor.rowcount
+    conn.close()
+    
+
+    return changed
+
+def delete_planner_task(username, task_id):
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM planner_tasks
+        WHERE id = ?
+        AND username = ?
+    """, (task_id, username))
+
+    conn.commit()
+    deleted = cursor.rowcount
+    conn.close()
+
+    return deleted
