@@ -442,37 +442,66 @@ def get_study_stats():
 
 @app.route("/planner/add", methods=["POST"])
 def planner_add():
-    if "user" not in session:
+    username = session.get("user")
+    if not username:
         return jsonify({"success": False, "error": "Unauthorized"}), 401
 
+    title = request.form.get("title") or request.form.get("modalTaskName")
+    subject = request.form.get("subject") or request.form.get("modalSubject")
+    due_date = request.form.get("due_date") or request.form.get("modalDueDate")
+    raw_minutes = request.form.get("estimated_minutes") or request.form.get("modalEstMinutes") or 30
+    priority = request.form.get("priority") or request.form.get("modalPriority") or "Medium"
+
     try:
-        title = request.form.get("title") or request.form.get("modalTaskName")
-        subject = request.form.get("subject") or request.form.get("modalSubject")
-        due_date = request.form.get("due_date") or request.form.get("modalDueDate")
-        raw_minutes = request.form.get("estimated_minutes") or request.form.get("modalEstMinutes") or 30
-        priority = request.form.get("priority") or request.form.get("modalPriority") or "Medium"
+        estimated_minutes = int(raw_minutes)
+    except (ValueError, TypeError):
+        estimated_minutes = 30
 
-        try:
-            estimated_minutes = int(raw_minutes)
-        except (ValueError, TypeError):
-            estimated_minutes = 30
+    if not title:
+        return jsonify({"success": False, "error": "Task title is required"}), 400
 
-        if not title:
-            return jsonify({"success": False, "error": "Task title is required"}), 400
+    planner.add_planner_task(
+        username=username,
+        title=title,
+        subject=subject,
+        due_date=due_date,
+        estimated_minutes=estimated_minutes,
+        priority=priority
+    )
+    return jsonify({"success": True})
 
-        planner.add_planner_task(
-            username=session["user"],
-            title=title,
-            subject=subject,
-            due_date=due_date,
-            estimated_minutes=estimated_minutes,
-            priority=priority
-        )
 
-        return jsonify({"success": True, "message": "Task created successfully"})
+@app.route("/planner/update/<int:task_id>", methods=["POST"])
+def planner_update(task_id):
+    username = session.get("user")
+    if not username:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    except Exception as e:
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+    title = request.form.get("title")
+    subject = request.form.get("subject")
+    due_date = request.form.get("due_date")
+    raw_minutes = request.form.get("estimated_minutes") or 30
+    priority = request.form.get("priority") or "Medium"
+
+    try:
+        estimated_minutes = int(raw_minutes)
+    except (ValueError, TypeError):
+        estimated_minutes = 30
+
+    changed = planner.update_planner_task(
+        username=username,
+        task_id=task_id,
+        title=title,
+        subject=subject,
+        due_date=due_date,
+        estimated_minutes=estimated_minutes,
+        priority=priority
+    )
+
+    if changed:
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Task not found or unchanged"}), 404
+
 
 @app.route("/planner/toggle/<int:task_id>", methods=["POST"])
 def planner_toggle(task_id):
@@ -484,6 +513,7 @@ def planner_toggle(task_id):
     if changed:
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "Task not found"}), 404
+
 
 @app.route("/planner/delete/<int:task_id>", methods=["POST"])
 def planner_delete(task_id):
