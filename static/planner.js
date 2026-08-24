@@ -1,36 +1,6 @@
 // =========================
 // 1. STATE & DATA
 // =========================
-let tasks = [
-    {
-        id: 1,
-        title: "Math Test",
-        subject: "Mathematics",
-        minutes: 45,
-        due: "Today",
-        priority: "high",
-        completed: false
-    },
-    {
-        id: 2,
-        title: "Science Quiz",
-        subject: "Science",
-        minutes: 30,
-        due: "Today",
-        priority: "medium",
-        completed: false
-    },
-    {
-        id: 3,
-        title: "History Essay",
-        subject: "History",
-        minutes: 60,
-        due: "Monday",
-        priority: "low",
-        completed: false
-    }
-];
-
 let editingTaskId = null;
 
 // =========================
@@ -55,7 +25,7 @@ function closeModal() {
     
     if (modal) modal.style.display = "none";
     if (form) form.reset();
-    editingTaskId = null; // Clear edit mode
+    editingTaskId = null;
 }
 
 // Close modal when clicking background overlay
@@ -67,160 +37,110 @@ window.addEventListener("click", function(event) {
 });
 
 function getPriorityIcon(priority) {
-    if (priority === "high") return "🔴";
-    if (priority === "medium") return "🟡";
+    const lowerPrio = (priority || "").toLowerCase();
+    if (lowerPrio === "high") return "🔴";
+    if (lowerPrio === "medium") return "🟡";
     return "🟢";
 }
 
-function showEmptyState(container, message) {
-    if (container && container.children.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                ${message}
-            </div>
-        `;
-    }
-}
-
 // =========================
-// 3. RENDER FUNCTION
+// 3. TASK API & ACTIONS
 // =========================
-function renderTasks() {
-    const todayContainer = document.getElementById("today-tasks");
-    const upcomingContainer = document.getElementById("upcoming-tasks");
-    const completedContainer = document.getElementById("completed-tasks");
-
-    if (!todayContainer || !upcomingContainer) return;
-
-    // Reset container contents
-    todayContainer.innerHTML = "";
-    upcomingContainer.innerHTML = "";
-    if (completedContainer) completedContainer.innerHTML = "";
-
-    // Sort tasks: Active first, then by priority (High -> Low)
-    tasks.sort((a, b) => {
-        const priorityScore = { high: 1, medium: 2, low: 3 };
-
-        if (a.completed !== b.completed) {
-            return a.completed ? 1 : -1;
-        }
-        return priorityScore[a.priority] - priorityScore[b.priority];
-    });
-
-    tasks.forEach(task => {
-        const card = document.createElement("div");
-        card.className = `task-card ${task.completed ? "is-completed" : ""}`;
-
-        card.innerHTML = `
-            <div class="task-info">
-                <div class="task-title">
-                    ${getPriorityIcon(task.priority)} ${task.title}
-                </div>
-                <div class="task-subject">${task.subject}</div>
-                <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
-            </div>
-            <div class="task-actions">
-                ${!task.completed 
-                    ? `<button class="task-button complete-button" onclick="completeTask(${task.id})">✓ Complete</button>` 
-                    : ''}
-                <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
-                <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
-            </div>
-        `;
-
-        // Route card to the corresponding section
-        if (task.completed && completedContainer) {
-            completedContainer.appendChild(card);
-        } else if (task.due === "Today") {
-            todayContainer.appendChild(card);
+async function completeTask(id) {
+    try {
+        const response = await fetch(`/planner/toggle/${id}`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+        if (result.success) {
+            window.location.reload();
         } else {
-            upcomingContainer.appendChild(card);
+            alert(result.error || "Failed to update task.");
         }
-    });
-
-    // Display empty placeholder messages if lists are empty
-    showEmptyState(todayContainer, "📋 No tasks for today");
-    showEmptyState(upcomingContainer, "📅 No upcoming tasks");
-    if (completedContainer) showEmptyState(completedContainer, "✅ No completed tasks yet");
-}
-
-// =========================
-// 4. TASK ACTIONS
-// =========================
-function completeTask(id) {
-    const task = tasks.find(t => t.id === id);
-    if (task) {
-        task.completed = true;
-        renderTasks();
+    } catch (err) {
+        console.error("Error toggling task:", err);
     }
 }
 
-function deleteTask(id) {
-    tasks = tasks.filter(t => t.id !== id);
-    renderTasks();
+async function deleteTask(id) {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+
+    try {
+        const response = await fetch(`/planner/delete/${id}`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert(result.error || "Failed to delete task.");
+        }
+    } catch (err) {
+        console.error("Error deleting task:", err);
+    }
 }
 
-function editTask(id) {
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
-
-    document.getElementById("modalTaskName").value = task.title;
-    document.getElementById("modalSubject").value = task.subject;
-    document.getElementById("modalEstMinutes").value = task.minutes;
-    document.getElementById("modalPriority").value = task.priority;
+function editTask(id, title, subject, minutes, priority, dueDate) {
+    document.getElementById("modalTaskName").value = title || "";
+    document.getElementById("modalSubject").value = subject || "";
+    document.getElementById("modalEstMinutes").value = minutes || 30;
+    document.getElementById("modalPriority").value = priority || "Medium";
+    
+    const dueInput = document.getElementById("modalDueDate");
+    if (dueInput) dueInput.value = dueDate || "";
 
     editingTaskId = id;
     openModal();
 }
 
 // =========================
-// 5. INITIALIZATION & FORM SUBMIT
+// 4. INITIALIZATION & FORM SUBMIT
 // =========================
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("addTaskForm");
 
     if (form) {
-        form.addEventListener("submit", function(event) {
+        form.addEventListener("submit", async function(event) {
             event.preventDefault();
 
             const title = document.getElementById("modalTaskName").value.trim();
             const subject = document.getElementById("modalSubject").value.trim();
-            const minutes = parseInt(document.getElementById("modalEstMinutes").value, 10);
+            const minutes = document.getElementById("modalEstMinutes").value;
             const priority = document.getElementById("modalPriority").value;
-            const dueDateInput = document.getElementById("modalDueDate")?.value;
+            const dueDate = document.getElementById("modalDueDate")?.value || "";
 
             if (!title) {
                 alert("Please enter a task name.");
                 return;
             }
 
-            if (editingTaskId !== null) {
-                // Update existing task
-                const task = tasks.find(t => t.id === editingTaskId);
-                if (task) {
-                    task.title = title;
-                    task.subject = subject;
-                    task.minutes = minutes;
-                    task.priority = priority;
-                }
-            } else {
-                // Create new task
-                tasks.push({
-                    id: Date.now(),
-                    title: title,
-                    subject: subject,
-                    minutes: minutes,
-                    priority: priority,
-                    due: dueDateInput || "Today",
-                    completed: false
-                });
-            }
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("subject", subject);
+            formData.append("estimated_minutes", minutes);
+            formData.append("priority", priority);
+            formData.append("due_date", dueDate);
 
-            renderTasks();
-            closeModal();
+            const endpoint = editingTaskId 
+                ? `/planner/update/${editingTaskId}` 
+                : '/planner/add';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal();
+                    window.location.reload();
+                } else {
+                    alert(result.error || "Failed to save task.");
+                }
+            } catch (err) {
+                console.error("Error submitting task form:", err);
+            }
         });
     }
-
-    // Initial render on load
-    renderTasks();
 });
