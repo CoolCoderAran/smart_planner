@@ -82,272 +82,190 @@
             </div>
         </header>
 
-       <main class="container">
-    <p class="date-display">Today's Date: <span id="current-date"></span></p>
+        <main class="container">
+            <p class="date-display">Today's Date: <span id="current-date"></span></p>
 
-    <section class="task-section">
-        <h2>Today</h2>
-        <div id="today-tasks" class="task-list"></div>
-    </section>
-
-    <section class="task-section">
-        <h2>Upcoming</h2>
-        <div id="upcoming-tasks" class="task-list"></div>
-    </section>
-
-    <!-- NEW COMPLETED SECTION -->
-    <section class="task-section">
-        <h2>Completed</h2>
-        <div id="completed-tasks" class="task-list"></div>
-    </section>
-</main>
-
-    <!-- MODAL OVERLAY & WINDOW -->
-    <div id="taskModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h2>Add New Task</h2>
-            
-            <form id="addTaskForm">
-                <!-- 1. Task Name -->
-                <div class="form-group">
-                    <label for="modalTaskName">Task Name</label>
-                    <input type="text" id="modalTaskName" placeholder="e.g., Read Chapter 4 & take notes" required />
+            <!-- TODAY TASKS SECTION -->
+            <section class="task-section">
+                <h2>Today</h2>
+                <div id="today-tasks" class="task-list">
+                    {% for task in tasks if not task.completed and (task.due_date == 'Today' or task.due_date == today_date) %}
+                    <div class="task-card">
+                        <div class="task-info">
+                            <div class="task-title">
+                                {% if task.priority == 'high' %}🔴{% elif task.priority == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
+                            </div>
+                            <div class="task-subject">{{ task.subject }}</div>
+                            <div class="task-meta">{{ task.estimated_minutes }} min · Due {{ task.due_date }}</div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
+                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title }}', '{{ task.subject }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
+                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
+            </section>
 
-                <!-- 2. Subject / Course -->
-                <div class="form-group">
-                    <label for="modalSubject">Subject / Course</label>
-                    <input type="text" id="modalSubject" placeholder="e.g., AP Computer Science / MATH 101" required />
+            <!-- UPCOMING TASKS SECTION -->
+            <section class="task-section">
+                <h2>Upcoming</h2>
+                <div id="upcoming-tasks" class="task-list">
+                    {% for task in tasks if not task.completed and task.due_date != 'Today' and task.due_date != today_date %}
+                    <div class="task-card">
+                        <div class="task-info">
+                            <div class="task-title">
+                                {% if task.priority == 'high' %}🔴{% elif task.priority == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
+                            </div>
+                            <div class="task-subject">{{ task.subject }}</div>
+                            <div class="task-meta">{{ task.estimated_minutes }} min · Due {{ task.due_date }}</div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
+                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title }}', '{{ task.subject }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
+                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
+            </section>
 
-                <!-- Row 1: Due Date & Specific Deadline Time -->
-                <div class="form-row">
+            <!-- COMPLETED TASKS SECTION -->
+            <section class="task-section">
+                <h2>Completed</h2>
+                <div id="completed-tasks" class="task-list">
+                    {% for task in tasks if task.completed %}
+                    <div class="task-card">
+                        <div class="task-info">
+                            <div class="task-title">
+                                <s>{{ task.title }}</s>
+                            </div>
+                            <div class="task-subject">{{ task.subject }}</div>
+                            <div class="task-meta">{{ task.estimated_minutes }} min</div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">↩ Undo</button>
+                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+
+        <!-- MODAL OVERLAY & WINDOW -->
+        <div id="taskModal" class="modal-overlay">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+                <h2>Add New Task</h2>
+                
+                <form id="addTaskForm">
+                    <input type="hidden" id="modalTaskId" name="task_id" value="">
+
+                    <!-- 1. Task Name -->
                     <div class="form-group">
-                        <label for="modalDueDate">Due Date</label>
-                        <input type="date" id="modalDueDate" required />
+                        <label for="modalTaskName">Task Name</label>
+                        <input type="text" id="modalTaskName" name="title" placeholder="e.g., Read Chapter 4 & take notes" required />
                     </div>
 
+                    <!-- 2. Subject / Course -->
                     <div class="form-group">
-                        <label for="modalDeadline">Deadline (Time)</label>
-                        <input type="time" id="modalDeadline" required />
-                    </div>
-                </div>
-
-                <!-- Row 2: Estimated Time & Priority -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="modalEstMinutes">Est. Minutes</label>
-                        <input type="number" id="modalEstMinutes" min="5" step="5" placeholder="30" required />
+                        <label for="modalSubject">Subject / Course</label>
+                        <input type="text" id="modalSubject" name="subject" placeholder="e.g., AP Computer Science / MATH 101" required />
                     </div>
 
-                    <div class="form-group">
-                        <label for="modalPriority">Priority</label>
-                        <select id="modalPriority" required>
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-                </div>
+                    <!-- Row 1: Due Date & Specific Deadline Time -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalDueDate">Due Date</label>
+                            <input type="date" id="modalDueDate" name="due_date" required />
+                        </div>
 
-                <!-- Form Action Buttons -->
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-submit">Save Task</button>
-                </div>
-            </form>
+                        <div class="form-group">
+                            <label for="modalDeadline">Deadline (Time)</label>
+                            <input type="time" id="modalDeadline" name="deadline" required />
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Estimated Time & Priority -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalEstMinutes">Est. Minutes</label>
+                            <input type="number" id="modalEstMinutes" name="estimated_minutes" min="5" step="5" placeholder="30" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="modalPriority">Priority</label>
+                            <select id="modalPriority" name="priority" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Form Action Buttons -->
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Save Task</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- INLINE JAVASCRIPT -->
-   <script>
-    // In-memory data store for tasks
-    let tasks = [
-        {
-            id: 1,
-            title: "Math Test",
-            subject: "Mathematics",
-            minutes: 45,
-            due: "Today",
-            priority: "high",
-            completed: false
-        },
-        {
-            id: 2,
-            title: "Science Quiz",
-            subject: "Science",
-            minutes: 30,
-            due: "Today",
-            priority: "medium",
-            completed: false
-        },
-        {
-            id: 3,
-            title: "History Essay",
-            subject: "English",
-            minutes: 60,
-            due: "Monday",
-            priority: "low",
-            completed: false
+    <!-- UI TOGGLE SCRIPT ONLY -->
+    <script>
+        // Set display date
+        const currentDateEl = document.getElementById("current-date");
+        if (currentDateEl) {
+            currentDateEl.textContent = new Date().toLocaleDateString();
         }
-    ];
 
-    let editingTaskId = null;
-
-    // Display current date on page load
-    const todayDate = new Date().toLocaleDateString();
-    const currentDateEl = document.getElementById("current-date");
-    if (currentDateEl) currentDateEl.textContent = todayDate;
-
-    // Sidebar Controls
-    function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        const mainContent = document.getElementById("mainContent");
-        if (sidebar) sidebar.classList.toggle("open");
-        if (mainContent) mainContent.classList.toggle("shifted");
-    }
-
-    // Modal Controls
-    function openModal() {
-        const modal = document.getElementById("taskModal");
-        if (modal) modal.style.display = "flex";
-    }
-
-    function closeModal() {
-        const modal = document.getElementById("taskModal");
-        const form = document.getElementById("addTaskForm");
-        if (modal) modal.style.display = "none";
-        if (form) form.reset();
-        editingTaskId = null;
-    }
-
-    // Close modal when clicking background overlay
-    window.onclick = function(event) {
-        const modal = document.getElementById("taskModal");
-        if (event.target === modal) {
-            closeModal();
+        // Sidebar Controls
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.getElementById("mainContent");
+            if (sidebar) sidebar.classList.toggle("open");
+            if (mainContent) mainContent.classList.toggle("shifted");
         }
-    };
 
-    function getPriorityIcon(priority) {
-        if (priority === "high") return "🔴";
-        if (priority === "medium") return "🟡";
-        return "🟢";
-    }
-
-    // FIX: Main render function defined in scope
-    function renderTasks() {
-        const todayContainer = document.getElementById("today-tasks");
-        const upcomingContainer = document.getElementById("upcoming-tasks");
-        const completedContainer = document.getElementById("completed-tasks");
-
-        if (!todayContainer || !upcomingContainer) return;
-
-        todayContainer.innerHTML = "";
-        upcomingContainer.innerHTML = "";
-        if (completedContainer) completedContainer.innerHTML = "";
-
-        tasks.forEach(task => {
-            const card = document.createElement("div");
-            card.className = "task-card";
-
-            card.innerHTML = `
-                <div class="task-info">
-                    <div class="task-title">
-                        ${getPriorityIcon(task.priority)} ${task.title}
-                    </div>
-                    <div class="task-subject">${task.subject}</div>
-                    <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
-                </div>
-                <div class="task-actions">
-                    <button class="task-button complete-button" onclick="completeTask(${task.id})">
-                        ${task.completed ? "↩ Undo" : "✓ Complete"}
-                    </button>
-                    <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
-                    <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
-                </div>
-            `;
-
-            if (task.completed) {
-                if (completedContainer) completedContainer.appendChild(card);
-            } else if (task.due === "Today") {
-                todayContainer.appendChild(card);
-            } else {
-                upcomingContainer.appendChild(card);
-            }
-        });
-    }
-
-    // Task Action Handlers
-    function completeTask(id) {
-        const task = tasks.find(t => t.id === id);
-        if (task) {
-            task.completed = !task.completed;
-            renderTasks();
+        // Modal Controls
+        function openModal() {
+            const modal = document.getElementById("taskModal");
+            if (modal) modal.style.display = "flex";
         }
-    }
 
-    function deleteTask(id) {
-        tasks = tasks.filter(t => t.id !== id);
-        renderTasks();
-    }
+        function closeModal() {
+            const modal = document.getElementById("taskModal");
+            const form = document.getElementById("addTaskForm");
+            if (modal) modal.style.display = "none";
+            if (form) form.reset();
+            const taskIdEl = document.getElementById("modalTaskId");
+            if (taskIdEl) taskIdEl.value = "";
+        }
 
-    function editTask(id) {
-        const task = tasks.find(t => t.id === id);
-        if (!task) return;
-
-        document.getElementById("modalTaskName").value = task.title;
-        document.getElementById("modalSubject").value = task.subject;
-        document.getElementById("modalEstMinutes").value = task.minutes;
-        document.getElementById("modalPriority").value = task.priority;
-
-        editingTaskId = id;
-        openModal();
-    }
-
-    // Form Submit Event Handler
-    document.addEventListener("DOMContentLoaded", function() {
-        const form = document.getElementById("addTaskForm");
-        if (form) {
-            form.addEventListener("submit", function(event) {
-                event.preventDefault();
-
-                const title = document.getElementById("modalTaskName").value.trim();
-                const subject = document.getElementById("modalSubject").value.trim();
-                const minutes = parseInt(document.getElementById("modalEstMinutes").value, 10);
-                const priority = document.getElementById("modalPriority").value;
-                const dueDateInput = document.getElementById("modalDueDate").value;
-
-                if (editingTaskId !== null) {
-                    const task = tasks.find(t => t.id === editingTaskId);
-                    if (task) {
-                        task.title = title;
-                        task.subject = subject;
-                        task.minutes = minutes;
-                        task.priority = priority;
-                    }
-                } else {
-                    tasks.push({
-                        id: Date.now(),
-                        title: title,
-                        subject: subject,
-                        minutes: minutes,
-                        priority: priority,
-                        due: dueDateInput || "Today",
-                        completed: false
-                    });
-                }
-
-                renderTasks();
+        window.onclick = function(event) {
+            const modal = document.getElementById("taskModal");
+            if (event.target === modal) {
                 closeModal();
-            });
-        }
+            }
+        };
 
-        renderTasks();
-    });
-</script>
-    <!-- Connected External JavaScript -->
+        // Populate modal for editing
+        function editTask(id, title, subject, minutes, priority, dueDate) {
+            document.getElementById("modalTaskId").value = id;
+            document.getElementById("modalTaskName").value = title;
+            document.getElementById("modalSubject").value = subject;
+            document.getElementById("modalEstMinutes").value = minutes;
+            document.getElementById("modalPriority").value = priority;
+            document.getElementById("modalDueDate").value = dueDate;
+            openModal();
+        }
+    </script>
+
+    <!-- Connected Backend External JavaScript -->
     <script src="{{ url_for('static', filename='planner.js') }}"></script>
 </body>
 </html>
