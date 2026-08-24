@@ -113,7 +113,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 alert("Please enter a task name.");
                 return;
             }
+               if (!title || !subject) {
+        alert("Task name and subject cannot be empty or just spaces.");
+        return;
+    }
 
+    // Proceed with your existing fetch('/planner/add', ...) API call
+});
             const formData = new FormData();
             formData.append("title", title);
             formData.append("subject", subject);
