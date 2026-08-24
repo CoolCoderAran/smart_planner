@@ -129,45 +129,20 @@
 
     </div>
 
-    <div class="dashboard-stats">
-
-        <div class="stat-card">
-
-            <h2>
-                {{ tasks|length }}
-            </h2>
-
-            <p>
-                Active Tasks
-            </p>
-
-        </div>
-
-        <div class="stat-card">
-
-            <h2>
-                87%
-            </h2>
-
-            <p>
-                Productivity
-            </p>
-
-        </div>
-
-        <div class="stat-card">
-
-            <h2>
-                5
-            </h2>
-
-            <p>
-                Day Streak
-            </p>
-
-        </div>
-
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <h2>{{ tasks|length }}</h2>
+        <p>Active Tasks</p>
     </div>
+    <div class="stat-card">
+        <h2>{{ streak_data.current_streak }} Days</h2>
+        <p>Current Streak</p>
+    </div>
+    <div class="stat-card">
+        <h2>{{ streak_data.best_streak }} Days</h2>
+        <p>Best Streak</p>
+    </div>
+</div>
 
 </section>
 
