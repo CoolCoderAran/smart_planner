@@ -352,7 +352,17 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
+@app.route("/planner")
+def planner_view():
+    username = session.get("user")
+    if not username:
+        return redirect(url_for("login"))
 
+    # Fetch tasks for the logged-in user
+    user_tasks = planner.get_planner_tasks(username)
+
+    return render_template("planner.html", tasks=user_tasks, username=username)
+    
 @app.route("/planner/add", methods=["POST"])
 def planner_add():
     username = session.get("user")
