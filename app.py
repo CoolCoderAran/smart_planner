@@ -368,7 +368,19 @@ def planner_add():
     username = session.get("user")
     if not username:
         return jsonify({"success": False, "error": "Unauthorized"}), 401
+@app.route('/planner/add', methods=['POST'])
+def add_task():
+    # If receiving JSON from fetch
+    data = request.get_json() or request.form
+    
+    title = data.get('title', '').strip()
+    subject = data.get('subject', '').strip()
 
+    # Reject if whitespace-only
+    if not title or not subject:
+        return jsonify({"status": "error", "message": "Title and subject cannot be empty"}), 400
+
+    # Continue with database insertion...
     title = request.form.get("title") or request.form.get("modalTaskName")
     subject = request.form.get("subject") or request.form.get("modalSubject")
     due_date = request.form.get("due_date") or request.form.get("modalDueDate")
