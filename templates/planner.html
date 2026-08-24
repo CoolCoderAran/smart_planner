@@ -170,16 +170,16 @@
                     <input type="hidden" id="modalTaskId" name="task_id" value="">
 
                     <!-- 1. Task Name -->
-                    <div class="form-group">
-                        <label for="modalTaskName">Task Name</label>
-                        <input type="text" id="modalTaskName" name="title" placeholder="e.g., Read Chapter 4 & take notes" required />
-                    </div>
+<div class="form-group">
+    <label for="modalTaskName">Task Name</label>
+    <input type="text" id="modalTaskName" name="title" pattern=".*\S.*" title="Title cannot be empty or just spaces" placeholder="e.g., Read Chapter 4 & take notes" required />
+</div>
 
-                    <!-- 2. Subject / Course -->
-                    <div class="form-group">
-                        <label for="modalSubject">Subject / Course</label>
-                        <input type="text" id="modalSubject" name="subject" placeholder="e.g., AP Computer Science / MATH 101" required />
-                    </div>
+<!-- 2. Subject / Course -->
+<div class="form-group">
+    <label for="modalSubject">Subject / Course</label>
+    <input type="text" id="modalSubject" name="subject" pattern=".*\S.*" title="Subject cannot be empty or just spaces" placeholder="e.g., AP Computer Science / MATH 101" required />
+</div>
 
                     <!-- Row 1: Due Date & Specific Deadline Time -->
                     <div class="form-row">
