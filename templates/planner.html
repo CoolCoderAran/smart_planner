@@ -161,190 +161,192 @@
     </div>
 
     <!-- INLINE JAVASCRIPT -->
-    <script>
-        // 1. In-memory data store for tasks
-        let tasks = [
-            {
-                id: 1,
-                title: "Math Test",
-                subject: "Mathematics",
-                minutes: 45,
-                due: "Today",
-                priority: "high",
-                completed: false
-            },
-            {
-                id: 2,
-                title: "Science Quiz",
-                subject: "Science",
-                minutes: 30,
-                due: "Today",
-                priority: "medium",
-                completed: false
-            },
-            {
-                id: 3,
-                title: "History Essay",
-                subject: "English",
-                minutes: 60,
-                due: "Monday",
-                priority: "low",
-                completed: false
-            }
-        ];
-
-        let editingTaskId = null;
-
-        // Display current date on page load
-        const todayDate = new Date().toLocaleDateString();
-        const currentDateEl = document.getElementById("current-date");
-        if (currentDateEl) currentDateEl.textContent = todayDate;
-
-        // Sidebar Controls
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            const mainContent = document.getElementById("mainContent");
-            if (sidebar) sidebar.classList.toggle("open");
-            if (mainContent) mainContent.classList.toggle("shifted");
-        }
-
-        // Modal Controls
-        function openModal() {
-            const modal = document.getElementById("taskModal");
-            if (modal) modal.style.display = "flex";
-        }
-
-        function closeModal() {
-            const modal = document.getElementById("taskModal");
-            const form = document.getElementById("addTaskForm");
-            if (modal) modal.style.display = "none";
-            if (form) form.reset();
-            editingTaskId = null;
-        }
-
-        // Close modal when clicking on dark overlay background
-        window.onclick = function(event) {
-            const modal = document.getElementById("taskModal");
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-
-        // Get visual icon for task priority
-        function getPriorityIcon(priority) {
-            if (priority === "high") return "🔴";
-            if (priority === "medium") return "🟡";
-            return "🟢";
-        }
-
-        // Render tasks dynamically into HTML containers
+   <script>
+    // In-memory data store for tasks
+    let tasks = [
         {
-            const todayContainer = document.getElementById("today-tasks");
-            const upcomingContainer = document.getElementById("upcoming-tasks");
+            id: 1,
+            title: "Math Test",
+            subject: "Mathematics",
+            minutes: 45,
+            due: "Today",
+            priority: "high",
+            completed: false
+        },
+        {
+            id: 2,
+            title: "Science Quiz",
+            subject: "Science",
+            minutes: 30,
+            due: "Today",
+            priority: "medium",
+            completed: false
+        },
+        {
+            id: 3,
+            title: "History Essay",
+            subject: "English",
+            minutes: 60,
+            due: "Monday",
+            priority: "low",
+            completed: false
+        }
+    ];
 
-            if (!todayContainer || !upcomingContainer) return;
+    let editingTaskId = null;
 
-            todayContainer.innerHTML = "";
-            upcomingContainer.innerHTML = "";
+    // Display current date on page load
+    const todayDate = new Date().toLocaleDateString();
+    const currentDateEl = document.getElementById("current-date");
+    if (currentDateEl) currentDateEl.textContent = todayDate;
 
-            tasks.filter(t => !t.completed).forEach(task => {
-                const card = document.createElement("div");
-                card.className = "task-card";
+    // Sidebar Controls
+    function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const mainContent = document.getElementById("mainContent");
+        if (sidebar) sidebar.classList.toggle("open");
+        if (mainContent) mainContent.classList.toggle("shifted");
+    }
 
-                card.innerHTML = `
-                    <div class="task-info">
-                        <div class="task-title">
-                            ${getPriorityIcon(task.priority)} ${task.title}
-                        </div>
-                        <div class="task-subject">${task.subject}</div>
-                        <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
+    // Modal Controls
+    function openModal() {
+        const modal = document.getElementById("taskModal");
+        if (modal) modal.style.display = "flex";
+    }
+
+    function closeModal() {
+        const modal = document.getElementById("taskModal");
+        const form = document.getElementById("addTaskForm");
+        if (modal) modal.style.display = "none";
+        if (form) form.reset();
+        editingTaskId = null;
+    }
+
+    // Close modal when clicking background overlay
+    window.onclick = function(event) {
+        const modal = document.getElementById("taskModal");
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
+    function getPriorityIcon(priority) {
+        if (priority === "high") return "🔴";
+        if (priority === "medium") return "🟡";
+        return "🟢";
+    }
+
+    // FIX: Main render function defined in scope
+    function renderTasks() {
+        const todayContainer = document.getElementById("today-tasks");
+        const upcomingContainer = document.getElementById("upcoming-tasks");
+        const completedContainer = document.getElementById("completed-tasks");
+
+        if (!todayContainer || !upcomingContainer) return;
+
+        todayContainer.innerHTML = "";
+        upcomingContainer.innerHTML = "";
+        if (completedContainer) completedContainer.innerHTML = "";
+
+        tasks.forEach(task => {
+            const card = document.createElement("div");
+            card.className = "task-card";
+
+            card.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">
+                        ${getPriorityIcon(task.priority)} ${task.title}
                     </div>
-                    <div class="task-actions">
-                        <button class="task-button complete-button" onclick="completeTask(${task.id})">✓ Complete</button>
-                        <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
-                        <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
-                    </div>
-                `;
+                    <div class="task-subject">${task.subject}</div>
+                    <div class="task-meta">${task.minutes} min · Due ${task.due}</div>
+                </div>
+                <div class="task-actions">
+                    <button class="task-button complete-button" onclick="completeTask(${task.id})">
+                        ${task.completed ? "↩ Undo" : "✓ Complete"}
+                    </button>
+                    <button class="task-button edit-button" onclick="editTask(${task.id})">✏ Edit</button>
+                    <button class="task-button delete-button" onclick="deleteTask(${task.id})">🗑 Delete</button>
+                </div>
+            `;
 
-                if (task.due === "Today") {
-                    todayContainer.appendChild(card);
+            if (task.completed) {
+                if (completedContainer) completedContainer.appendChild(card);
+            } else if (task.due === "Today") {
+                todayContainer.appendChild(card);
+            } else {
+                upcomingContainer.appendChild(card);
+            }
+        });
+    }
+
+    // Task Action Handlers
+    function completeTask(id) {
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            task.completed = !task.completed;
+            renderTasks();
+        }
+    }
+
+    function deleteTask(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        renderTasks();
+    }
+
+    function editTask(id) {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+
+        document.getElementById("modalTaskName").value = task.title;
+        document.getElementById("modalSubject").value = task.subject;
+        document.getElementById("modalEstMinutes").value = task.minutes;
+        document.getElementById("modalPriority").value = task.priority;
+
+        editingTaskId = id;
+        openModal();
+    }
+
+    // Form Submit Event Handler
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("addTaskForm");
+        if (form) {
+            form.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const title = document.getElementById("modalTaskName").value.trim();
+                const subject = document.getElementById("modalSubject").value.trim();
+                const minutes = parseInt(document.getElementById("modalEstMinutes").value, 10);
+                const priority = document.getElementById("modalPriority").value;
+                const dueDateInput = document.getElementById("modalDueDate").value;
+
+                if (editingTaskId !== null) {
+                    const task = tasks.find(t => t.id === editingTaskId);
+                    if (task) {
+                        task.title = title;
+                        task.subject = subject;
+                        task.minutes = minutes;
+                        task.priority = priority;
+                    }
                 } else {
-                    upcomingContainer.appendChild(card);
+                    tasks.push({
+                        id: Date.now(),
+                        title: title,
+                        subject: subject,
+                        minutes: minutes,
+                        priority: priority,
+                        due: dueDateInput || "Today",
+                        completed: false
+                    });
                 }
+
+                renderTasks();
+                closeModal();
             });
         }
 
-        // Task Action Handlers
-        function completeTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = true;
-                renderTasks();
-            }
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            renderTasks();
-        }
-
-        function editTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (!task) return;
-
-            document.getElementById("modalTaskName").value = task.title;
-            document.getElementById("modalSubject").value = task.subject;
-            document.getElementById("modalEstMinutes").value = task.minutes;
-            document.getElementById("modalPriority").value = task.priority;
-
-            editingTaskId = id;
-            openModal();
-        }
-
-        // Form Submit Event Handler
-        document.addEventListener("DOMContentLoaded", function() {
-            const form = document.getElementById("addTaskForm");
-            if (form) {
-                form.addEventListener("submit", function(event) {
-                    event.preventDefault();
-
-                    const title = document.getElementById("modalTaskName").value.trim();
-                    const subject = document.getElementById("modalSubject").value.trim();
-                    const minutes = parseInt(document.getElementById("modalEstMinutes").value, 10);
-                    const priority = document.getElementById("modalPriority").value;
-                    const dueDateInput = document.getElementById("modalDueDate").value;
-
-                    if (editingTaskId !== null) {
-                        // Editing existing task
-                        const task = tasks.find(t => t.id === editingTaskId);
-                        if (task) {
-                            task.title = title;
-                            task.subject = subject;
-                            task.minutes = minutes;
-                            task.priority = priority;
-                        }
-                    } else {
-                        // Creating new task
-                        tasks.push({
-                            id: Date.now(),
-                            title: title,
-                            subject: subject,
-                            minutes: minutes,
-                            priority: priority,
-                            due: dueDateInput || "Today",
-                            completed: false
-                        });
-                    }
-
-                    renderTasks();
-                    closeModal();
-                });
-            }
-
-            // Initial view load
-            renderTasks();
-        });
-    </script>
+        renderTasks();
+    });
+</script>
     <!-- Connected External JavaScript -->
     <script src="{{ url_for('static', filename='planner.js') }}"></script>
 </body>
