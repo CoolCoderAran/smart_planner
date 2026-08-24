@@ -1,19 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Smart Planner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body class="auth-body">
-
     <div class="auth-container">
-
         <h1 class="auth-title">Welcome Back</h1>
         <p class="auth-subtitle">Login to continue</p>
 
-        <form action="/login" method="POST" class="auth-form">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for message in messages %}
+                <p class="flash-error" style="color: red; margin-bottom: 10px;">{{ message }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
 
+        <form action="/login" method="POST" class="auth-form">
             <label>Username</label>
             <input type="text" name="username" placeholder="Enter username" required>
 
@@ -21,15 +29,12 @@
             <input type="password" name="password" placeholder="Enter password" required>
 
             <button type="submit" class="auth-btn">Login</button>
-
         </form>
 
         <p class="auth-footer">
             Don't have an account?
             <a href="/signup">Sign Up</a>
         </p>
-
     </div>
-
 </body>
 </html>
