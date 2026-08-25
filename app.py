@@ -25,6 +25,28 @@ app.permanent_session_lifetime = timedelta(days=30)
 
 db.init_db()
 
+from datetime import datetime, timedelta
+
+def validate_task_date(date_str):
+    try:
+        # Parse the incoming date string (assuming 'YYYY-MM-DD' format)
+        task_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return False, "Invalid date format. Use YYYY-MM-DD."
+
+    # 1. Restrict year between 2000 and 2050
+    if not (2000 <= task_date.year <= 2050):
+        return False, "Year must be between 2000 and 2050."
+
+    # 2. Prevent dates older than 6 months (approx. 182 days) in the past
+    today = datetime.now().date()
+    six_months_ago = today - timedelta(days=182)
+
+    if task_date < six_months_ago:
+        return False, "Task date cannot be more than 6 months in the past."
+
+    return True, task_date
+    
 Common_Patterns = {"password", "123456", "qwerty", "admin", "@123"}
 
 
