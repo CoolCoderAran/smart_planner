@@ -387,25 +387,29 @@ def planner_view():
     
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task_route():
-    if "username" not in session:
+    # Use session.get("user") to match the rest of app.py
+    username = session.get("user")
+    if not username:
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
-    # Unify input parsing for both JSON fetch calls and standard Form POSTs
     data = request.get_json(silent=True) or request.form
 
     title = (data.get("title") or data.get("modalTaskName") or "").strip()
     subject = (data.get("subject") or data.get("modalTaskSubject") or "").strip()
     due_date = data.get("due_date") or data.get("modalDueDate")
     priority = data.get("priority") or data.get("modalPriority") or "Medium"
+    
+    # Extract estimated minutes (defaults to 30)
+    try:
+        estimated_minutes = int(data.get("estimated_minutes") or data.get("modalEstMinutes") or 30)
+    except (ValueError, TypeError):
+        estimated_minutes = 30
 
-    # Reject empty or whitespace-only inputs
     if not title or not subject:
         return jsonify({"status": "error", "message": "Title and subject cannot be empty"}), 400
 
-    username = session["username"]
-    
-    # Insert task into database
-    success = add_planner_task(username, title, subject, due_date, priority)
+    # Pass all 6 required parameters to match planner.py
+    success = planner.add_planner_task(username, title, subject, due_date, estimated_minutes, priority)
 
     if success:
         return jsonify({"status": "success", "message": "Task added successfully"}), 200
