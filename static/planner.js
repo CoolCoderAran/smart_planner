@@ -163,7 +163,13 @@ function applyFilters() {
         const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
         const priority = (card.dataset.priority || "").toLowerCase();
         const isCompleted = card.dataset.completed === "1" || card.classList.contains("completed");
+// Inside applyFilters() in planner_3.js
+const title = (card.querySelector(".task-title")?.textContent || "").toLowerCase();
+const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
+const dateMeta = (card.querySelector(".task-meta")?.textContent || "").toLowerCase();
 
+// Matches query against title, subject, or date text
+const matchesSearch = title.includes(query) || subject.includes(query) || dateMeta.includes(query);
         // 1. Check Search Match
         const matchesSearch = title.includes(query) || subject.includes(query);
 
@@ -185,6 +191,7 @@ function applyFilters() {
         }
     });
 }
+
 
 // Bind event handlers once the DOM is loaded
 document.addEventListener("DOMContentLoaded", function() {
