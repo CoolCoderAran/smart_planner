@@ -795,3 +795,16 @@ a {
         padding: 20px;
     }
 }
+
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    color: var(--color-text-subtle);
+    font-size: 0.82rem;
+}
+
+.task-meta span {
+    display: inline-block;
+}
