@@ -387,34 +387,50 @@ def planner_view():
     
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task_route():
-    # Use session.get("user") to match the rest of app.py
     username = session.get("user")
     if not username:
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
+    # Extract parameters from JSON or Form submission
     data = request.get_json(silent=True) or request.form
 
     title = (data.get("title") or data.get("modalTaskName") or "").strip()
     subject = (data.get("subject") or data.get("modalTaskSubject") or "").strip()
-    due_date = data.get("due_date") or data.get("modalDueDate")
+    due_date = data.get("due_date") or data.get("modalDueDate") or None
     priority = data.get("priority") or data.get("modalPriority") or "Medium"
-    
-    # Extract estimated minutes (defaults to 30)
+
+    # Input validation
+    if not title or not subject:
+        return jsonify({"status": "error", "message": "Title and subject are required."}), 400
+
+    # Parse estimated minutes
     try:
-        estimated_minutes = int(data.get("estimated_minutes") or data.get("modalEstMinutes") or 30)
+        raw_minutes = data.get("estimated_minutes") or data.get("modalEstMinutes") or 30
+        estimated_minutes = int(raw_minutes)
     except (ValueError, TypeError):
         estimated_minutes = 30
 
-    if not title or not subject:
-        return jsonify({"status": "error", "message": "Title and subject cannot be empty"}), 400
+    # Optional: Date format/range check using existing helper
+    if due_date:
+        valid_date, date_or_msg = validate_task_date(due_date)
+        if not valid_date:
+            return jsonify({"status": "error", "message": date_or_msg}), 400
+        due_date = date_or_msg.strftime("%Y-%m-%d")
 
-    # Pass all 6 required parameters to match planner.py
-    success = planner.add_planner_task(username, title, subject, due_date, estimated_minutes, priority)
+    # Insert task into DB
+    success = planner.add_planner_task(
+        username=username,
+        title=title,
+        subject=subject,
+        due_date=due_date,
+        estimated_minutes=estimated_minutes,
+        priority=priority
+    )
 
     if success:
         return jsonify({"status": "success", "message": "Task added successfully"}), 200
-    else:
-        return jsonify({"status": "error", "message": "Failed to add task to database"}), 500
+    
+    return jsonify({"status": "error", "message": "Database insertion failed"}), 500
     
 @app.route("/planner/update/<int:task_id>", methods=["POST"])
 def planner_update(task_id):
