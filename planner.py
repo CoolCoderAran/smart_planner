@@ -3,11 +3,10 @@ import sqlite3
 import db
 
 def add_planner_task(username, title, subject, due_date, estimated_minutes, priority):
-    """Inserts a new task into the planner_tasks table."""
+    """Inserts a new task into planner_tasks and returns success status."""
     conn = db.get_db()
     cursor = conn.cursor()
-    
-    created_at = datetime.now().isoformat()
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     try:
         cursor.execute("""
@@ -16,9 +15,14 @@ def add_planner_task(username, title, subject, due_date, estimated_minutes, prio
             ) VALUES (?, ?, ?, ?, ?, ?, 0, ?)
         """, (username, title, subject, due_date, estimated_minutes, priority, created_at))
         conn.commit()
+        return True
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Database insertion error: {e}")
+        return False
     finally:
         conn.close()
-
+        
 def get_planner_tasks(username):
     """Retrieves all tasks for a given user from planner_tasks."""
     conn = db.get_db()
