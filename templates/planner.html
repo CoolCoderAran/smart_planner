@@ -187,19 +187,16 @@
                 <form id="addTaskForm">
                     <input type="hidden" id="modalTaskId" name="task_id" value="">
 
-                    <!-- 1. Task Name -->
                     <div class="form-group">
                         <label for="modalTaskName">Task Name</label>
                         <input type="text" id="modalTaskName" name="title" pattern=".*\S.*" title="Title cannot be empty or just spaces" placeholder="e.g., Read Chapter 4 & take notes" required />
                     </div>
 
-                    <!-- 2. Subject / Course -->
                     <div class="form-group">
                         <label for="modalSubject">Subject / Course</label>
                         <input type="text" id="modalSubject" name="subject" pattern=".*\S.*" title="Subject cannot be empty or just spaces" placeholder="e.g., AP Computer Science / MATH 101" required />
                     </div>
 
-                    <!-- Row 1: Due Date & Specific Deadline Time -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="modalDueDate">Due Date</label>
@@ -212,7 +209,6 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: Estimated Time & Priority -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="modalEstMinutes">Est. Minutes</label>
@@ -229,7 +225,6 @@
                         </div>
                     </div>
 
-                    <!-- Form Action Buttons -->
                     <div class="modal-actions">
                         <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
                         <button type="submit" class="btn-submit">Save Task</button>
@@ -239,120 +234,7 @@
         </div>
     </div>
 
-    <!-- UI TOGGLE & FILTERING SCRIPT -->
-    <script>
-        let currentFilter = "all";
-
-        // Set display date
-        const currentDateEl = document.getElementById("current-date");
-        if (currentDateEl) {
-            currentDateEl.textContent = new Date().toLocaleDateString();
-        }
-
-        // Sidebar Controls
-        function toggleSidebar() {
-            const sidebar = document.getElementById("sidebar");
-            const mainContent = document.getElementById("mainContent");
-            if (sidebar) sidebar.classList.toggle("open");
-            if (mainContent) mainContent.classList.toggle("shifted");
-        }
-
-        // Search & Filter Logic
-        function applyFilters() {
-            const searchInput = document.getElementById("search");
-            const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
-            const taskCards = document.querySelectorAll(".task-card");
-            const taskSections = document.querySelectorAll(".task-section");
-
-            taskCards.forEach(card => {
-                const title = (card.querySelector(".task-title")?.textContent || "").toLowerCase();
-                const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
-                const meta = (card.querySelector(".task-meta")?.textContent || "").toLowerCase();
-                const isCompleted = card.dataset.completed === "true";
-                const category = card.dataset.category;
-
-                // Search Match
-                const matchesSearch = title.includes(query) || subject.includes(query) || meta.includes(query);
-
-                // Tab/Sidebar Filter Match
-                let matchesFilter = true;
-                if (currentFilter === "today") {
-                    matchesFilter = (category === "today");
-                } else if (currentFilter === "upcoming") {
-                    matchesFilter = (category === "upcoming");
-                } else if (currentFilter === "completed") {
-                    matchesFilter = isCompleted;
-                }
-
-                // Apply display
-                if (matchesSearch && matchesFilter) {
-                    card.style.display = "flex";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-
-            // Adjust Section Visibility based on active filter
-            taskSections.forEach(section => {
-                const sectionCategory = section.dataset.section;
-                if (currentFilter === "all") {
-                    section.style.display = "block";
-                } else if (currentFilter === sectionCategory) {
-                    section.style.display = "block";
-                } else {
-                    section.style.display = "none";
-                }
-            });
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // Search Input Event
-            const searchInput = document.getElementById("search");
-            if (searchInput) {
-                searchInput.addEventListener("input", applyFilters);
-            }
-
-            // Header Filter Buttons Event
-            const filterBtns = document.querySelectorAll(".filter-btn");
-            filterBtns.forEach(btn => {
-                btn.addEventListener("click", function() {
-                    filterBtns.forEach(b => b.classList.remove("active"));
-                    this.classList.add("active");
-                    currentFilter = this.dataset.filter;
-                    
-                    // Sync sidebar link highlight
-                    document.querySelectorAll(".sidebar-filter-link").forEach(link => {
-                        link.classList.toggle("active", link.dataset.filter === currentFilter);
-                    });
-
-                    applyFilters();
-                });
-            });
-
-            // Sidebar Links Event
-            const sidebarLinks = document.querySelectorAll(".sidebar-filter-link");
-            sidebarLinks.forEach(link => {
-                link.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    sidebarLinks.forEach(l => l.classList.remove("active"));
-                    this.classList.add("active");
-                    currentFilter = this.dataset.filter;
-
-                    // Sync header filter button highlight
-                    document.querySelectorAll(".filter-btn").forEach(btn => {
-                        btn.classList.toggle("active", btn.dataset.filter === currentFilter);
-                    });
-
-                    applyFilters();
-                    toggleSidebar(); // Close sidebar on selection
-                });
-            });
-        });
-
-    
-    </script>
-
-    <!-- Connected Backend External JavaScript -->
+    <!-- Single JS file link -->
     <script src="{{ url_for('static', filename='planner.js') }}"></script>
 </body>
 </html>
