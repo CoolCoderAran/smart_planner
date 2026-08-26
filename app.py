@@ -390,8 +390,22 @@ def planner_add():
     username = session.get("user")
     if not username:
         return jsonify({"success": False, "error": "Unauthorized"}), 401
-@app.route('/planner/add', methods=['POST'])
-def add_task():
+
+
+    data = request.get_json() or {}
+    raw_date = data.get("date")
+
+    # Validate date constraints
+    is_valid, result = validate_task_date(raw_date)
+    if not is_valid:
+        return jsonify({"success": False, "error": result}), 400
+
+    # Proceed with saving task using valid date
+    # ...
+    
+    
+    
+    
     # If receiving JSON from fetch
     data = request.get_json() or request.form
     
