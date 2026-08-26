@@ -146,3 +146,65 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+// =========================
+// SEARCH & FILTER LOGIC
+// =========================
+let currentFilter = "all";
+
+function applyFilters() {
+    const searchInput = document.getElementById("searchInput");
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    const taskCards = document.querySelectorAll(".task-card");
+
+    taskCards.forEach(card => {
+        // Read dataset attributes or fallback to card content text
+        const title = (card.querySelector(".task-title")?.textContent || "").toLowerCase();
+        const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
+        const priority = (card.dataset.priority || "").toLowerCase();
+        const isCompleted = card.dataset.completed === "1" || card.classList.contains("completed");
+
+        // 1. Check Search Match
+        const matchesSearch = title.includes(query) || subject.includes(query);
+
+        // 2. Check Category/Priority Filter Match
+        let matchesFilter = true;
+        if (currentFilter === "completed") {
+            matchesFilter = isCompleted;
+        } else if (currentFilter === "pending") {
+            matchesFilter = !isCompleted;
+        } else if (["high", "medium", "low"].includes(currentFilter)) {
+            matchesFilter = priority === currentFilter;
+        }
+
+        // Show or hide card
+        if (matchesSearch && matchesFilter) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// Bind event handlers once the DOM is loaded
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Search Bar Input Event
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilters);
+    }
+
+    // 2. Filter Buttons Click Event
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    filterButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+            // Toggle active visual state
+            filterButtons.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+
+            // Extract target filter (e.g. data-filter="high" or textContent fallback)
+            currentFilter = (this.dataset.filter || this.textContent).toLowerCase().trim();
+            applyFilters();
+        });
+    });
+});
