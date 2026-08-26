@@ -215,3 +215,38 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+// =========================
+// SIDEBAR INTERACTION LOGIC
+// =========================
+const sidebarLinks = document.querySelectorAll(".sidebar nav a, .sidebar .nav-item");
+const sidebarToggleBtn = document.getElementById("sidebarToggle") || document.querySelector(".sidebar-toggle");
+const sidebar = document.querySelector(".sidebar");
+
+// 1. Mobile Sidebar Toggle
+if (sidebarToggleBtn && sidebar) {
+    sidebarToggleBtn.addEventListener("click", function() {
+        sidebar.classList.toggle("open");
+    });
+}
+
+// 2. Active Link Switching & Navigation Handling
+sidebarLinks.forEach(link => {
+    link.addEventListener("click", function(event) {
+        // Remove active class from all links
+        sidebarLinks.forEach(item => item.classList.remove("active"));
+        this.classList.add("active");
+
+        // If link has a data-filter attribute, apply it directly to tasks
+        const filterType = this.dataset.filter;
+        if (filterType && typeof applyFilters === "function") {
+            currentFilter = filterType;
+            applyFilters();
+        }
+
+        // Close mobile sidebar automatically after clicking a menu item
+        if (sidebar && sidebar.classList.contains("open")) {
+            sidebar.classList.remove("open");
+        }
+    });
+});
