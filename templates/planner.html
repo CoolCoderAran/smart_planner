@@ -349,38 +349,7 @@
             });
         });
 
-        // Modal Controls
-        function openModal() {
-            const modal = document.getElementById("taskModal");
-            if (modal) modal.style.display = "flex";
-        }
-
-        function closeModal() {
-            const modal = document.getElementById("taskModal");
-            const form = document.getElementById("addTaskForm");
-            if (modal) modal.style.display = "none";
-            if (form) form.reset();
-            const taskIdEl = document.getElementById("modalTaskId");
-            if (taskIdEl) taskIdEl.value = "";
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById("taskModal");
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-
-        // Populate modal for editing
-        function editTask(id, title, subject, minutes, priority, dueDate) {
-            document.getElementById("modalTaskId").value = id;
-            document.getElementById("modalTaskName").value = title;
-            document.getElementById("modalSubject").value = subject;
-            document.getElementById("modalEstMinutes").value = minutes;
-            document.getElementById("modalPriority").value = priority;
-            document.getElementById("modalDueDate").value = dueDate;
-            openModal();
-        }
+    
     </script>
 
     <!-- Connected Backend External JavaScript -->
