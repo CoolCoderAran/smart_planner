@@ -109,17 +109,11 @@ document.addEventListener("DOMContentLoaded", function() {
             const priority = document.getElementById("modalPriority").value;
             const dueDate = document.getElementById("modalDueDate")?.value || "";
 
-            if (!title) {
-                alert("Please enter a task name.");
+            if (!title || !subject) {
+                alert("Task name and subject cannot be empty or just spaces.");
                 return;
             }
-               if (!title || !subject) {
-        alert("Task name and subject cannot be empty or just spaces.");
-        return;
-    }
 
-    // Proceed with your existing fetch('/planner/add', ...) API call
-});
             const formData = new FormData();
             formData.append("title", title);
             formData.append("subject", subject);
@@ -138,11 +132,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
                 const result = await response.json();
 
-                if (result.success) {
+                if (result.status === 'success' || result.success) {
                     closeModal();
                     window.location.reload();
                 } else {
-                    alert(result.error || "Failed to save task.");
+                    alert(result.message || result.error || "Failed to save task.");
                 }
             } catch (err) {
                 console.error("Error submitting task form:", err);
