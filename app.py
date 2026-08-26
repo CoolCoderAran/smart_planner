@@ -386,70 +386,32 @@ def planner_view():
     return render_template("planner.html", tasks=user_tasks, username=username)
     
 @app.route("/planner/add", methods=["POST"])
-def planner_add():
-    username = session.get("user")
-    if not username:
-        return jsonify({"success": False, "error": "Unauthorized"}), 401
+def add_planner_task_route():
+    if "username" not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
+    # Unify input parsing for both JSON fetch calls and standard Form POSTs
+    data = request.get_json(silent=True) or request.form
 
-    data = request.get_json() or {}
-    raw_date = data.get("date")
+    title = (data.get("title") or data.get("modalTaskName") or "").strip()
+    subject = (data.get("subject") or data.get("modalTaskSubject") or "").strip()
+    due_date = data.get("due_date") or data.get("modalDueDate")
+    priority = data.get("priority") or data.get("modalPriority") or "Medium"
 
-    # Validate date constraints
-    is_valid, result = validate_task_date(raw_date)
-    if not is_valid:
-        return jsonify({"success": False, "error": result}), 400
-
-    # Proceed with saving task using valid date
-    # ...
-    
-    
-    
-    
-    # If receiving JSON from fetch
-    data = request.get_json() or request.form
-    
-    title = data.get('title', '').strip()
-    subject = data.get('subject', '').strip()
-
-    # Reject if whitespace-only
+    # Reject empty or whitespace-only inputs
     if not title or not subject:
         return jsonify({"status": "error", "message": "Title and subject cannot be empty"}), 400
 
-    # Continue with database insertion...
-    title = request.form.get("title") or request.form.get("modalTaskName")
-    subject = request.form.get("subject") or request.form.get("modalSubject")
-    due_date = request.form.get("due_date") or request.form.get("modalDueDate")
-    raw_minutes = (
-        request.form.get("estimated_minutes")
-        or request.form.get("modalEstMinutes")
-        or 30
-    )
-    priority = (
-        request.form.get("priority")
-        or request.form.get("modalPriority")
-        or "Medium"
-    )
+    username = session["username"]
+    
+    # Insert task into database
+    success = add_planner_task(username, title, subject, due_date, priority)
 
-    try:
-        estimated_minutes = int(raw_minutes)
-    except (ValueError, TypeError):
-        estimated_minutes = 30
-
-    if not title:
-        return jsonify({"success": False, "error": "Task title is required"}), 400
-
-    planner.add_planner_task(
-        username=username,
-        title=title,
-        subject=subject,
-        due_date=due_date,
-        estimated_minutes=estimated_minutes,
-        priority=priority,
-    )
-    return jsonify({"success": True})
-
-
+    if success:
+        return jsonify({"status": "success", "message": "Task added successfully"}), 200
+    else:
+        return jsonify({"status": "error", "message": "Failed to add task to database"}), 500
+    
 @app.route("/planner/update/<int:task_id>", methods=["POST"])
 def planner_update(task_id):
     username = session.get("user")
