@@ -2,6 +2,7 @@
 // 1. STATE & DATA
 // =========================
 let editingTaskId = null;
+let currentFilter = "all";
 
 // =========================
 // 2. UI TOGGLES & HELPERS
@@ -26,6 +27,8 @@ function closeModal() {
     if (modal) modal.style.display = "none";
     if (form) form.reset();
     editingTaskId = null;
+    const taskIdEl = document.getElementById("modalTaskId");
+    if (taskIdEl) taskIdEl.value = "";
 }
 
 // Close modal when clicking background overlay
@@ -52,10 +55,10 @@ async function completeTask(id) {
             method: 'POST'
         });
         const result = await response.json();
-        if (result.success) {
+        if (result.success || result.status === 'success') {
             window.location.reload();
         } else {
-            alert(result.error || "Failed to update task.");
+            alert(result.error || result.message || "Failed to update task.");
         }
     } catch (err) {
         console.error("Error toggling task:", err);
@@ -70,10 +73,10 @@ async function deleteTask(id) {
             method: 'POST'
         });
         const result = await response.json();
-        if (result.success) {
+        if (result.success || result.status === 'success') {
             window.location.reload();
         } else {
-            alert(result.error || "Failed to delete task.");
+            alert(result.error || result.message || "Failed to delete task.");
         }
     } catch (err) {
         console.error("Error deleting task:", err);
@@ -81,6 +84,7 @@ async function deleteTask(id) {
 }
 
 function editTask(id, title, subject, minutes, priority, dueDate) {
+    document.getElementById("modalTaskId").value = id || "";
     document.getElementById("modalTaskName").value = title || "";
     document.getElementById("modalSubject").value = subject || "";
     document.getElementById("modalEstMinutes").value = minutes || 30;
@@ -94,11 +98,64 @@ function editTask(id, title, subject, minutes, priority, dueDate) {
 }
 
 // =========================
-// 4. INITIALIZATION & FORM SUBMIT
+// 4. SEARCH & FILTER LOGIC
+// =========================
+function applyFilters() {
+    const searchInput = document.getElementById("search");
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    const taskCards = document.querySelectorAll(".task-card");
+    const taskSections = document.querySelectorAll(".task-section");
+
+    taskCards.forEach(card => {
+        const title = (card.querySelector(".task-title")?.textContent || "").toLowerCase();
+        const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
+        const dateMeta = (card.querySelector(".task-meta")?.textContent || "").toLowerCase();
+        const isCompleted = card.dataset.completed === "true" || card.classList.contains("completed");
+        const category = card.dataset.category;
+        const priority = (card.dataset.priority || "").toLowerCase();
+
+        // 1. Check Search Match against title, subject, or date metadata
+        const matchesSearch = title.includes(query) || subject.includes(query) || dateMeta.includes(query);
+
+        // 2. Check Filter Match
+        let matchesFilter = true;
+        if (currentFilter === "today") {
+            matchesFilter = (category === "today");
+        } else if (currentFilter === "upcoming") {
+            matchesFilter = (category === "upcoming");
+        } else if (currentFilter === "completed") {
+            matchesFilter = isCompleted;
+        } else if (["high", "medium", "low"].includes(currentFilter)) {
+            matchesFilter = priority === currentFilter;
+        }
+
+        // Toggle visibility
+        if (matchesSearch && matchesFilter) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    // Toggle Section visibility depending on active view
+    taskSections.forEach(section => {
+        const sectionCategory = section.dataset.section;
+        if (currentFilter === "all" || ["high", "medium", "low"].includes(currentFilter)) {
+            section.style.display = "block";
+        } else if (currentFilter === sectionCategory) {
+            section.style.display = "block";
+        } else {
+            section.style.display = "none";
+        }
+    });
+}
+
+// =========================
+// 5. INITIALIZATION & EVENT LISTENERS
 // =========================
 document.addEventListener("DOMContentLoaded", function() {
+    // A. Form Submission Handler
     const form = document.getElementById("addTaskForm");
-
     if (form) {
         form.addEventListener("submit", async function(event) {
             event.preventDefault();
@@ -145,108 +202,55 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-});
 
-// =========================
-// SEARCH & FILTER LOGIC
-// =========================
-let currentFilter = "all";
-
-function applyFilters() {
-    const searchInput = document.getElementById("searchInput");
-    const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
-    const taskCards = document.querySelectorAll(".task-card");
-
-    taskCards.forEach(card => {
-        // Read dataset attributes or fallback to card content text
-        const title = (card.querySelector(".task-title")?.textContent || "").toLowerCase();
-        const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
-        const priority = (card.dataset.priority || "").toLowerCase();
-        const isCompleted = card.dataset.completed === "1" || card.classList.contains("completed");
-// Inside applyFilters() in planner_3.js
-const title = (card.querySelector(".task-title")?.textContent || "").toLowerCase();
-const subject = (card.querySelector(".task-subject")?.textContent || "").toLowerCase();
-const dateMeta = (card.querySelector(".task-meta")?.textContent || "").toLowerCase();
-
-// Matches query against title, subject, or date text
-const matchesSearch = title.includes(query) || subject.includes(query) || dateMeta.includes(query);
-        // 1. Check Search Match
-        const matchesSearch = title.includes(query) || subject.includes(query);
-
-        // 2. Check Category/Priority Filter Match
-        let matchesFilter = true;
-        if (currentFilter === "completed") {
-            matchesFilter = isCompleted;
-        } else if (currentFilter === "pending") {
-            matchesFilter = !isCompleted;
-        } else if (["high", "medium", "low"].includes(currentFilter)) {
-            matchesFilter = priority === currentFilter;
-        }
-
-        // Show or hide card
-        if (matchesSearch && matchesFilter) {
-            card.style.display = "flex";
-        } else {
-            card.style.display = "none";
-        }
-    });
-}
-
-
-// Bind event handlers once the DOM is loaded
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Search Bar Input Event
-    const searchInput = document.getElementById("searchInput");
+    // B. Search Bar Listener
+    const searchInput = document.getElementById("search");
     if (searchInput) {
         searchInput.addEventListener("input", applyFilters);
     }
 
-    // 2. Filter Buttons Click Event
+    // C. Filter Bar Buttons Listener
     const filterButtons = document.querySelectorAll(".filter-btn");
     filterButtons.forEach(btn => {
         btn.addEventListener("click", function() {
-            // Toggle active visual state
             filterButtons.forEach(b => b.classList.remove("active"));
             this.classList.add("active");
 
-            // Extract target filter (e.g. data-filter="high" or textContent fallback)
             currentFilter = (this.dataset.filter || this.textContent).toLowerCase().trim();
+            
+            // Sync active class with sidebar filter links
+            document.querySelectorAll(".sidebar-filter-link").forEach(link => {
+                link.classList.toggle("active", link.dataset.filter === currentFilter);
+            });
+
             applyFilters();
         });
     });
-});
 
-// =========================
-// SIDEBAR INTERACTION LOGIC
-// =========================
-const sidebarLinks = document.querySelectorAll(".sidebar nav a, .sidebar .nav-item");
-const sidebarToggleBtn = document.getElementById("sidebarToggle") || document.querySelector(".sidebar-toggle");
-const sidebar = document.querySelector(".sidebar");
+    // D. Sidebar Links Listener
+    const sidebarLinks = document.querySelectorAll(".sidebar-filter-link");
+    sidebarLinks.forEach(link => {
+        link.addEventListener("click", function(event) {
+            sidebarLinks.forEach(item => item.classList.remove("active"));
+            this.classList.add("active");
 
-// 1. Mobile Sidebar Toggle
-if (sidebarToggleBtn && sidebar) {
-    sidebarToggleBtn.addEventListener("click", function() {
-        sidebar.classList.toggle("open");
-    });
-}
+            const filterType = this.dataset.filter;
+            if (filterType) {
+                currentFilter = filterType;
+                
+                // Sync active class with top filter bar buttons
+                document.querySelectorAll(".filter-btn").forEach(btn => {
+                    btn.classList.toggle("active", btn.dataset.filter === currentFilter);
+                });
 
-// 2. Active Link Switching & Navigation Handling
-sidebarLinks.forEach(link => {
-    link.addEventListener("click", function(event) {
-        // Remove active class from all links
-        sidebarLinks.forEach(item => item.classList.remove("active"));
-        this.classList.add("active");
+                applyFilters();
+            }
 
-        // If link has a data-filter attribute, apply it directly to tasks
-        const filterType = this.dataset.filter;
-        if (filterType && typeof applyFilters === "function") {
-            currentFilter = filterType;
-            applyFilters();
-        }
-
-        // Close mobile sidebar automatically after clicking a menu item
-        if (sidebar && sidebar.classList.contains("open")) {
-            sidebar.classList.remove("open");
-        }
+            // Close mobile sidebar on selection
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar && sidebar.classList.contains("open")) {
+                toggleSidebar();
+            }
+        });
     });
 });
