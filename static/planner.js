@@ -114,10 +114,10 @@ function applyFilters() {
         const category = card.dataset.category;
         const priority = (card.dataset.priority || "").toLowerCase();
 
-        // 1. Check Search Match against title, subject, or date metadata
+        // Check Search Match
         const matchesSearch = title.includes(query) || subject.includes(query) || dateMeta.includes(query);
 
-        // 2. Check Filter Match
+        // Check Filter Match
         let matchesFilter = true;
         if (currentFilter === "today") {
             matchesFilter = (category === "today");
@@ -129,7 +129,6 @@ function applyFilters() {
             matchesFilter = priority === currentFilter;
         }
 
-        // Toggle visibility
         if (matchesSearch && matchesFilter) {
             card.style.display = "flex";
         } else {
@@ -151,10 +150,10 @@ function applyFilters() {
 }
 
 // =========================
-// 5. INITIALIZATION & EVENT LISTENERS
+// 5. INITIALIZATION & LISTENERS
 // =========================
 document.addEventListener("DOMContentLoaded", function() {
-    // A. Form Submission Handler
+    // Form Submission
     const form = document.getElementById("addTaskForm");
     if (form) {
         form.addEventListener("submit", async function(event) {
@@ -203,13 +202,13 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // B. Search Bar Listener
+    // Search Bar Input Event
     const searchInput = document.getElementById("search");
     if (searchInput) {
         searchInput.addEventListener("input", applyFilters);
     }
 
-    // C. Filter Bar Buttons Listener
+    // Header Filter Bar Buttons
     const filterButtons = document.querySelectorAll(".filter-btn");
     filterButtons.forEach(btn => {
         btn.addEventListener("click", function() {
@@ -218,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
             currentFilter = (this.dataset.filter || this.textContent).toLowerCase().trim();
             
-            // Sync active class with sidebar filter links
             document.querySelectorAll(".sidebar-filter-link").forEach(link => {
                 link.classList.toggle("active", link.dataset.filter === currentFilter);
             });
@@ -227,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // D. Sidebar Links Listener
+    // Sidebar Links
     const sidebarLinks = document.querySelectorAll(".sidebar-filter-link");
     sidebarLinks.forEach(link => {
         link.addEventListener("click", function(event) {
@@ -238,7 +236,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (filterType) {
                 currentFilter = filterType;
                 
-                // Sync active class with top filter bar buttons
                 document.querySelectorAll(".filter-btn").forEach(btn => {
                     btn.classList.toggle("active", btn.dataset.filter === currentFilter);
                 });
@@ -246,7 +243,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 applyFilters();
             }
 
-            // Close mobile sidebar on selection
             const sidebar = document.getElementById("sidebar");
             if (sidebar && sidebar.classList.contains("open")) {
                 toggleSidebar();
