@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const dueDate = document.getElementById("modalDueDate")?.value || "";
 
             if (!title || !subject) {
-                alert("Task name and subject cannot be empty or just spaces.");
+                alert("Task name and subject cannot be empty.");
                 return;
             }
 
@@ -130,16 +130,18 @@ document.addEventListener("DOMContentLoaded", function() {
                     method: 'POST',
                     body: formData
                 });
+
                 const result = await response.json();
 
-                if (result.status === 'success' || result.success) {
+                if (response.ok && (result.status === 'success' || result.success)) {
                     closeModal();
                     window.location.reload();
                 } else {
                     alert(result.message || result.error || "Failed to save task.");
                 }
             } catch (err) {
-                console.error("Error submitting task form:", err);
+                console.error("Submission error:", err);
+                alert("Network error: Could not reach server.");
             }
         });
     }
