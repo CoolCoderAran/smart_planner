@@ -1,0 +1,27 @@
+.calendar-grid.view-month {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-grid.view-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    min-height: 400px;
+    gap: 8px;
+}
+
+.calendar-grid.view-day {
+    display: block;
+    min-height: 400px;
+}
+
+.calendar-day.single-day-view {
+    width: 100%;
+    min-height: 400px;
+}
+
+.calendar-task-badge.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
