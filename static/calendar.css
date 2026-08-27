@@ -25,3 +25,122 @@
     text-decoration: line-through;
     opacity: 0.6;
 }
+/* Calendar Layout */
+.calendar-container {
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 600;
+    padding-bottom: 8px;
+    color: #555;
+}
+
+.calendar-grid {
+    gap: 8px;
+}
+
+.calendar-grid.view-month,
+.calendar-grid.view-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-grid.view-day {
+    display: block;
+}
+
+/* Day Cards */
+.calendar-day {
+    background: #fdfdfd;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    min-height: 110px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+}
+
+.calendar-day.empty {
+    background: #f8fafc;
+    border-color: transparent;
+}
+
+.calendar-day.today {
+    border: 2px solid #3b82f6;
+    background: #eff6ff;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* Workload Indicators */
+.workload-tag {
+    font-size: 0.7rem;
+    padding: 2px 5px;
+    border-radius: 10px;
+    color: #fff;
+}
+.workload-tag.light { background-color: #10b981; }
+.workload-tag.moderate { background-color: #f59e0b; }
+.workload-tag.heavy { background-color: #ef4444; }
+
+/* Task Badges */
+.day-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    max-height: 120px;
+}
+
+.calendar-task-badge {
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+
+}
+
+.calendar-task-badge.priority-high { background: #fee2e2; border-left: 3px solid #ef4444; color: #991b1b; }
+.calendar-task-badge.priority-medium { background: #fef3c7; border-left: 3px solid #f59e0b; color: #92400e; }
+.calendar-task-badge.priority-low { background: #d1fae5; border-left: 3px solid #10b981; color: #065f46; }
+
+.calendar-task-badge.completed {
+    text-decoration: line-through;
+    opacity: 0.55;
+}
+
+.calendar-task-badge.overdue {
+    border: 1px solid #ef4444;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .calendar-grid.view-month {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    .calendar-weekdays {
+        display: none;
+    }
+    .calendar-day {
+        min-height: auto;
+    }
+}
