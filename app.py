@@ -487,7 +487,28 @@ def planner_delete(task_id):
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "Task not found"}), 404
 
-
+@app.route('/calendar')
+def calendar_view():
+    if "user" not in session:
+        return redirect("/login")
+        
+    user_id = session.get("user_id") # adjust to your session key
+    tasks = get_user_tasks(user_id)  # fetch tasks from database/store
+    
+    # Selected month/year from query params or current date
+    selected_year = request.args.get('year', default=date.today().year, type=int)
+    selected_month = request.args.get('month', default=date.today().month, type=int)
+    
+    today_str = date.today().isoformat()
+    
+    return render_template(
+        'calendar.html', 
+        tasks=tasks, 
+        year=selected_year, 
+        month=selected_month, 
+        today_date=today_str
+    )
+    
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
     email = request.form.get("email", "").strip()
