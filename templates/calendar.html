@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner Calendar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='planner.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="/planner">Planner</a></li>
+                <li><a href="/calendar" class="active">Calendar</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- CALENDAR HEADER & NAVIGATION -->
+        <header class="calendar-header">
+            <div class="calendar-nav-controls">
+                <button id="prevMonthBtn" class="nav-btn">&larr; Previous</button>
+                <h2 id="currentMonthYearDisplay"></h2>
+                <button id="nextMonthBtn" class="nav-btn">Next &rarr;</button>
+                <button id="todayBtn" class="today-btn">Today</button>
+            </div>
+            
+            <div class="calendar-view-picker">
+                <button class="view-btn active" data-view="month">Month</button>
+                <button class="view-btn" data-view="week">Week</button>
+            </div>
+        </header>
+
+        <!-- CALENDAR GRID CONTAINER -->
+        <main class="calendar-container">
+            <div class="calendar-weekdays">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div id="calendarGrid" class="calendar-grid">
+                <!-- Days will be dynamically rendered via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Embed Task Data for JS to render onto calendar slots -->
+    <script>
+        const rawTasksData = {{ tasks | tojson | safe }};
+        const serverToday = "{{ today_date }}";
+        let currentYear = {{ year }};
+        let currentMonth = {{ month }}; // 1-indexed (1 = Jan, 12 = Dec)
+    </script>
+    <script src="{{ url_for('static', filename='planner.js') }}"></script>
+    <script src="{{ url_for('static', filename='calendar.js') }}"></script>
+</body>
+</html>
