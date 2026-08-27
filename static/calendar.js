@@ -2,7 +2,6 @@ let currentView = "month"; // "month" | "week" | "day"
 let currentDate = new Date(currentYear, currentMonth - 1, 1);
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Initial Render
     updateCalendarView();
 
     // View Switching Listeners
@@ -62,7 +61,6 @@ function updateCalendarView() {
     }
 }
 
-// Helper: Format JS Date to YYYY-MM-DD
 function formatDateISO(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -70,7 +68,7 @@ function formatDateISO(d) {
     return `${year}-${month}-${day}`;
 }
 
-// 1. MONTH VIEW
+// Render Month
 function renderMonthView(grid, display) {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -82,24 +80,20 @@ function renderMonthView(grid, display) {
     const firstDayIndex = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Previous month padding
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyCell = document.createElement("div");
         emptyCell.classList.add("calendar-day", "empty");
         grid.appendChild(emptyCell);
     }
 
-    // Days of month
     for (let day = 1; day <= daysInMonth; day++) {
         const dayDate = new Date(year, month, day);
         const dateISO = formatDateISO(dayDate);
-        
-        const dayCell = createDayCell(day, dateISO);
-        grid.appendChild(dayCell);
+        grid.appendChild(createDayCell(day, dateISO));
     }
 }
 
-// 2. WEEK VIEW
+// Render Week
 function renderWeekView(grid, display) {
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
@@ -114,17 +108,13 @@ function renderWeekView(grid, display) {
     for (let i = 0; i < 7; i++) {
         const dayDate = new Date(startOfWeek);
         dayDate.setDate(startOfWeek.getDate() + i);
-        const dateISO = formatDateISO(dayDate);
-
-        const dayCell = createDayCell(dayDate.getDate(), dateISO, true);
-        grid.appendChild(dayCell);
+        grid.appendChild(createDayCell(dayDate.getDate(), formatDateISO(dayDate), true));
     }
 }
 
-// 3. DAY VIEW
+// Render Day
 function renderDayView(grid, display) {
     const dateISO = formatDateISO(currentDate);
-
     if (display) {
         display.textContent = currentDate.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     }
@@ -134,7 +124,7 @@ function renderDayView(grid, display) {
     grid.appendChild(dayCell);
 }
 
-// Reusable Cell Creator
+// Reusable Cell Creator with Workload Indicators & Interactive Task Badges
 function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
     const dayCell = document.createElement("div");
     dayCell.classList.add("calendar-day");
@@ -147,19 +137,65 @@ function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
         headerHTML = `<span class="weekday-label">${weekday}</span> ` + headerHTML;
     }
 
-    dayCell.innerHTML = `<div class="day-header">${headerHTML}</div><div class="day-tasks"></div>`;
+    const matchingTasks = rawTasksData.filter(t => t.due_date === dateISO);
+    const pendingTasks = matchingTasks.filter(t => !t.completed);
+    const totalMinutes = pendingTasks.reduce((acc, t) => acc + (parseInt(t.estimated_minutes) || 0), 0);
+
+    // Workload Indicator Badge
+    let workloadHTML = "";
+    if (totalMinutes > 0) {
+        const loadClass = totalMinutes > 120 ? "heavy" : (totalMinutes > 60 ? "moderate" : "light");
+        workloadHTML = `<span class="workload-tag ${loadClass}">${totalMinutes}m</span>`;
+    }
+
+    dayCell.innerHTML = `
+        <div class="day-header">
+            ${headerHTML}
+            ${workloadHTML}
+        </div>
+        <div class="day-tasks"></div>
+    `;
 
     const tasksContainer = dayCell.querySelector(".day-tasks");
-    const matchingTasks = rawTasksData.filter(t => t.due_date === dateISO);
 
     matchingTasks.forEach(task => {
         const taskBadge = document.createElement("div");
-        taskBadge.classList.add("calendar-task-badge", `priority-${(task.priority || 'medium').toLowerCase()}`);
-        if (task.completed) taskBadge.classList.add("completed");
+        const isOverdue = !task.completed && dateISO < serverToday;
         
-        taskBadge.textContent = task.title;
-        taskBadge.setAttribute("data-task-id", task.id);
+        taskBadge.className = `calendar-task-badge priority-${(task.priority || 'medium').toLowerCase()}`;
+        if (task.completed) taskBadge.classList.add("completed");
+        if (isOverdue) taskBadge.classList.add("overdue");
+
+        taskBadge.innerHTML = `
+            <span class="badge-title">${isOverdue ? '⚠️ ' : ''}${task.title}</span>
+            <span class="badge-time">${task.estimated_minutes}m</span>
+        `;
+        
+        // Step 3: Click Badge to Edit via Planner Modal
+        taskBadge.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (typeof editTask === "function") {
+                editTask(
+                    task.id, 
+                    task.title, 
+                    task.subject, 
+                    task.estimated_minutes, 
+                    task.priority, 
+                    task.due_date
+                );
+            }
+        });
+
         tasksContainer.appendChild(taskBadge);
+    });
+
+    // Quick Add on double-clicking empty day space
+    dayCell.addEventListener("dblclick", () => {
+        if (typeof openModal === "function") {
+            const dueInput = document.getElementById("modalDueDate");
+            if (dueInput) dueInput.value = dateISO;
+            openModal();
+        }
     });
 
     return dayCell;
