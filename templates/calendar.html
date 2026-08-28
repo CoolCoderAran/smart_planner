@@ -60,3 +60,22 @@
     <script src="{{ url_for('static', filename='calendar.js') }}"></script>
 </body>
 </html>
+
+<!-- Calendar Task Modal -->
+<div id="calendarTaskModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeCalendarModal()">&times;</span>
+    <h3 id="calModalTitle"></h3>
+    <p><strong>Subject:</strong> <span id="calModalSubject"></span></p>
+    <p><strong>Due Date:</strong> <span id="calModalDueDate"></span></p>
+    <p><strong>Priority:</strong> <span id="calModalPriority"></span></p>
+    <p><strong>Est. Time:</strong> <span id="calModalEst"></span> mins</p>
+    <p><strong>Status:</strong> <span id="calModalStatus"></span></p>
+    
+    <div class="modal-actions">
+        <button id="calToggleBtn" class="btn">Toggle Complete</button>
+        <button id="calEditBtn" class="btn">Edit</button>
+        <button id="calDeleteBtn" class="btn btn-danger">Delete</button>
+    </div>
+  </div>
+</div>
