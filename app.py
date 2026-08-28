@@ -1,7 +1,7 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import re
 import sqlite3
-import date
+
 
 from flask import (
     Flask,
