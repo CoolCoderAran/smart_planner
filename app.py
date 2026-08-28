@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime
 import re
 import sqlite3
-
+import date
 
 from flask import (
     Flask,
@@ -489,26 +489,30 @@ def planner_delete(task_id):
     return jsonify({"success": False, "error": "Task not found"}), 404
 
     
-@app.route('/calendar')
+@app.route("/calendar")
 def calendar_view():
-    if "user" not in session:
-        return redirect("/login")
-        
-    # Retrieve user tasks from your database/data store
-    user_tasks = get_user_tasks(session.get("user_id"))  
-    
+    username = session.get("user")
+    if not username:
+        return redirect(url_for("login"))
+
+    # Use planner helper function with the logged-in username
+    user_tasks = planner.get_planner_tasks(username)
+
     today_str = date.today().isoformat()
-    selected_year = request.args.get('year', default=date.today().year, type=int)
-    selected_month = request.args.get('month', default=date.today().month, type=int)
-    
-    return render_template(
-        'calendar.html', 
-        tasks=user_tasks, 
-        year=selected_year, 
-        month=selected_month, 
-        today_date=today_str
+    selected_year = request.args.get(
+        "year", default=date.today().year, type=int
+    )
+    selected_month = request.args.get(
+        "month", default=date.today().month, type=int
     )
 
+    return render_template(
+        "calendar.html",
+        tasks=user_tasks,
+        year=selected_year,
+        month=selected_month,
+        today_date=today_str,
+    )
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
