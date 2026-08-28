@@ -1,8 +1,7 @@
 from datetime import timedelta, datetime
 import re
 import sqlite3
-import rich
-import textual
+
 
 from flask import (
     Flask,
