@@ -49,12 +49,12 @@
         </main>
     </div>
 
-    <!-- Embed Task Data for JS to render onto calendar slots -->
+    <!-- Safe Variable Embedding -->
     <script>
-        const rawTasksData = {{ tasks | tojson | safe }};
-        const serverToday = "{{ today_date }}";
-        let currentYear = {{ year }};
-        let currentMonth = {{ month }}; // 1-indexed (1 = Jan, 12 = Dec)
+        const rawTasksData = {{ (tasks if tasks is defined else []) | tojson | safe }};
+        const serverToday = {{ (today_date if today_date is defined else '') | tojson | safe }};
+        let currentYear = Number("{{ year | default(2026, true) }}");
+        let currentMonth = Number("{{ month | default(1, true) }}"); // 1-indexed (1 = Jan, 12 = Dec)
     </script>
     <script src="{{ url_for('static', filename='planner.js') }}"></script>
     <script src="{{ url_for('static', filename='calendar.js') }}"></script>
