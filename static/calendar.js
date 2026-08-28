@@ -200,3 +200,44 @@ function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
 
     return dayCell;
 }
+
+function renderCalendarTasks() {
+    // Clear out existing task elements from calendar cells
+    document.querySelectorAll('.calendar-day-tasks').forEach(el => el.innerHTML = '');
+
+    // Map tasks by date
+    rawTasksData.forEach(task => {
+        if (!task.due_date) return;
+        
+        // Ensure format is YYYY-MM-DD
+        const taskDateStr = task.due_date.split('T')[0]; 
+        
+        // Find cell matching this date (e.g., <div data-date="2026-08-28">)
+        const dayCell = document.querySelector(`.calendar-day[data-date="${taskDateStr}"] .calendar-day-tasks`);
+        
+        if (dayCell) {
+            // Check overflow (+X more)
+            if (dayCell.children.length >= 3) {
+                let badge = dayCell.querySelector('.more-tasks-badge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'more-tasks-badge';
+                    dayCell.appendChild(badge);
+                }
+                const count = dayCell.querySelectorAll('.calendar-task-card').length - 2;
+                badge.textContent = `+${count + 1} more`;
+                return;
+            }
+
+            const card = document.createElement('div');
+            card.className = `calendar-task-card priority-${(task.priority || 'medium').toLowerCase()} ${task.completed ? 'completed' : ''}`;
+            card.textContent = task.title;
+            card.onclick = (e) => {
+                e.stopPropagation();
+                openCalendarTaskModal(task);
+            };
+
+            dayCell.appendChild(card);
+        }
+    });
+}
