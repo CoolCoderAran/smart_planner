@@ -8,7 +8,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
 </head>
 <body>
+<!-- Calendar Task Details Modal -->
+    <div id="calendarTaskModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeCalendarModal()">&times;</button>
+        <h3 id="calModalTitle">Task Details</h3>
+        <p><strong>Subject:</strong> <span id="calModalSubject"></span></p>
+        <p><strong>Due Date:</strong> <span id="calModalDueDate"></span></p>
+        <p><strong>Priority:</strong> <span id="calModalPriority"></span></p>
+        <p><strong>Est. Time:</strong> <span id="calModalEst"></span> mins</p>
+        <p><strong>Status:</strong> <span id="calModalStatus"></span></p>
+        
+        <div class="modal-actions">
+            <button id="calToggleBtn" class="task-button complete-button">Toggle Complete</button>
+            <button id="calEditBtn" class="task-button edit-button">Edit</button>
+            <button id="calDeleteBtn" class="task-button delete-button">Delete</button>
+        </div>
+      </div>
+    </div>
 
+    <!-- Scripts Loaded in Proper Order -->
+    <script src="{{ url_for('static', filename='planner.js') }}"></script>
+    <script src="{{ url_for('static', filename='calendar.js') }}"></script>
+</body>
+</html>
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="nav-left">
