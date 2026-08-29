@@ -250,3 +250,22 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+function editTask(id, title, subject, minutes, priority, dueDate) {
+    const idEl = document.getElementById("modalTaskId");
+    const nameEl = document.getElementById("modalTaskName");
+    const subjEl = document.getElementById("modalSubject") || document.getElementById("modalTaskSubject");
+    const minEl = document.getElementById("modalEstMinutes");
+    const prioEl = document.getElementById("modalPriority");
+    const dueEl = document.getElementById("modalDueDate");
+
+    if (idEl) idEl.value = id || "";
+    if (nameEl) nameEl.value = title || "";
+    if (subjEl) subjEl.value = subject || "";
+    if (minEl) minEl.value = minutes || 30;
+    if (prioEl) prioEl.value = priority || "Medium";
+    if (dueEl) dueEl.value = dueDate || "";
+
+    editingTaskId = id;
+    openModal();
+}
