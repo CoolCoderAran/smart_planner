@@ -308,62 +308,63 @@ body {
    PLANNER CONTROLS, SEARCH & BUTTONS
 ========================================================= */
 
+/* =========================================================
+   LARGE INTELLIGENT PLANNER HEADER OVERHAUL
+========================================================= */
+
 .planner-header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    text-align: center;
+    gap: 24px;
     width: 100%;
-    margin-bottom: 24px;
+    padding: 3.5rem 2rem;
+    margin-bottom: 32px;
+    
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(99, 102, 241, 0.15) 100%);
+    backdrop-filter: var(--blur-strength);
+    -webkit-backdrop-filter: var(--blur-strength);
+    border: 1px solid var(--glass-border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+}
+
+.planner-header h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #ffffff 30%, var(--accent-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.planner-header .header-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    max-width: 600px;
+    line-height: 1.5;
 }
 
 .search-wrapper {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     width: 100%;
+    max-width: 720px;
 }
-
-.search-bar { flex: 1; }
 
 .search-bar input {
-    width: 100%;
-    padding: 12px 18px;
-    background: var(--glass-bg-input);
-    color: var(--color-white);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-md);
-    outline: none;
-    backdrop-filter: blur(10px);
-    transition: border-color var(--transition-normal), background var(--transition-normal);
+    font-size: 1rem;
+    padding: 14px 22px;
 }
 
-.search-bar input::placeholder { color: var(--color-text-subtle); }
-
-.search-bar input:focus {
-    background: var(--glass-bg-focus);
-    border-color: var(--color-primary);
+.add-task-btn, .open-btn {
+    padding: 14px 24px;
+    font-size: 1rem;
 }
-
-.open-btn, .add-task-btn {
-    padding: 12px 18px;
-    background: var(--color-primary);
-    color: var(--color-white);
-    border: 0;
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background var(--transition-normal), transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-
-.open-btn:hover, .add-task-btn:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-}
-
 
 /* =========================================================
    FILTERS
