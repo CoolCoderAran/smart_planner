@@ -128,6 +128,7 @@ function renderDayView(grid, display) {
 function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
     const dayCell = document.createElement("div");
     dayCell.classList.add("calendar-day");
+    dayCell.setAttribute("data-date", dateISO); // Fix: Add date attribute
     if (dateISO === serverToday) dayCell.classList.add("today");
 
     let headerHTML = `<span class="day-number">${dayNumber}</span>`;
@@ -141,7 +142,6 @@ function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
     const pendingTasks = matchingTasks.filter(t => !t.completed);
     const totalMinutes = pendingTasks.reduce((acc, t) => acc + (parseInt(t.estimated_minutes) || 0), 0);
 
-    // Workload Indicator Badge
     let workloadHTML = "";
     if (totalMinutes > 0) {
         const loadClass = totalMinutes > 120 ? "heavy" : (totalMinutes > 60 ? "moderate" : "light");
@@ -153,7 +153,7 @@ function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
             ${headerHTML}
             ${workloadHTML}
         </div>
-        <div class="day-tasks"></div>
+        <div class="day-tasks calendar-day-tasks"></div>
     `;
 
     const tasksContainer = dayCell.querySelector(".day-tasks");
@@ -171,31 +171,13 @@ function createDayCell(dayNumber, dateISO, showWeekdayLabel = false) {
             <span class="badge-time">${task.estimated_minutes}m</span>
         `;
         
-        // Step 3: Click Badge to Edit via Planner Modal
+        // Fix: Open the calendar task details modal on click
         taskBadge.addEventListener("click", (e) => {
             e.stopPropagation();
-            if (typeof editTask === "function") {
-                editTask(
-                    task.id, 
-                    task.title, 
-                    task.subject, 
-                    task.estimated_minutes, 
-                    task.priority, 
-                    task.due_date
-                );
-            }
+            openCalendarTaskModal(task);
         });
 
         tasksContainer.appendChild(taskBadge);
-    });
-
-    // Quick Add on double-clicking empty day space
-    dayCell.addEventListener("dblclick", () => {
-        if (typeof openModal === "function") {
-            const dueInput = document.getElementById("modalDueDate");
-            if (dueInput) dueInput.value = dateISO;
-            openModal();
-        }
     });
 
     return dayCell;
