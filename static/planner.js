@@ -251,21 +251,17 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-function editTask(id, title, subject, minutes, priority, dueDate) {
-    const idEl = document.getElementById("modalTaskId");
-    const nameEl = document.getElementById("modalTaskName");
-    const subjEl = document.getElementById("modalSubject") || document.getElementById("modalTaskSubject");
-    const minEl = document.getElementById("modalEstMinutes");
-    const prioEl = document.getElementById("modalPriority");
-    const dueEl = document.getElementById("modalDueDate");
+function editTask(id, title, subject, est, priority, dueDate) {
+    document.getElementById("editTaskId").value = id;
+    document.getElementById("modalTaskTitle").value = title;
+    
+    // Updated from 'modalSubject' to 'modalTaskSubject'
+    const subjectSelect = document.getElementById("modalTaskSubject");
+    if (subjectSelect) subjectSelect.value = subject;
 
-    if (idEl) idEl.value = id || "";
-    if (nameEl) nameEl.value = title || "";
-    if (subjEl) subjEl.value = subject || "";
-    if (minEl) minEl.value = minutes || 30;
-    if (prioEl) prioEl.value = priority || "Medium";
-    if (dueEl) dueEl.value = dueDate || "";
+    document.getElementById("modalEstTime").value = est;
+    document.getElementById("modalPriority").value = priority;
+    document.getElementById("modalDueDate").value = dueDate;
 
-    editingTaskId = id;
-    openModal();
+    document.getElementById("editTaskModal").style.display = "flex";
 }
