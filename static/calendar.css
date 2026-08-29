@@ -145,48 +145,4 @@
     }
 }
 
-let selectedTask = null;
 
-function openCalendarTaskModal(task) {
-    selectedTask = task;
-    document.getElementById("calModalTitle").textContent = task.title;
-    document.getElementById("calModalSubject").textContent = task.subject || "N/A";
-    document.getElementById("calModalDueDate").textContent = task.due_date || "No Date";
-    document.getElementById("calModalPriority").textContent = task.priority || "Medium";
-    document.getElementById("calModalEst").textContent = task.estimated_minutes || 30;
-    document.getElementById("calModalStatus").textContent = task.completed ? "Completed" : "Pending";
-    
-    document.getElementById("calendarTaskModal").style.display = "flex";
-}
-
-function closeCalendarModal() {
-    document.getElementById("calendarTaskModal").style.display = "none";
-}
-
-// Bind buttons to existing Planner API endpoints
-document.getElementById("calToggleBtn").addEventListener("click", async () => {
-    if (!selectedTask) return;
-    // Reuse existing completeTask from planner.js or fetch directly
-    await completeTask(selectedTask.id); 
-});
-
-document.getElementById("calDeleteBtn").addEventListener("click", async () => {
-    if (!selectedTask) return;
-    await deleteTask(selectedTask.id);
-});
-
-document.getElementById("calEditBtn").addEventListener("click", () => {
-    if (!selectedTask) return;
-    closeCalendarModal();
-    // Re-use planner.js editTask modal filler
-    if (typeof editTask === "function") {
-        editTask(
-            selectedTask.id, 
-            selectedTask.title, 
-            selectedTask.subject, 
-            selectedTask.estimated_minutes, 
-            selectedTask.priority, 
-            selectedTask.due_date
-        );
-    }
-});
