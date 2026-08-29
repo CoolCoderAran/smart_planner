@@ -208,22 +208,7 @@ document.addEventListener("DOMContentLoaded", function() {
         searchInput.addEventListener("input", applyFilters);
     }
 
-    // Header Filter Bar Buttons
-    const filterButtons = document.querySelectorAll(".filter-btn");
-    filterButtons.forEach(btn => {
-        btn.addEventListener("click", function() {
-            filterButtons.forEach(b => b.classList.remove("active"));
-            this.classList.add("active");
 
-            currentFilter = (this.dataset.filter || this.textContent).toLowerCase().trim();
-            
-            document.querySelectorAll(".sidebar-filter-link").forEach(link => {
-                link.classList.toggle("active", link.dataset.filter === currentFilter);
-            });
-
-            applyFilters();
-        });
-    });
 
     // Sidebar Links
     const sidebarLinks = document.querySelectorAll(".sidebar-filter-link");
