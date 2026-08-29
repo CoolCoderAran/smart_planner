@@ -4,16 +4,32 @@ let currentDate = new Date(currentYear, currentMonth - 1, 1);
 document.addEventListener("DOMContentLoaded", function () {
     updateCalendarView();
 
-    // View Switching Listeners
-    const viewBtns = document.querySelectorAll(".view-btn");
-    viewBtns.forEach(btn => {
-        btn.addEventListener("click", function () {
-            viewBtns.forEach(b => b.classList.remove("active"));
-            this.classList.add("active");
-            currentView = this.dataset.view;
-            updateCalendarView();
-        });
+    // Bind Calendar Modal Actions
+    document.getElementById("calToggleBtn")?.addEventListener("click", async () => {
+        if (!selectedTask) return;
+        await completeTask(selectedTask.id); 
     });
+
+    document.getElementById("calDeleteBtn")?.addEventListener("click", async () => {
+        if (!selectedTask) return;
+        await deleteTask(selectedTask.id);
+    });
+
+    document.getElementById("calEditBtn")?.addEventListener("click", () => {
+        if (!selectedTask) return;
+        closeCalendarModal();
+        if (typeof editTask === "function") {
+            editTask(
+                selectedTask.id, 
+                selectedTask.title, 
+                selectedTask.subject, 
+                selectedTask.estimated_minutes, 
+                selectedTask.priority, 
+                selectedTask.due_date
+            );
+        }
+    });
+});
 
     // Navigation Controls
     document.getElementById("prevMonthBtn")?.addEventListener("click", () => {
