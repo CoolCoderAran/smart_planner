@@ -28,7 +28,8 @@
     --color-text-dark: #0f172a;
     --color-text-muted: #94a3b8;
     --color-text-subtle: #64748b;
-
+    --accent-blue: #60a5fa;
+   
     /* Priority / Status Colors */
     --color-success: #06d6a0;
     --color-info: #38bdf8;
@@ -79,10 +80,12 @@ body {
 ========================================================= */
 /* --- Layout polish --- */
 .app-wrapper {
-    display: grid;
-    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-    align-items: start;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
     min-height: calc(100vh - 73px);
+    width: min(1400px, 100% - 32px);
+    margin: 24px auto;
 }
 
 .main-content {
@@ -100,13 +103,23 @@ body {
 
 /* Sidebar usability */
 .sidebar {
+    width: var(--sidebar-width);
     position: sticky;
-    top: 73px;              /* same as navbar height area */
-    height: calc(100vh - 73px);
-    overflow-y: auto;
-    padding: 20px 12px;
-}
+    top: 89px; /* navbar height + breathing room */
+    max-height: calc(100vh - 105px);
+    overflow: auto;
 
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-strength);
+    -webkit-backdrop-filter: var(--blur-strength);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-shrink: 0;
+}
 .sidebar-nav a {
     min-height: 42px;
 }
@@ -159,9 +172,12 @@ body {
         justify-content: center;
     }
 
-    .main-content {
-        max-width: 100%;
-        padding: 16px;
+   .main-content {
+    flex: 1;
+    min-width: 0;
+    max-width: 980px;
+    padding: 0;
+}
     }
 
     .planner-header {
@@ -338,10 +354,10 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 24px;
+    gap: 16px;
     width: 100%;
-    padding: 3.5rem 2rem;
-    margin-bottom: 32px;
+    padding: 2.25rem 1.5rem;
+    margin-bottom: 24px;
     
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(99, 102, 241, 0.15) 100%);
     backdrop-filter: var(--blur-strength);
@@ -352,7 +368,7 @@ body {
 }
 
 .planner-header h1 {
-    font-size: 2.75rem;
+    font-size: clamp(1.8rem, 3.5vw, 2.5 rem);
     font-weight: 800;
     letter-spacing: -0.03em;
     background: linear-gradient(135deg, #ffffff 30%, var(--accent-blue) 100%);
@@ -393,7 +409,7 @@ body {
 .filter-bar {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     padding-bottom: 4px;
     overflow-x: auto;
@@ -445,7 +461,7 @@ body {
 .task-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .task-card {
@@ -453,16 +469,16 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 18px 22px;
+    padding: 16px 18px;
     background: var(--glass-bg);
     border: 1px solid var(--border-light);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-mg);
     backdrop-filter: var(--blur-strength);
     -webkit-backdrop-filter: var(--blur-strength);
     transition: transform var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal);
 }
 
-.task-card:hover {
+.task-card:hover 
     background: var(--glass-bg-hover);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -610,21 +626,51 @@ body {
 ========================================================= */
 
 @media (max-width: 900px) {
-    .app-wrapper { flex-direction: column; }
-    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--glass-border); padding: 12px 16px; }
-    .sidebar-nav { flex-direction: row; overflow-x: auto; }
+    .app-wrapper {
+        flex-direction: column;
+        gap: 14px;
+        width: min(1100px, 100% - 20px);
+        margin: 14px auto;
+    }
+
+    .sidebar {
+        position: static;
+        top: auto;
+        max-height: none;
+        width: 100%;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--glass-border);
+        padding: 10px;
+    }
+
     .sidebar-title { display: none; }
-    .navbar { padding-inline: 24px; }
+
+    .sidebar-nav {
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+    }
+
+    .sidebar-nav a {
+        white-space: nowrap;
+        padding: 9px 12px;
+    }
+
+    .main-content { max-width: 100%; }
+    .navbar { padding-inline: 18px; }
 }
 
-@media (max-width: 600px) {
-    .navbar { padding: 12px 16px; }
-    .nav-links { display: none; }
-    .search-wrapper { flex-direction: column; }
-    .open-btn, .add-task-btn { width: 100%; }
-    .task-card { align-items: flex-start; flex-direction: column; }
-    .task-actions { width: 100%; }
-    .task-button { flex: 1; }
-    .form-row { flex-direction: column; gap: 0; }
+.planner-header {
+    padding: 1.25rem 1rem;
+    border-radius: var(--radius-md);
 }
 
+.planner-header .header-subtitle {
+    font-size: 0.95rem;
+}
+
+.search-wrapper {
+    gap: 10px;
+}
