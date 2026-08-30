@@ -29,9 +29,11 @@ function closeModal() {
     editingTaskId = null;
     const taskIdEl = document.getElementById("modalTaskId");
     if (taskIdEl) taskIdEl.value = "";
+    
+    const headerTitle = document.getElementById("modalHeaderTitle");
+    if (headerTitle) headerTitle.textContent = "Add New Task";
 }
 
-// Close modal when clicking background overlay
 window.addEventListener("click", function(event) {
     const modal = document.getElementById("taskModal");
     if (event.target === modal) {
@@ -93,6 +95,9 @@ function editTask(id, title, subject, minutes, priority, dueDate) {
     const dueInput = document.getElementById("modalDueDate");
     if (dueInput) dueInput.value = dueDate || "";
 
+    const headerTitle = document.getElementById("modalHeaderTitle");
+    if (headerTitle) headerTitle.textContent = "Edit Task";
+
     editingTaskId = id;
     openModal();
 }
@@ -114,10 +119,8 @@ function applyFilters() {
         const category = card.dataset.category;
         const priority = (card.dataset.priority || "").toLowerCase();
 
-        // Check Search Match
         const matchesSearch = title.includes(query) || subject.includes(query) || dateMeta.includes(query);
 
-        // Check Filter Match
         let matchesFilter = true;
         if (currentFilter === "today") {
             matchesFilter = (category === "today");
@@ -129,14 +132,9 @@ function applyFilters() {
             matchesFilter = priority === currentFilter;
         }
 
-        if (matchesSearch && matchesFilter) {
-            card.style.display = "flex";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display = (matchesSearch && matchesFilter) ? "flex" : "none";
     });
 
-    // Toggle Section visibility depending on active view
     taskSections.forEach(section => {
         const sectionCategory = section.dataset.section;
         if (currentFilter === "all" || ["high", "medium", "low"].includes(currentFilter)) {
@@ -153,7 +151,16 @@ function applyFilters() {
 // 5. INITIALIZATION & LISTENERS
 // =========================
 document.addEventListener("DOMContentLoaded", function() {
-    // Form Submission
+    const currentDateElem = document.getElementById("current-date");
+    if (currentDateElem) {
+        currentDateElem.textContent = new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
     const form = document.getElementById("addTaskForm");
     if (form) {
         form.addEventListener("submit", async function(event) {
@@ -202,15 +209,27 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Search Bar Input Event
     const searchInput = document.getElementById("search");
     if (searchInput) {
         searchInput.addEventListener("input", applyFilters);
     }
 
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    filterButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+            filterButtons.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
 
+            currentFilter = (this.dataset.filter || this.textContent).toLowerCase().trim();
+            
+            document.querySelectorAll(".sidebar-filter-link").forEach(link => {
+                link.classList.toggle("active", link.dataset.filter === currentFilter);
+            });
 
-    // Sidebar Links
+            applyFilters();
+        });
+    });
+
     const sidebarLinks = document.querySelectorAll(".sidebar-filter-link");
     sidebarLinks.forEach(link => {
         link.addEventListener("click", function(event) {
@@ -235,18 +254,3 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
-
-function editTask(id, title, subject, est, priority, dueDate) {
-    document.getElementById("editTaskId").value = id;
-    document.getElementById("modalTaskTitle").value = title;
-    
-    // Updated from 'modalSubject' to 'modalTaskSubject'
-    const subjectSelect = document.getElementById("modalTaskSubject");
-    if (subjectSelect) subjectSelect.value = subject;
-
-    document.getElementById("modalEstTime").value = est;
-    document.getElementById("modalPriority").value = priority;
-    document.getElementById("modalDueDate").value = dueDate;
-
-    document.getElementById("editTaskModal").style.display = "flex";
-}
