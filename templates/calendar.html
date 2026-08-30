@@ -1,45 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calendar</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner Calendar</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='planner.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
 </head>
 <body>
-  <nav class="navbar">
-    <div class="nav-left">
-      <a href="#" class="logo"><img src="logo.png" alt="Logo" /></a>
-      <ul class="nav-links">
-        <li><a href="planner.html">Planner</a></li>
-        <li><a href="calendar.html" class="active">Calendar</a></li>
-      </ul>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="/planner">Planner</a></li>
+                <li><a href="/calendar" class="active">Calendar</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- CALENDAR HEADER & NAVIGATION -->
+        <header class="calendar-header">
+            <div class="calendar-nav-controls">
+                <button id="prevMonthBtn" class="nav-btn">&larr; Previous</button>
+                <h2 id="currentMonthYearDisplay"></h2>
+                <button id="nextMonthBtn" class="nav-btn">Next &rarr;</button>
+                <button id="todayBtn" class="today-btn">Today</button>
+            </div>
+            
+            <div class="calendar-view-picker">
+                <button class="view-btn active" data-view="month">Month</button>
+                <button class="view-btn" data-view="week">Week</button>
+                <button class="view-btn" data-view="day">Day</button>
+            </div>
+        </header>
+
+        <!-- CALENDAR GRID CONTAINER -->
+        <main class="calendar-container">
+            <div class="calendar-weekdays">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+        </main>
     </div>
-  </nav>
 
-  <div class="app-wrapper">
-    <main class="main-content" style="max-width: 100%;">
-      <!-- Controls Bar -->
-      <div class="planner-header">
-        <div class="calendar-controls">
-          <button id="prevBtn" class="task-button">&larr; Previous</button>
-          <button id="nextBtn" class="task-button">Next &rarr;</button>
-          <button id="todayBtn" class="task-button">Today</button>
-          <h2 id="currentMonthYear" style="margin-left: auto;"></h2>
+    <!-- Calendar Task Details Modal -->
+    <div id="calendarTaskModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeCalendarModal()">&times;</button>
+        <h3 id="calModalTitle">Task Details</h3>
+        <p><strong>Subject:</strong> <span id="calModalSubject"></span></p>
+        <p><strong>Due Date:</strong> <span id="calModalDueDate"></span></p>
+        <p><strong>Priority:</strong> <span id="calModalPriority"></span></p>
+        <p><strong>Est. Time:</strong> <span id="calModalEst"></span> mins</p>
+        <p><strong>Status:</strong> <span id="calModalStatus"></span></p>
+        
+        <div class="modal-actions">
+            <button id="calToggleBtn" class="task-button complete-button">Toggle Complete</button>
+            <button id="calEditBtn" class="task-button edit-button">Edit</button>
+            <button id="calDeleteBtn" class="task-button delete-button">Delete</button>
         </div>
       </div>
+    </div>
 
-      <!-- Days Container -->
-      <div class="calendar-shell">
-        <div class="weekday-header">
-          <div>SUN</div><div>MON</div><div>TUE</div>
-          <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+    <!-- Edit Task Modal (Needed by editTask in planner.js) -->
+    <div id="taskModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h3>Task Details</h3>
+            <form id="addTaskForm">
+                <input type="hidden" id="modalTaskId">
+                <div class="form-group">
+                    <label for="modalTaskName">Task Title</label>
+                    <input type="text" id="modalTaskName" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalSubject">Subject</label>
+                    <input type="text" id="modalSubject" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modalEstMinutes">Est. Minutes</label>
+                        <input type="number" id="modalEstMinutes" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="modalPriority">Priority</label>
+                        <select id="modalPriority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="modalDueDate">Due Date</label>
+                    <input type="date" id="modalDueDate">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Save Task</button>
+                </div>
+            </form>
         </div>
-        <div id="calendarGrid" class="calendar-days-grid"></div>
-      </div>
-    </main>
-  </div>
+    </div>
 
-  <script src="calendar.js"></script>
+    <!-- Safe Variable Embedding & Script Load -->
+    <script>
+        const rawTasksData = {{ (tasks if tasks is defined else []) | tojson | safe }};
+        const serverToday = {{ (today_date if today_date is defined else '') | tojson | safe }};
+        let currentYear = Number("{{ year | default(2026, true) }}");
+        let currentMonth = Number("{{ month | default(1, true) }}");
+    </script>
+    <script src="{{ url_for('static', filename='planner.js') }}"></script>
+    <script src="{{ url_for('static', filename='calendar.js') }}"></script>
 </body>
 </html>
