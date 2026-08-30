@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +16,7 @@
             </a>
             <ul class="nav-links">
                 <li><a href="/planner">Planner</a></li>
-                <li><a href="/features">Features</a></li>
+                <li><a href="/calendar">Calendar</a></li>
                 <li><a href="/about">About</a></li>
             </ul>
         </div>
@@ -36,7 +34,7 @@
                     ▾
                 </button>
                 <div class="account-dropdown">
-                    <a href="/planner">Dashboard</a>
+                    <a href="/dashboard">Dashboard</a>
                     <a href="/logout">Logout</a>
                 </div>
             </div>
@@ -49,7 +47,7 @@
 
     <!-- TOPBAR -->
     <nav class="topbar">
-       <center><h1>Intelligent Task Planner</h1></center>
+        <h1>Intelligent Task Planner</h1>
     </nav>
 
     <!-- SIDEBAR -->
@@ -95,7 +93,7 @@
                     <div class="task-card" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="today">
                         <div class="task-info">
                             <div class="task-title">
-                                {% if task.priority == 'high' %}🔴{% elif task.priority == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
+                                {% if task.priority|lower == 'high' %}🔴{% elif task.priority|lower == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
                             </div>
                             <div class="task-subject">{{ task.subject }}</div>
                             <div class="task-meta">
@@ -108,7 +106,7 @@
                         </div>
                         <div class="task-actions">
                             <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
-                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title }}', '{{ task.subject }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
+                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', '{{ task.subject|replace('\'', '\\\'') }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
                             <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
                         </div>
                     </div>
@@ -126,12 +124,12 @@
                     <div class="task-card" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="upcoming">
                         <div class="task-info">
                             <div class="task-title">
-                                {% if task.priority == 'high' %}🔴{% elif task.priority == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
+                                {% if task.priority|lower == 'high' %}🔴{% elif task.priority|lower == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
                             </div>
                             <div class="task-subject">{{ task.subject }}</div>
                             <div class="task-meta">
                                 <span>⏱ {{ task.estimated_minutes }} min</span> · 
-                                <span>📅 Due: {{ task.due_date }}</span>
+                                <span>📅 Due: {{ task.due_date or 'No date' }}</span>
                                 {% if task.created_at %}
                                 <span> · Created: {{ task.created_at[:10] }}</span>
                                 {% endif %}
@@ -139,7 +137,7 @@
                         </div>
                         <div class="task-actions">
                             <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
-                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title }}', '{{ task.subject }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
+                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', '{{ task.subject|replace('\'', '\\\'') }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
                             <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
                         </div>
                     </div>
@@ -184,7 +182,7 @@
         <div id="taskModal" class="modal-overlay">
             <div class="modal-content">
                 <span class="modal-close" onclick="closeModal()">&times;</span>
-                <h2>Add New Task</h2>
+                <h2 id="modalHeaderTitle">Add New Task</h2>
                 
                 <form id="addTaskForm">
                     <input type="hidden" id="modalTaskId" name="task_id" value="">
@@ -202,27 +200,22 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="modalDueDate">Due Date</label>
-                            <input type="date" id="modalDueDate" name="due_date" required />
+                            <input type="date" id="modalDueDate" name="due_date" />
                         </div>
 
                         <div class="form-group">
-                            <label for="modalDeadline">Deadline (Time)</label>
-                            <input type="time" id="modalDeadline" name="deadline" />
+                            <label for="modalEstMinutes">Est. Minutes</label>
+                            <input type="number" id="modalEstMinutes" name="estimated_minutes" min="5" step="5" placeholder="30" required />
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="modalEstMinutes">Est. Minutes</label>
-                            <input type="number" id="modalEstMinutes" name="estimated_minutes" min="5" step="5" placeholder="30" required />
-                        </div>
-
-                        <div class="form-group">
                             <label for="modalPriority">Priority</label>
                             <select id="modalPriority" name="priority" required>
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
                             </select>
                         </div>
                     </div>
@@ -236,8 +229,6 @@
         </div>
     </div>
 
-    <!-- Single JS file link -->
     <script src="{{ url_for('static', filename='planner.js') }}"></script>
 </body>
 </html>
-
