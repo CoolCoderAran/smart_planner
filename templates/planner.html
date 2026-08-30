@@ -1,240 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligent Task Organizer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='planner.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligent Task Planner</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="logo">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner Logo">
-            </a>
-            <ul class="nav-links">
-                <li><a href="/planner">Planner</a></li>
-                <li><a href="/features">Features</a></li>
-                <li><a href="/about">About</a></li>
-            </ul>
-        </div>
-
-        <div class="nav-right">
-            {% if session.get("user") %}
-            <div class="account-menu">
-                <button class="account-btn">
-                    <span class="account-avatar">
-                        {{ session["user"][0].upper() }}
-                    </span>
-                    <span class="account-name">
-                        {{ session["user"] }}
-                    </span>
-                    ▾
-                </button>
-                <div class="account-dropdown">
-                    <a href="/planner">Dashboard</a>
-                    <a href="/logout">Logout</a>
-                </div>
-            </div>
-            {% else %}
-            <a href="/login" class="nav-login">Login</a>
-            <a href="/signup" class="nav-signup">Get Started</a>
-            {% endif %}
-        </div>
-    </nav>    
-
-    <!-- TOPBAR -->
-    <nav class="topbar">
-       <center><h1>Intelligent Task Planner</h1></center>
-    </nav>
-
-    <!-- SIDEBAR -->
-    <div id="sidebar" class="sidebar">
-        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
-        <a href="#" class="sidebar-filter-link active" data-filter="all">📋 Dashboard</a>
-        <a href="#" class="sidebar-filter-link" data-filter="today">📅 Today's Tasks</a>
-        <a href="#" class="sidebar-filter-link" data-filter="upcoming">⏳ Upcoming</a>
-        <a href="#" class="sidebar-filter-link" data-filter="completed">✅ Completed</a>
-        <a href="/logout">🚪 Logout</a>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="#" class="logo"><img src="logo.png" alt="Logo" /></a>
+      <ul class="nav-links">
+        <li><a href="planner.html" class="active">Planner</a></li>
+        <li><a href="calendar.html">Calendar</a></li>
+      </ul>
     </div>
+    <div class="nav-right">
+      <div class="account-menu">
+        <button class="account-btn">
+          <span class="account-avatar">G</span>
+          GoodBoy57
+        </button>
+      </div>
+    </div>
+  </nav>
 
-    <!-- MAIN PAGE CONTENT -->
-    <div id="mainContent" class="main-content">
+  <!-- App Main Wrapper -->
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-title">Menu</div>
+      <ul class="sidebar-nav">
+        <li><a href="#" class="active">Dashboard</a></li>
+        <li><a href="#">Today's Tasks</a></li>
+        <li><a href="#">Upcoming</a></li>
+        <li><a href="#">Completed</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Content -->
+    <main class="main-content">
+      <header class="planner-header">
+        <h1>Intelligent Task Planner</h1>
+        <p class="header-subtitle">Manage your daily tasks and remain productive.</p>
         
-        <!-- HEADER / CONTROLS -->
-        <header class="planner-header">
-            <div class="search-wrapper">
-                <button class="open-btn" onclick="toggleSidebar()">&#9776; Menu</button>
-                <div class="search-bar">
-                    <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
-                </div>
-                <button class="add-task-btn" onclick="openModal()">+ Add Task</button>
-            </div>
-
-            <!-- Filter Tabs -->
-            <div class="filter-bar">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="today">Today</button>
-                <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-                <button class="filter-btn" data-filter="completed">Completed</button>
-            </div>
-        </header>
-
-        <main class="container">
-            <p class="date-display">Today's Date: <span id="current-date"></span></p>
-
-            <!-- TODAY TASKS SECTION -->
-            <section class="task-section" data-section="today">
-                <h2>Today</h2>
-                <div id="today-tasks" class="task-list">
-                    {% for task in tasks if not task.completed and (task.due_date == 'Today' or task.due_date == today_date) %}
-                    <div class="task-card" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="today">
-                        <div class="task-info">
-                            <div class="task-title">
-                                {% if task.priority == 'high' %}🔴{% elif task.priority == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
-                            </div>
-                            <div class="task-subject">{{ task.subject }}</div>
-                            <div class="task-meta">
-                                <span>⏱ {{ task.estimated_minutes }} min</span> · 
-                                <span>📅 Due: {{ task.due_date }}</span>
-                                {% if task.created_at %}
-                                <span> · Created: {{ task.created_at[:10] }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
-                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title }}', '{{ task.subject }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
-                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p class="no-tasks">No tasks scheduled for today!</p>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <!-- UPCOMING TASKS SECTION -->
-            <section class="task-section" data-section="upcoming">
-                <h2>Upcoming</h2>
-                <div id="upcoming-tasks" class="task-list">
-                    {% for task in tasks if not task.completed and task.due_date != 'Today' and task.due_date != today_date %}
-                    <div class="task-card" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="upcoming">
-                        <div class="task-info">
-                            <div class="task-title">
-                                {% if task.priority == 'high' %}🔴{% elif task.priority == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
-                            </div>
-                            <div class="task-subject">{{ task.subject }}</div>
-                            <div class="task-meta">
-                                <span>⏱ {{ task.estimated_minutes }} min</span> · 
-                                <span>📅 Due: {{ task.due_date }}</span>
-                                {% if task.created_at %}
-                                <span> · Created: {{ task.created_at[:10] }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
-                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title }}', '{{ task.subject }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
-                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p class="no-tasks">No upcoming tasks!</p>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <!-- COMPLETED TASKS SECTION -->
-            <section class="task-section" data-section="completed">
-                <h2>Completed</h2>
-                <div id="completed-tasks" class="task-list">
-                    {% for task in tasks if task.completed %}
-                    <div class="task-card completed" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="true" data-category="completed">
-                        <div class="task-info">
-                            <div class="task-title">
-                                <s>{{ task.title }}</s>
-                            </div>
-                            <div class="task-subject">{{ task.subject }}</div>
-                            <div class="task-meta">
-                                <span>⏱ {{ task.estimated_minutes }} min</span> · 
-                                <span>📅 Completed</span>
-                                {% if task.created_at %}
-                                <span> · Created: {{ task.created_at[:10] }}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">↩ Undo</button>
-                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p class="no-tasks">No completed tasks yet!</p>
-                    {% endfor %}
-                </div>
-            </section>
-        </main>
-
-        <!-- MODAL OVERLAY & WINDOW -->
-        <div id="taskModal" class="modal-overlay">
-            <div class="modal-content">
-                <span class="modal-close" onclick="closeModal()">&times;</span>
-                <h2>Add New Task</h2>
-                
-                <form id="addTaskForm">
-                    <input type="hidden" id="modalTaskId" name="task_id" value="">
-
-                    <div class="form-group">
-                        <label for="modalTaskName">Task Name</label>
-                        <input type="text" id="modalTaskName" name="title" pattern=".*\S.*" title="Title cannot be empty or just spaces" placeholder="e.g., Read Chapter 4 & take notes" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="modalSubject">Subject / Course</label>
-                        <input type="text" id="modalSubject" name="subject" pattern=".*\S.*" title="Subject cannot be empty or just spaces" placeholder="e.g., AP Computer Science / MATH 101" required />
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="modalDueDate">Due Date</label>
-                            <input type="date" id="modalDueDate" name="due_date" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="modalDeadline">Deadline (Time)</label>
-                            <input type="time" id="modalDeadline" name="deadline" />
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="modalEstMinutes">Est. Minutes</label>
-                            <input type="number" id="modalEstMinutes" name="estimated_minutes" min="5" step="5" placeholder="30" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="modalPriority">Priority</label>
-                            <select id="modalPriority" name="priority" required>
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                        <button type="submit" class="btn-submit">Save Task</button>
-                    </div>
-                </form>
-            </div>
+        <div class="search-wrapper">
+          <div class="search-bar">
+            <input type="text" placeholder="Start typing to search..." />
+          </div>
+          <button class="add-task-btn">+ Add Task</button>
         </div>
-    </div>
+      </header>
 
-    <!-- Single JS file link -->
-    <script src="{{ url_for('static', filename='planner.js') }}"></script>
+      <div class="planner-shell">
+        <div class="filter-bar">
+          <button class="filter-btn active">All</button>
+          <button class="filter-btn">Today</button>
+          <button class="filter-btn">Upcoming</button>
+          <button class="filter-btn">Completed</button>
+        </div>
+
+        <section class="task-section">
+          <h2>Today</h2>
+          <div class="task-list">
+            <p class="empty-state">No tasks scheduled for today!</p>
+          </div>
+        </section>
+
+        <section class="task-section">
+          <h2>Upcoming</h2>
+          <div class="task-list">
+            <p class="empty-state">No upcoming tasks!</p>
+          </div>
+        </section>
+
+        <section class="task-section">
+          <h2>Completed</h2>
+          <div class="task-list">
+            <p class="empty-state">No completed tasks yet!</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
