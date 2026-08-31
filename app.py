@@ -2,7 +2,6 @@ from datetime import timedelta, datetime, date
 import re
 import sqlite3
 
-
 from flask import (
     Flask,
     flash,
@@ -16,8 +15,8 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import achievements
-import db
-import planner
+import db_2 as db
+import planner_2 as planner
 import streaks
 
 app = Flask(__name__)
@@ -26,30 +25,32 @@ app.permanent_session_lifetime = timedelta(days=30)
 
 db.init_db()
 
-from datetime import datetime, timedelta
+# Helper Validation Functions
 
 def validate_task_date(date_str):
+    if not date_str:
+        return True, None
     try:
-        # Parse the incoming date string (assuming 'YYYY-MM-DD' format)
         task_date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         return False, "Invalid date format. Use YYYY-MM-DD."
 
-    # 1. Restrict year between 2000 and 2050
     if not (2000 <= task_date.year <= 2050):
         return False, "Year must be between 2000 and 2050."
 
-    # 2. Prevent dates older than 6 months (approx. 182 days) in the past
-    today = datetime.now().date()
-    six_months_ago = today - timedelta(days=182)
+    return True, task_date.strftime("%Y-%m-%d")
 
-    if task_date < six_months_ago:
-        return False, "Task date cannot be more than 6 months in the past."
+# Fix 15: Validate due_time format (HH:MM)
+def validate_task_time(time_str):
+    if not time_str:
+        return True, ""
+    try:
+        parsed_time = datetime.strptime(time_str, "%H:%M")
+        return True, parsed_time.strftime("%H:%M")
+    except ValueError:
+        return False, "Invalid time format. Use HH:MM (24-hour)."
 
-    return True, task_date
-    
 Common_Patterns = {"password", "123456", "qwerty", "admin", "@123"}
-
 
 def secure_password(password):
     if len(password) < 12:
@@ -91,20 +92,7 @@ def dashboard():
 
     streak_data = streaks.get_streak_data(username)
     achievement_data = achievements.get_user_achievements(username)
-
-    conn = db.get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT id, task
-        FROM tasks
-        WHERE username = ?
-        ORDER BY id DESC
-        """,
-        (username,),
-    )
-    tasks = cursor.fetchall()
-    conn.close()
+    tasks = planner.get_planner_tasks(username)
 
     return render_template(
         "dashboard.html",
@@ -115,25 +103,14 @@ def dashboard():
     )
 
 
+# Fix 18: Unauthenticated access redirect for /study
 @app.route("/study")
 def study():
     username = session.get("user")
     if not username:
         return redirect(url_for("login"))
 
-    conn = db.get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT id, task
-        FROM tasks
-        WHERE username = ?
-        ORDER BY id DESC
-        """,
-        (username,),
-    )
-    tasks = cursor.fetchall()
-    conn.close()
+    tasks = planner.get_planner_tasks(username)
 
     return render_template(
         "study.html",
@@ -149,10 +126,7 @@ def save_study_session():
     if username is None:
         return jsonify({"success": False, "message": "Not logged in"}), 401
 
-    data = request.get_json()
-    if not data:
-        return jsonify({"success": False, "message": "No data received"}), 400
-
+    data = request.get_json(silent=True) or {}
     mode = data.get("mode", "Unknown")
     task = data.get("task", "")
 
@@ -166,18 +140,6 @@ def save_study_session():
 
     conn = db.get_db()
     cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT 1
-        FROM tasks
-        WHERE username = ?
-          AND task = ?
-        """,
-        (username, task),
-    )
-    if cursor.fetchone() is None:
-        task = ""
 
     try:
         cursor.execute(
@@ -204,82 +166,6 @@ def save_study_session():
     return jsonify({"success": True})
 
 
-@app.route("/get_study_stats")
-def get_study_stats():
-    username = session.get("user")
-
-    if username is None:
-        return jsonify({
-            "today_minutes": 0,
-            "weekly_minutes": 0,
-            "total_sessions": 0,
-            "total_minutes": 0,
-            "today_sessions": 0,
-            "current_streak": 0,
-            "best_streak": 0,
-            "achievement_count": 0,
-        })
-
-    conn = db.get_db()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT COUNT(*), COALESCE(SUM(minutes), 0)
-        FROM study_sessions
-        WHERE username = ?
-        """,
-        (username,),
-    )
-    total_sessions, total_minutes = cursor.fetchone()
-
-    cursor.execute(
-        """
-        SELECT COALESCE(SUM(minutes), 0)
-        FROM study_sessions
-        WHERE username = ? AND DATE(completed_at) = DATE('now')
-        """,
-        (username,),
-    )
-    today_minutes = cursor.fetchone()[0]
-
-    cursor.execute(
-        """
-        SELECT COALESCE(SUM(minutes), 0)
-        FROM study_sessions
-        WHERE username = ? AND DATE(completed_at) >= DATE('now', '-6 days')
-        """,
-        (username,),
-    )
-    weekly_minutes = cursor.fetchone()[0]
-
-    cursor.execute(
-        """
-        SELECT COUNT(*)
-        FROM study_sessions
-        WHERE username = ? AND DATE(completed_at) = DATE('now')
-        """,
-        (username,),
-    )
-    today_sessions = cursor.fetchone()[0]
-
-    conn.close()
-
-    streak_data = streaks.get_streak_data(username)
-    achievement_count = achievements.get_count(username)
-
-    return jsonify({
-        "today_minutes": today_minutes,
-        "weekly_minutes": weekly_minutes,
-        "total_sessions": total_sessions,
-        "total_minutes": total_minutes,
-        "today_sessions": today_sessions,
-        "current_streak": streak_data["current_streak"],
-        "best_streak": streak_data["best_streak"],
-        "achievement_count": achievement_count,
-    })
-
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if "user" in session:
@@ -294,10 +180,7 @@ def signup():
             return redirect(url_for("signup"))
 
         if not secure_password(password):
-            flash(
-                "Password must contain 12+ characters, uppercase, lowercase,"
-                " number, and symbol."
-            )
+            flash("Password must contain 12+ characters, uppercase, lowercase, number, and symbol.")
             return redirect(url_for("signup"))
 
         hashed_password = generate_password_hash(password)
@@ -307,10 +190,7 @@ def signup():
 
         try:
             cursor.execute(
-                """
-                INSERT INTO users (username, password)
-                VALUES (?, ?)
-                """,
+                "INSERT INTO users (username, password) VALUES (?, ?)",
                 (username, hashed_password),
             )
             conn.commit()
@@ -329,6 +209,7 @@ def signup():
     return render_template("signup.html")
 
 
+# Fix 20: Explicit flash error messages on login failure
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "user" in session:
@@ -338,28 +219,19 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
+        if not username or not password:
+            flash("Please provide both username and password.")
+            return redirect(url_for("login"))
+
         conn = db.get_db()
         cursor = conn.cursor()
 
-        cursor.execute(
-            """
-            SELECT password
-            FROM users
-            WHERE username = ?
-            """,
-            (username,),
-        )
+        cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
         user = cursor.fetchone()
         conn.close()
 
-        if not user:
-            flash("User not found.")
-            return redirect(url_for("login"))
-
-        stored_password = user[0]
-
-        if not check_password_hash(stored_password, password):
-            flash("Incorrect password.")
+        if not user or not check_password_hash(user[0], password):
+            flash("Invalid username or password.")
             return redirect(url_for("login"))
 
         session.permanent = True
@@ -370,85 +242,117 @@ def login():
     return render_template("login.html")
 
 
+# Fix 19: Clean session invalidation on logout
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
+
+# Fix 16: Unauthenticated access redirect for /planner
 @app.route("/planner")
 def planner_view():
     username = session.get("user")
     if not username:
         return redirect(url_for("login"))
 
-    # Fetch tasks for the logged-in user
     user_tasks = planner.get_planner_tasks(username)
-
     return render_template("planner.html", tasks=user_tasks, username=username)
-    
+
+
+# Fixes 11, 12, 13, 14, 15: Server-side task creation validation
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task_route():
     username = session.get("user")
     if not username:
         return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
-    # Extract parameters from JSON or Form submission
     data = request.get_json(silent=True) or request.form
 
+    # Fix 11: Sanitize and reject whitespace-only or empty titles
     title = (data.get("title") or data.get("modalTaskName") or "").strip()
     subject = (data.get("subject") or data.get("modalTaskSubject") or "").strip()
     due_date = data.get("due_date") or data.get("modalDueDate") or None
-    priority = data.get("priority") or data.get("modalPriority") or "Medium"
+    due_time = data.get("due_time") or data.get("modalDueTime") or None
+    raw_priority = data.get("priority") or data.get("modalPriority") or "Medium"
 
-    # Input validation
-    if not title or not subject:
-        return jsonify({"status": "error", "message": "Title and subject are required."}), 400
+    if not title:
+        return jsonify({"status": "error", "message": "Task title is required."}), 400
 
-    # Parse estimated minutes
+    # Fix 12: Character limit capping
+    if len(title) > 255:
+        return jsonify({"status": "error", "message": "Title cannot exceed 255 characters."}), 400
+    if len(subject) > 255:
+        return jsonify({"status": "error", "message": "Subject cannot exceed 255 characters."}), 400
+
+    # Fix 13: Validate estimated minutes
     try:
         raw_minutes = data.get("estimated_minutes") or data.get("modalEstMinutes") or 30
         estimated_minutes = int(raw_minutes)
+        if estimated_minutes < 0:
+            return jsonify({"status": "error", "message": "Estimated minutes cannot be negative."}), 400
+        if estimated_minutes == 0:
+            estimated_minutes = 30
     except (ValueError, TypeError):
         estimated_minutes = 30
 
-    # Optional: Date format/range check using existing helper
+    # Fix 14: Whitelist priority validation
+    priority = raw_priority if raw_priority in ["Low", "Medium", "High"] else "Medium"
+
+    # Date validation
     if due_date:
         valid_date, date_or_msg = validate_task_date(due_date)
         if not valid_date:
             return jsonify({"status": "error", "message": date_or_msg}), 400
-        due_date = date_or_msg.strftime("%Y-%m-%d")
+        due_date = date_or_msg
 
-    # Insert task into DB
+    # Fix 15: Time validation
+    if due_time:
+        valid_time, time_or_msg = validate_task_time(due_time)
+        if not valid_time:
+            return jsonify({"status": "error", "message": time_or_msg}), 400
+        due_time = time_or_msg
+
     success = planner.add_planner_task(
         username=username,
         title=title,
         subject=subject,
         due_date=due_date,
+        due_time=due_time,
         estimated_minutes=estimated_minutes,
-        priority=priority
+        priority=priority,
     )
 
     if success:
         return jsonify({"status": "success", "message": "Task added successfully"}), 200
     
     return jsonify({"status": "error", "message": "Database insertion failed"}), 500
-    
+
+
 @app.route("/planner/update/<int:task_id>", methods=["POST"])
 def planner_update(task_id):
     username = session.get("user")
     if not username:
         return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    title = request.form.get("title")
-    subject = request.form.get("subject")
-    due_date = request.form.get("due_date")
-    raw_minutes = request.form.get("estimated_minutes") or 30
-    priority = request.form.get("priority") or "Medium"
+    data = request.get_json(silent=True) or request.form
+
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"success": False, "error": "Task title is required."}), 400
+
+    subject = (data.get("subject") or "").strip()
+    due_date = data.get("due_date") or None
+    due_time = data.get("due_time") or None
+    raw_priority = data.get("priority") or "Medium"
+    completed = data.get("completed")
 
     try:
-        estimated_minutes = int(raw_minutes)
+        estimated_minutes = max(0, int(data.get("estimated_minutes") or 30))
     except (ValueError, TypeError):
         estimated_minutes = 30
+
+    priority = raw_priority if raw_priority in ["Low", "Medium", "High"] else "Medium"
 
     changed = planner.update_planner_task(
         username=username,
@@ -456,8 +360,10 @@ def planner_update(task_id):
         title=title,
         subject=subject,
         due_date=due_date,
+        due_time=due_time,
         estimated_minutes=estimated_minutes,
         priority=priority,
+        completed=completed,
     )
 
     if changed:
@@ -488,23 +394,19 @@ def planner_delete(task_id):
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "Task not found"}), 404
 
-    
+
+# Fix 17: Unauthenticated access redirect for /calendar
 @app.route("/calendar")
 def calendar_view():
     username = session.get("user")
     if not username:
         return redirect(url_for("login"))
 
-    # Use planner helper function with the logged-in username
     user_tasks = planner.get_planner_tasks(username)
 
     today_str = date.today().isoformat()
-    selected_year = request.args.get(
-        "year", default=date.today().year, type=int
-    )
-    selected_month = request.args.get(
-        "month", default=date.today().month, type=int
-    )
+    selected_year = request.args.get("year", default=date.today().year, type=int)
+    selected_month = request.args.get("month", default=date.today().month, type=int)
 
     return render_template(
         "calendar.html",
@@ -513,32 +415,6 @@ def calendar_view():
         month=selected_month,
         today_date=today_str,
     )
-
-@app.route("/subscribe", methods=["POST"])
-def subscribe():
-    email = request.form.get("email", "").strip()
-
-    if not email:
-        return redirect(url_for("home"))
-
-    conn = db.get_db()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute(
-            """
-            INSERT INTO subscribers (email)
-            VALUES (?)
-            """,
-            (email,),
-        )
-        conn.commit()
-        flash("Successfully subscribed!")
-    except sqlite3.IntegrityError:
-        flash("Email already subscribed.")
-
-    conn.close()
-    return redirect(url_for("home"))
 
 
 @app.errorhandler(404)
