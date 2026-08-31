@@ -254,3 +254,43 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+// Fix 21: Parse date string directly as local YYYY-MM-DD to avoid timezone shifting
+function parseLocalDate(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+// Fix 23: Format and render deadline times on calendar task elements
+function formatTaskTime(timeStr) {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const formattedHour = h % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+}
+
+// Fix 24 & 25: Calendar-to-Planner bi-directional synchronization via fetch API
+async function toggleCalendarTask(taskId) {
+    const res = await fetch(`/planner/toggle/${taskId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        window.location.reload();
+    } else {
+        alert(data.error || 'Failed to toggle task completion.');
+    }
+}
+
+async function deleteCalendarTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    const res = await fetch(`/planner/delete/${taskId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        window.location.reload();
+    } else {
+        alert(data.error || 'Failed to delete task.');
+    }
+}
