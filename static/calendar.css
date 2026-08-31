@@ -370,6 +370,24 @@ body {
     border-color: var(--accent-blue);
 }
 
+/* Week View Layout Override */
+.calendar-grid:has(.week-view-day) {
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-day.week-view-day {
+    min-height: 250px;
+}
+
+/* Day View Layout Override */
+.calendar-grid:has(.day-view-full) {
+    grid-template-columns: 1fr;
+}
+
+.calendar-day.day-view-full {
+    min-height: 400px;
+}
+
 /* =========================================================
    HOUR 4 & 5 EXTENSIONS (OVERDUE, EMPTY STATES, MOBILE)
 ========================================================= */
