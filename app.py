@@ -395,7 +395,7 @@ def planner_delete(task_id):
     return jsonify({"success": False, "error": "Task not found"}), 404
 
 
-# Fix 17: Unauthenticated access redirect for /calendar
+# Fix 22: Clean month boundary wrap-around logic for calendar navigation
 @app.route("/calendar")
 def calendar_view():
     username = session.get("user")
@@ -403,17 +403,35 @@ def calendar_view():
         return redirect(url_for("login"))
 
     user_tasks = planner.get_planner_tasks(username)
+    
+    today = date.today()
+    selected_year = request.args.get("year", default=today.year, type=int)
+    selected_month = request.args.get("month", default=today.month, type=int)
 
-    today_str = date.today().isoformat()
-    selected_year = request.args.get("year", default=date.today().year, type=int)
-    selected_month = request.args.get("month", default=date.today().month, type=int)
+    # Normalize month boundaries (1-12)
+    if selected_month > 12:
+        selected_year += (selected_month - 1) // 12
+        selected_month = ((selected_month - 1) % 12) + 1
+    elif selected_month < 1:
+        selected_year -= abs(selected_month) // 12 + 1
+        selected_month = 12 - (abs(selected_month) % 12)
+
+    # Calculate previous and next month/year values for template controls
+    prev_month = 12 if selected_month == 1 else selected_month - 1
+    prev_year = selected_year - 1 if selected_month == 1 else selected_year
+    next_month = 1 if selected_month == 12 else selected_month + 1
+    next_year = selected_year + 1 if selected_month == 12 else selected_year
 
     return render_template(
         "calendar.html",
         tasks=user_tasks,
         year=selected_year,
         month=selected_month,
-        today_date=today_str,
+        prev_month=prev_month,
+        prev_year=prev_year,
+        next_month=next_month,
+        next_year=next_year,
+        today_date=today.strftime("%Y-%m-%d"),
     )
 
 
