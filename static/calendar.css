@@ -268,6 +268,7 @@ body {
    GLASS MODALS
    ========================================================================== */
 .modal-overlay {
+    display: none; /* Add this line */
     position: fixed;
     top: 0;
     left: 0;
