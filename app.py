@@ -128,18 +128,31 @@ def save_study_session():
 
     data = request.get_json(silent=True) or {}
     mode = data.get("mode", "Unknown")
-    task = data.get("task", "")
+    task_title = (data.get("task") or "").strip()
 
     try:
-        minutes = max(0, int(data.get("minutes", 0)))
+        minutes = int(data.get("minutes", 0))
     except (ValueError, TypeError):
         minutes = 0
 
+    # Fix 27: Reject zero or negative study minutes server-side
     if minutes <= 0:
-        return jsonify({"success": False, "message": "Invalid study time."}), 400
+        return jsonify({"success": False, "message": "Study time must be greater than 0 minutes."}), 400
 
     conn = db.get_db()
     cursor = conn.cursor()
+
+    # Fix 26: Validate that the selected task belongs strictly to the logged-in user
+    if task_title:
+        cursor.execute(
+            """
+            SELECT 1 FROM planner_tasks
+            WHERE username = ? AND title = ?
+            """,
+            (username, task_title),
+        )
+        if cursor.fetchone() is None:
+            task_title = ""  # Disassociate task if user ownership fails
 
     try:
         cursor.execute(
@@ -150,7 +163,7 @@ def save_study_session():
             (
                 username,
                 mode,
-                task,
+                task_title,
                 minutes,
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             ),
@@ -161,10 +174,11 @@ def save_study_session():
         return jsonify({"success": False, "error": str(e)}), 500
 
     conn.close()
+
+    # Fix 29: Execute achievement checks strictly isolated to active user
     achievements.check_achievements(username)
 
-    return jsonify({"success": True})
-
+    return jsonify({"success": True, "message": "Study session saved successfully."}), 200
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -439,6 +453,16 @@ def calendar_view():
 def page_not_found(error):
     return render_template("404.html"), 404
 
+def build_response(success, message="", data=None, status_code=200):
+    payload = {
+        "success": success,
+        "message": message,
+        "status": "success" if success else "error"
+    }
+    if data is not None:
+        payload["data"] = data
+    return jsonify(payload), status_code
+    
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000, debug=True)
