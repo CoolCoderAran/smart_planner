@@ -201,7 +201,12 @@ function renderCalendarTasks() {
             if (!tasksContainer) return;
 
             const badge = document.createElement("div");
-            badge.className = `calendar-task-badge ${task.completed ? "completed" : ""}`;
+           // Change this line inside renderCalendarTasks():
+// badge.className = `calendar-task-badge ${task.completed ? "completed" : ""}`;
+
+// To this:
+const priorityClass = task.priority ? `priority-${task.priority.toLowerCase()}` : '';
+badge.className = `calendar-task-badge ${priorityClass} ${task.completed ? "completed" : ""}`;
             badge.textContent = task.title;
 
             badge.addEventListener("click", (e) => {
