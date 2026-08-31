@@ -10,90 +10,102 @@ def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
+    try:
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        task TEXT NOT NULL
-    )
-    """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            task TEXT NOT NULL
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS subscribers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL
-    )
-    """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS study_sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        mode TEXT NOT NULL,
-        task TEXT,
-        minutes INTEGER NOT NULL,
-        completed_at TEXT NOT NULL
-    )
-    """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS study_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            mode TEXT NOT NULL,
+            task TEXT,
+            minutes INTEGER NOT NULL,
+            completed_at TEXT NOT NULL
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS planner_tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        title TEXT NOT NULL,
-        subject TEXT,
-        due_date TEXT,
-        estimated_minutes INTEGER NOT NULL DEFAULT 30,
-        priority TEXT NOT NULL DEFAULT 'Medium',
-        completed INTEGER NOT NULL DEFAULT 0,
-        created_at TEXT NOT NULL
-    )
-    """)
+        # Fix 1: Added due_time column
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS planner_tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            title TEXT NOT NULL,
+            subject TEXT,
+            due_date TEXT,
+            due_time TEXT,
+            estimated_minutes INTEGER NOT NULL DEFAULT 30,
+            priority TEXT NOT NULL DEFAULT 'Medium',
+            completed INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS achievements (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        description TEXT NOT NULL,
-        icon TEXT,
-        requirement_type TEXT NOT NULL,
-        requirement_value INTEGER NOT NULL
-    )
-    """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS achievements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL,
+            description TEXT NOT NULL,
+            icon TEXT,
+            requirement_type TEXT NOT NULL,
+            requirement_value INTEGER NOT NULL
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS user_achievements (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        achievement_id INTEGER NOT NULL,
-        earned_at TEXT NOT NULL,
-        UNIQUE(username, achievement_id)
-    )
-    """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_achievements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            achievement_id INTEGER NOT NULL,
+            earned_at TEXT NOT NULL,
+            UNIQUE(username, achievement_id)
+        )
+        """)
 
-    insert_achievements(cursor)
+        # Fix 2: Schema Migration Guard for existing databases
+        cursor.execute("PRAGMA table_info(planner_tasks)")
+        columns = [column[1] for column in cursor.fetchall()]
+        if "due_time" not in columns:
+            cursor.execute("ALTER TABLE planner_tasks ADD COLUMN due_time TEXT")
 
-    conn.commit()
-    conn.close()
+        insert_achievements(cursor)
+        conn.commit()
+    finally:
+        # Fix 3: Ensured connections close properly
+        conn.close()
 
 def delete_task(task_id: int):
     conn = get_db()
     cursor = conn.cursor()
     try:
+        # Fix 4: Parameterized query safety
         cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
     finally:
+        # Fix 3: Connection cleanup
         conn.close()
 
 def insert_achievements(cursor):
@@ -117,6 +129,7 @@ def insert_achievements(cursor):
         ("Marathon", "Study 180 minutes in one day", "🏃", "dailyminutes", 180)
     ]
 
+    # Fix 4: Parameterized query insertion
     cursor.executemany(
         """
         INSERT OR IGNORE INTO achievements
