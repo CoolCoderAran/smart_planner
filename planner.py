@@ -2,18 +2,20 @@ from datetime import datetime
 import sqlite3
 import db
 
-def add_planner_task(username, title, subject, due_date, estimated_minutes, priority):
-    """Inserts a new task into planner_tasks and returns success status."""
+# Fix 5: Expanded add_planner_task signature & INSERT statement to include due_time
+def add_planner_task(username, title, subject, due_date, due_time, estimated_minutes, priority):
+    """Inserts a new task into planner_tasks with due_time and returns success status."""
     conn = db.get_db()
     cursor = conn.cursor()
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     try:
+        # Fix 4: Parameterized binding across all inputs
         cursor.execute("""
             INSERT INTO planner_tasks (
-                username, title, subject, due_date, estimated_minutes, priority, completed, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 0, ?)
-        """, (username, title, subject, due_date, estimated_minutes, priority, created_at))
+                username, title, subject, due_date, due_time, estimated_minutes, priority, completed, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)
+        """, (username, title, subject, due_date, due_time, estimated_minutes, priority, created_at))
         conn.commit()
         return True
     except sqlite3.Error as e:
@@ -21,6 +23,7 @@ def add_planner_task(username, title, subject, due_date, estimated_minutes, prio
         print(f"Database insertion error: {e}")
         return False
     finally:
+        # Fix 3: Guaranteed resource cleanup
         conn.close()
         
 def get_planner_tasks(username):
