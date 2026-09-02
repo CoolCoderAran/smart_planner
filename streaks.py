@@ -7,29 +7,25 @@ import db
 # =====================================
 
 def get_study_days(username):
-
     conn = db.get_db()
     cursor = conn.cursor()
 
+    # Fix 28: DISTINCT DATE filtering ensures single daily bucket for streaks
     cursor.execute(
         """
         SELECT DISTINCT DATE(completed_at)
         FROM study_sessions
-        WHERE username = ?
+        WHERE username = ? AND completed_at IS NOT NULL
         ORDER BY DATE(completed_at) DESC
         """,
         (username,)
     )
 
     rows = cursor.fetchall()
-
     conn.close()
 
     return [
-        datetime.strptime(
-            row[0],
-            "%Y-%m-%d"
-        ).date()
+        datetime.strptime(row[0], "%Y-%m-%d").date()
         for row in rows
         if row[0]
     ]
