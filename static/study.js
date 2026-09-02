@@ -119,40 +119,48 @@ function resetTimer(){
     loadMode();
 }
 
-function sessionFinished() {
+function sessionFinished(){
+
     let completedMinutes;
 
-    if (currentMode === "custom") {
-        completedMinutes = parseInt(
-            document.getElementById("customFocus").value
-        ) || 0;
-    } else {
-        completedMinutes = MODES[currentMode].focus;
+    if(currentMode==="custom"){
+
+        completedMinutes=
+            parseInt(
+                document.getElementById("customFocus").value
+            );
+
+    }else{
+
+        completedMinutes=
+            MODES[currentMode].focus;
     }
 
-    const taskSelectElement = document.getElementById("taskSelect");
-    const selectedTask = taskSelectElement ? taskSelectElement.value : "General Study";
+    fetch("/save_study_session",{
 
-    fetch("/save_study_session", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
         },
-        body: JSON.stringify({
-            mode: currentMode,
-            task: selectedTask,
-            minutes: completedMinutes
+
+        body:JSON.stringify({
+
+            mode:currentMode,
+
+            task:
+                document.getElementById(
+                    "taskSelect"
+                ).value,
+
+            minutes:completedMinutes
+
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadStats();
-        }
-    })
-    .catch(err => console.error("Error saving session:", err));
+
+    });
 
     alert("Focus session complete!");
+
     switchPhase();
 }
 
