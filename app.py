@@ -15,8 +15,8 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import achievements
-import db_2 as db
-import planner_2 as planner
+import db
+import planner
 import streaks
 
 app = Flask(__name__)
