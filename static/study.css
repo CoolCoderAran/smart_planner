@@ -25,25 +25,28 @@
 
 /* NAVBAR */
 /* FIXED TOP NAVBAR */
+/* NAVBAR HEIGHT & LOGO FIX */
 .navbar {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 0 30px 0;
-    padding: 16px 40px;
+    height: 64px; /* Fixed height */
+    padding: 0 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
-    /* Full-width glass strip */
-    background: rgba(15, 23, 42, 0.65);
+    background: rgba(15, 23, 42, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-radius: 0;
-    border-top: none;
-    border-left: none;
-    border-right: none;
     border-bottom: 1px solid var(--glass-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 32px; /* Restricts giant images */
+    width: auto;
+    object-fit: contain;
 }
 
 /* Ensure body removes top offset */
