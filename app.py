@@ -180,6 +180,62 @@ def save_study_session():
 
     return jsonify({"success": True, "message": "Study session saved successfully."}), 200
 
+@app.route("/get_study_stats")
+def get_study_stats():
+    username = session.get("user")
+    if not username:
+        return jsonify({
+            "today_minutes": 0,
+            "weekly_minutes": 0,
+            "total_sessions": 0,
+            "total_minutes": 0
+        }), 401
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    try:
+        # Today's minutes
+        cursor.execute("""
+            SELECT COALESCE(SUM(minutes), 0)
+            FROM study_sessions
+            WHERE username = ? AND DATE(completed_at) = DATE('now', 'localtime')
+        """, (username,))
+        today_minutes = cursor.fetchone()[0]
+
+        # Weekly minutes (last 7 days)
+        cursor.execute("""
+            SELECT COALESCE(SUM(minutes), 0)
+            FROM study_sessions
+            WHERE username = ? AND DATE(completed_at) >= DATE('now', 'localtime', '-7 days')
+        """, (username,))
+        weekly_minutes = cursor.fetchone()[0]
+
+        # Total sessions
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM study_sessions
+            WHERE username = ?
+        """, (username,))
+        total_sessions = cursor.fetchone()[0]
+
+        # Total minutes
+        cursor.execute("""
+            SELECT COALESCE(SUM(minutes), 0)
+            FROM study_sessions
+            WHERE username = ?
+        """, (username,))
+        total_minutes = cursor.fetchone()[0]
+
+    finally:
+        conn.close()
+
+    return jsonify({
+        "today_minutes": today_minutes,
+        "weekly_minutes": weekly_minutes,
+        "total_sessions": total_sessions,
+        "total_minutes": total_minutes
+    })
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if "user" in session:
@@ -293,13 +349,11 @@ def add_planner_task_route():
     if not title:
         return jsonify({"status": "error", "message": "Task title is required."}), 400
 
-    # Fix 12: Character limit capping
     if len(title) > 255:
         return jsonify({"status": "error", "message": "Title cannot exceed 255 characters."}), 400
     if len(subject) > 255:
         return jsonify({"status": "error", "message": "Subject cannot exceed 255 characters."}), 400
 
-    # Fix 13: Validate estimated minutes
     try:
         raw_minutes = data.get("estimated_minutes") or data.get("modalEstMinutes") or 30
         estimated_minutes = int(raw_minutes)
@@ -310,7 +364,6 @@ def add_planner_task_route():
     except (ValueError, TypeError):
         estimated_minutes = 30
 
-    # Fix 14: Whitelist priority validation
     priority = raw_priority if raw_priority in ["Low", "Medium", "High"] else "Medium"
 
     # Date validation
