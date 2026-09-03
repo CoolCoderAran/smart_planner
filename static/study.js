@@ -131,6 +131,10 @@ async function loadStats() {
         document.getElementById("totalSessions").innerText = data.total_sessions || 0;
         document.getElementById("totalMinutes").innerText = data.total_minutes || 0;
 
+        // Populate Streaks
+        document.getElementById("currentStreak").innerText = `${data.current_streak || 0} Days`;
+        document.getElementById("bestStreak").innerText = `${data.best_streak || 0} Days`;
+
         // Daily Goal progress update (Target: 120 mins)
         const target = 120;
         const pct = Math.min(100, Math.round((today / target) * 100));
