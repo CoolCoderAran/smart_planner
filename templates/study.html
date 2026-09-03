@@ -6,9 +6,9 @@
     <title>Focus Mode • Smart Planner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='study_2.css') }}">
 </head>
-<body>
+<body class="focus-body">
 
-<nav class="navbar">
+<nav class="navbar glass-card">
     <div class="nav-left">
         <a href="/" class="logo">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner">
@@ -16,7 +16,7 @@
         <ul class="nav-links">
             <li><a href="/planner">Planner</a></li>
             <li><a href="/calendar">Calendar</a></li>
-            <li><a href="/study">Focus Mode</a></li>
+            <li><a href="/study" class="active">Focus Mode</a></li>
         </ul>
     </div>
     <div class="nav-right">
@@ -26,7 +26,7 @@
                 <span class="account-avatar">{{ session["user"][0].upper() }}</span>
                 <span>{{ session["user"] }}</span>
             </button>
-            <div class="account-dropdown">
+            <div class="account-dropdown glass-card">
                 <a href="/dashboard">Dashboard</a>
                 <a href="/logout">Logout</a>
             </div>
@@ -35,9 +35,9 @@
     </div>
 </nav>
 
-<div class="study-container">
+<main class="study-container">
     <!-- TIMER GLASS CARD -->
-    <div class="glass-card timer-card">
+    <section class="glass-card timer-card">
         <span id="phaseLabel" class="phase-badge">Focus Time</span>
         
         <div class="timer-ring">
@@ -50,10 +50,10 @@
             <button class="glass-btn" onclick="resumeTimer()">Resume</button>
             <button class="glass-btn danger" onclick="resetTimer()">Reset</button>
         </div>
-    </div>
+    </section>
 
     <!-- CONFIGURATION PANEL -->
-    <div class="glass-card config-card">
+    <section class="glass-card config-card">
         <h2>Session Setup</h2>
         
         <div class="input-group">
@@ -95,11 +95,11 @@
             </div>
             <div class="goal-bar"><div id="goalFill"></div></div>
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
 <!-- STATS GRID -->
-<div class="stats-section">
+<section class="stats-section">
     <div class="stats-grid">
         <div class="glass-card stat-card">
             <h3 id="todayMinutes">0</h3>
@@ -118,7 +118,7 @@
             <p>Total Focus Mins</p>
         </div>
     </div>
-</div>
+</section>
 
 <script src="{{ url_for('static', filename='study_2.js') }}"></script>
 </body>
