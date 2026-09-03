@@ -3,224 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Mode</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='study.css') }}">
+    <title>Focus Mode • Smart Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='study_2.css') }}">
 </head>
 <body>
-<!-- ================= NAVBAR ================= -->
 
 <nav class="navbar">
-
-    <!-- LEFT SIDE -->
     <div class="nav-left">
-
         <a href="/" class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}"
-                 alt="Smart Planner Logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner">
         </a>
-
         <ul class="nav-links">
-
-            <li>
-                <a href="/planner">
-                    Planner
-                </a>
-            </li>
-
-            <li>
-                <a href="/features">
-                    Features
-                </a>
-            </li>
-
-            <li>
-                <a href="/about">
-                    About
-                </a>
-            </li>
-
+            <li><a href="/planner">Planner</a></li>
+            <li><a href="/calendar">Calendar</a></li>
+            <li><a href="/study">Focus Mode</a></li>
         </ul>
-
     </div>
-
-    <!-- RIGHT SIDE -->
     <div class="nav-right">
-
         {% if session.get("user") %}
-
         <div class="account-menu">
-
             <button class="account-btn">
-
-                <span class="account-avatar">
-                    {{ session["user"][0].upper() }}
-                </span>
-
-                <span class="account-name">
-                    {{ session["user"] }}
-                </span>
-
-                ▾
-
+                <span class="account-avatar">{{ session["user"][0].upper() }}</span>
+                <span>{{ session["user"] }}</span>
             </button>
-
             <div class="account-dropdown">
-
-                <a href="/planner">
-                    Dashboard
-                </a>
-
-                <a href="/logout">
-                    Logout
-                </a>
-
+                <a href="/dashboard">Dashboard</a>
+                <a href="/logout">Logout</a>
             </div>
-
         </div>
-
-        {% else %}
-
-        <a href="/login" class="nav-login">
-            Login
-        </a>
-
-        <a href="/signup" class="nav-signup">
-            Get Started
-        </a>
-
         {% endif %}
-
     </div>
-
-</nav>    
-<nav class="topbar">
-<center>
-  <h1>Study Mode</h1>
-</center>
-    
 </nav>
 
-<div class="study-page">
+<div class="study-container">
+    <!-- TIMER GLASS CARD -->
+    <div class="glass-card timer-card">
+        <span id="phaseLabel" class="phase-badge">Focus Time</span>
+        
+        <div class="timer-ring">
+            <div id="timerDisplay">25:00</div>
+        </div>
 
-    <div class="hero">
-        <h1>Focus Timer</h1>
-        <p>Eliminate distractions and maximize productivity.</p>
-    </div>
-
-<div class="timer-controls">
-    <div class="form-group">
-        <label for="modeSelect">Select Mode:</label>
-        <select id="modeSelect" class="form-control">
-            <option value="pomodoro">Pomodoro (25/5)</option>
-            <option value="deepwork">Deep Work (90/15)</option>
-            <option value="quickburst">Quick Burst (15/3)</option>
-            <option value="examcrunch">Exam Crunch (50/10)</option>
-            <option value="custom">Custom</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="taskSelect">Link to Active Task:</label>
-        <select id="taskSelect" class="form-control">
-            <option value="General Study">-- General Study Session --</option>
-            {% for task in tasks %}
-                <option value="{{ task.title }}">{{ task.title }} ({{ task.subject }})</option>
-            {% endfor %}
-        </select>
-    </div>
-</div>
-
-            <div class="controls">
-                <button onclick="startTimer()">Start</button>
-                <button onclick="pauseTimer()">Pause</button>
-                <button onclick="resumeTimer()">Resume</button>
-                <button onclick="resetTimer()">Reset</button>
-            </div>
+        <div class="control-btn-group">
+            <button class="glass-btn primary" onclick="startTimer()">Start</button>
+            <button class="glass-btn" onclick="pauseTimer()">Pause</button>
+            <button class="glass-btn" onclick="resumeTimer()">Resume</button>
+            <button class="glass-btn danger" onclick="resetTimer()">Reset</button>
         </div>
     </div>
 
-    <div class="settings-section">
-        <div class="settings-card">
-            <h2>Study Session</h2>
-            
-            <label>Timer Mode</label>
-            <select id="modeSelect">
-                <option value="pomodoro">Pomodoro (25/5)</option>
-                <option value="deepwork">Deep Work (90/15)</option>
-                <option value="quickburst">Quick Burst (15/3)</option>
-                <option value="examcrunch">Exam Crunch (50/10)</option>
-                <option value="custom">Custom</option>
+    <!-- CONFIGURATION PANEL -->
+    <div class="glass-card config-card">
+        <h2>Session Setup</h2>
+        
+        <div class="input-group">
+            <label for="modeSelect">Timer Mode</label>
+            <select id="modeSelect" class="glass-input">
+                <option value="pomodoro">Pomodoro (25m / 5m)</option>
+                <option value="deepwork">Deep Work (90m / 15m)</option>
+                <option value="quickburst">Quick Burst (15m / 3m)</option>
+                <option value="examcrunch">Exam Crunch (50m / 10m)</option>
+                <option value="custom">Custom Mode</option>
             </select>
+        </div>
 
-            <div id="customSettings" style="display:none">
-                <label>Focus Minutes</label>
-                <input type="number" id="customFocus" value="30">
-
-                <label>Break Minutes</label>
-                <input type="number" id="customBreak" value="5">
+        <div id="customSettings" class="custom-group" style="display:none;">
+            <div class="input-group">
+                <label for="customFocus">Focus (Mins)</label>
+                <input type="number" id="customFocus" value="30" min="1" class="glass-input">
             </div>
+            <div class="input-group">
+                <label for="customBreak">Break (Mins)</label>
+                <input type="number" id="customBreak" value="5" min="1" class="glass-input">
+            </div>
+        </div>
 
-            <label>Task</label>
-            <select id="taskSelect">
+        <div class="input-group">
+            <label for="taskSelect">Active Planner Task</label>
+            <select id="taskSelect" class="glass-input">
+                <option value="">-- General Focus Session --</option>
                 {% for task in tasks %}
-                <option value="{{ task[1] }}">{{ task[1] }}</option>
+                <option value="{{ task.title }}">{{ task.title }} ({{ task.subject or 'General' }})</option>
                 {% endfor %}
             </select>
         </div>
-    </div>
 
-    <div class="goal-card">
-        <h3>Daily Goal</h3>
-        <div class="goal-bar">
-            <div id="goalFill"></div>
-        </div>
-        <p>
-            <span id="todayGoalMinutes">0</span> / 120 minutes
-        </p>
-    </div>
-
-    <div class="stats-section">
-        <h2>Statistics</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h2 id="todayMinutes">0</h2>
-                <p>Today</p>
+        <div class="goal-wrapper">
+            <div class="goal-text">
+                <span>Daily Goal Progress</span>
+                <span id="goalProgressText">0 / 120 mins</span>
             </div>
-
-            <div class="stat-card">
-                <h2 id="weeklyMinutes">0</h2>
-                <p>This Week</p>
-            </div>
-
-            <div class="stat-card">
-                <h2 id="totalSessions">0</h2>
-                <p>Sessions</p>
-            </div>
-
-            <div class="stat-card">
-                <h2 id="totalMinutes">0</h2>
-                <p>Total Minutes</p>
-            </div>
+            <div class="goal-bar"><div id="goalFill"></div></div>
         </div>
     </div>
-<div class="streak-card">
-
-    <h3>🔥 Current Streak</h3>
-    <p>
-        {{ streak_data.current_streak }}
-        Days
-    </p>
-
-    <h3>🏆 Best Streak</h3>
-    <p>
-        {{ streak_data.best_streak }}
-        Days
-    </p>
-
-</div>
 </div>
 
-<script src="{{ url_for('static', filename='study.js') }}"></script>
+<!-- STATS GRID -->
+<div class="stats-section">
+    <div class="stats-grid">
+        <div class="glass-card stat-card">
+            <h3 id="todayMinutes">0</h3>
+            <p>Today (Mins)</p>
+        </div>
+        <div class="glass-card stat-card">
+            <h3 id="weeklyMinutes">0</h3>
+            <p>This Week (Mins)</p>
+        </div>
+        <div class="glass-card stat-card">
+            <h3 id="totalSessions">0</h3>
+            <p>Completed Sessions</p>
+        </div>
+        <div class="glass-card stat-card">
+            <h3 id="totalMinutes">0</h3>
+            <p>Total Focus Mins</p>
+        </div>
+    </div>
+</div>
 
+<script src="{{ url_for('static', filename='study_2.js') }}"></script>
 </body>
 </html>
