@@ -416,6 +416,46 @@
     font-family: inherit;
 }
 
+/* ADDED SPACING BETWEEN STATS AND BOTTOM SECTION */
+.study-bottom-section {
+    max-width: 1200px;
+    margin: 40px auto 40px; /* Top margin adds breathing room below stats */
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 30px;
+}
+
+/* EXPANDED AMBIENT GRID FOR 6 SOUNDS */
+.ambient-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.ambient-btn {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 6px;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+}
+
+.ambient-btn:hover, .ambient-btn.playing {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: var(--accent);
+}
+
+.ambient-icon {
+    font-size: 1.3rem;
+}
 /* AMBIENT AUDIO */
 .ambient-card h3 {
     margin-bottom: 4px;
