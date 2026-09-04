@@ -75,6 +75,8 @@ async function sessionFinished() {
         completedMinutes = MODES[currentMode].focus;
     }
 
+    const selectedTask = document.getElementById("taskSelect").value;
+
     if (!isBreak && completedMinutes > 0) {
         try {
             const res = await fetch("/save_study_session", {
@@ -82,14 +84,16 @@ async function sessionFinished() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     mode: currentMode,
-                    task: document.getElementById("taskSelect").value,
+                    task: selectedTask || "General Focus",
                     minutes: completedMinutes
                 })
             });
 
             const data = await res.json();
             if (data.success) {
+                // Refresh both the stats counters and the history log table instantly
                 await loadStats();
+                await loadHistory();
             }
         } catch (err) {
             console.error("Failed to save study session:", err);
