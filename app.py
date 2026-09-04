@@ -131,25 +131,30 @@ def study():
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
     username = session.get("user")
-    if username is None:
-        return jsonify({"success": False, "message": "Not logged in"}), 401
+    if not username:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    data = request.get_json(silent=True) or {}
-    mode = data.get("mode", "Unknown")
-    task_title = (data.get("task") or "").strip()
+    data = request.get_json() or {}
+    mode = data.get("mode", "pomodoro")
+    task = data.get("task") or "General Focus"
+    minutes = int(data.get("minutes", 0))
 
-    try:
-        minutes = int(data.get("minutes", 0))
-    except (ValueError, TypeError):
-        minutes = 0
-
-    # Fix 27: Reject zero or negative study minutes server-side
     if minutes <= 0:
-        return jsonify({"success": False, "message": "Study time must be greater than 0 minutes."}), 400
+        return jsonify({"success": False, "error": "Invalid duration"}), 400
 
     conn = db.get_db()
     cursor = conn.cursor()
 
+    try:
+        cursor.execute("""
+            INSERT INTO study_sessions (username, mode, task, minutes, completed_at)
+            VALUES (?, ?, ?, ?, DATETIME('now', 'localtime'))
+        """, (username, mode, task, minutes))
+        conn.commit()
+    finally:
+        conn.close()
+
+    return jsonify({"success": True})
     # Fix 26: Validate that the selected task belongs strictly to the logged-in user
     if task_title:
         cursor.execute(
@@ -183,7 +188,6 @@ def save_study_session():
 
     conn.close()
 
-    # Fix 29: Execute achievement checks strictly isolated to active user
     achievements.check_achievements(username)
 
     return jsonify({"success": True, "message": "Study session saved successfully."}), 200
@@ -287,7 +291,6 @@ def signup():
     return render_template("signup.html")
 
 
-# Fix 20: Explicit flash error messages on login failure
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "user" in session:
