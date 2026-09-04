@@ -103,21 +103,29 @@ def dashboard():
     )
 
 
-# Fix 18: Unauthenticated access redirect for /study
+
 @app.route("/study")
 def study():
     username = session.get("user")
     if not username:
-        return redirect(url_for("login"))
+        return redirect("/login")
 
-    tasks = planner.get_planner_tasks(username)
+    conn = db.get_db()
+    cursor = conn.cursor()
 
-    return render_template(
-        "study.html",
-        username=username,
-        tasks=tasks,
-        streak_data=streaks.get_streak_data(username),
-    )
+    try:
+        # Fetch active/incomplete tasks for the current user
+        cursor.execute("""
+            SELECT title, subject 
+            FROM tasks 
+            WHERE username = ? AND is_completed = 0
+            ORDER BY created_at DESC
+        """, (username,))
+        tasks = [{"title": row[0], "subject": row[1]} for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+    return render_template("study_2.html", tasks=tasks)
 
 
 @app.route("/save_study_session", methods=["POST"])
@@ -312,14 +320,12 @@ def login():
     return render_template("login.html")
 
 
-# Fix 19: Clean session invalidation on logout
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
 
-# Fix 16: Unauthenticated access redirect for /planner
 @app.route("/planner")
 def planner_view():
     username = session.get("user")
@@ -330,7 +336,6 @@ def planner_view():
     return render_template("planner.html", tasks=user_tasks, username=username)
 
 
-# Fixes 11, 12, 13, 14, 15: Server-side task creation validation
 @app.route("/planner/add", methods=["POST"])
 def add_planner_task_route():
     username = session.get("user")
@@ -339,7 +344,6 @@ def add_planner_task_route():
 
     data = request.get_json(silent=True) or request.form
 
-    # Fix 11: Sanitize and reject whitespace-only or empty titles
     title = (data.get("title") or data.get("modalTaskName") or "").strip()
     subject = (data.get("subject") or data.get("modalTaskSubject") or "").strip()
     due_date = data.get("due_date") or data.get("modalDueDate") or None
