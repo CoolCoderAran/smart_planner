@@ -103,7 +103,6 @@ def dashboard():
     )
 
 
-
 @app.route("/study")
 def study():
     username = session.get("user")
@@ -127,61 +126,34 @@ def study():
 
     return render_template("study_2.html", tasks=tasks)
 
-
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
     username = session.get("user")
-    if username is None:
-        return jsonify({"success": False, "message": "Not logged in"}), 401
+    if not username:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    data = request.get_json(silent=True) or {}
-    mode = data.get("mode", "Unknown")
-    task_title = (data.get("task") or "").strip()
+    data = request.get_json() or {}
+    mode = data.get("mode", "pomodoro")
+    task = data.get("task") or "General Focus"
+    minutes = int(data.get("minutes", 0))
 
-    try:
-        minutes = int(data.get("minutes", 0))
-    except (ValueError, TypeError):
-        minutes = 0
-
-    # Fix 27: Reject zero or negative study minutes server-side
     if minutes <= 0:
-        return jsonify({"success": False, "message": "Study time must be greater than 0 minutes."}), 400
+        return jsonify({"success": False, "error": "Invalid duration"}), 400
 
     conn = db.get_db()
     cursor = conn.cursor()
 
-    # Fix 26: Validate that the selected task belongs strictly to the logged-in user
-    if task_title:
-        cursor.execute(
-            """
-            SELECT 1 FROM planner_tasks
-            WHERE username = ? AND title = ?
-            """,
-            (username, task_title),
-        )
-        if cursor.fetchone() is None:
-            task_title = ""  # Disassociate task if user ownership fails
-
     try:
-        cursor.execute(
-            """
+        cursor.execute("""
             INSERT INTO study_sessions (username, mode, task, minutes, completed_at)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (
-                username,
-                mode,
-                task_title,
-                minutes,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            ),
-        )
+            VALUES (?, ?, ?, ?, DATETIME('now', 'localtime'))
+        """, (username, mode, task, minutes))
         conn.commit()
-    except Exception as e:
+    finally:
         conn.close()
-        return jsonify({"success": False, "error": str(e)}), 500
 
-    conn.close()
+    return jsonify({"success": True})
+
 
     # Fix 29: Execute achievement checks strictly isolated to active user
     achievements.check_achievements(username)
