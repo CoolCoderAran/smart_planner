@@ -124,7 +124,7 @@ def study():
     finally:
         conn.close()
 
-    return render_template("study_2.html", tasks=tasks)
+    return render_template("study.html", tasks=tasks)
 
 
 @app.route("/save_study_session", methods=["POST"])
