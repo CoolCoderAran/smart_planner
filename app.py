@@ -501,7 +501,34 @@ def calendar_view():
         today_date=today.strftime("%Y-%m-%d"),
     )
 
+@app.route("/get_recent_sessions")
+def get_recent_sessions():
+    username = session.get("user")
+    if not username:
+        return jsonify([]), 401
 
+    conn = db.get_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT task, mode, minutes, completed_at
+            FROM study_sessions
+            WHERE username = ?
+            ORDER BY completed_at DESC
+            LIMIT 5
+        """, (username,))
+        rows = cursor.fetchall()
+        
+        history = [
+            {"task": r[0], "mode": r[1], "minutes": r[2], "completed_at": r[3]}
+            for r in rows
+        ]
+    finally:
+        conn.close()
+
+    return jsonify(history)
+    
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template("404.html"), 404
