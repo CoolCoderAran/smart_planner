@@ -116,8 +116,8 @@ def study():
     try:
         cursor.execute("""
             SELECT title, subject 
-            FROM tasks 
-            WHERE username = ? AND is_completed = 0
+            FROM planner_tasks 
+            WHERE username = ? AND completed = 0
             ORDER BY created_at DESC
         """, (username,))
         tasks = [{"title": row[0], "subject": row[1]} for row in cursor.fetchall()]
