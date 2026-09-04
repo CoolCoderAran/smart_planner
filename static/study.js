@@ -176,7 +176,10 @@ function toggleAudio(type) {
     const soundMap = {
         rain: { audio: document.getElementById("audioRain"), btn: event.currentTarget },
         lofi: { audio: document.getElementById("audioLofi"), btn: event.currentTarget },
-        waves: { audio: document.getElementById("audioWaves"), btn: event.currentTarget }
+        waves: { audio: document.getElementById("audioWaves"), btn: event.currentTarget },
+        forest: { audio: document.getElementById("audioForest"), btn: event.currentTarget },
+        cafe: { audio: document.getElementById("audioCafe"), btn: event.currentTarget },
+        fire: { audio: document.getElementById("audioFire"), btn: event.currentTarget }
     };
 
     const target = soundMap[type];
