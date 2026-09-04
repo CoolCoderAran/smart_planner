@@ -138,6 +138,67 @@
     </div>
 </section>
 
+<!-- BOTTOM UTILITY SECTION -->
+<section class="study-bottom-section">
+    <!-- LEFT: TABBED LOG & NOTES CONTAINER -->
+    <div class="glass-card bottom-tab-card">
+        <div class="tab-header">
+            <button class="tab-btn active" onclick="switchTab('history')">Session History</button>
+            <button class="tab-btn" onclick="switchTab('notes')">Quick Notepad</button>
+        </div>
+
+        <!-- TAB 1: HISTORY TABLE -->
+        <div id="tabHistory" class="tab-content active">
+            <div class="table-wrapper">
+                <table class="session-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Mode</th>
+                            <th>Duration</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionHistoryBody">
+                        <tr><td colspan="4" class="empty-msg">Loading history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: BRAIN DUMP NOTES -->
+        <div id="tabNotes" class="tab-content">
+            <textarea id="brainDumpNotes" class="glass-textarea" placeholder="Jot down quick thoughts, ideas, or distractions here... (Auto-saved)"></textarea>
+        </div>
+    </div>
+
+    <!-- RIGHT: AMBIENT AUDIO PLAYER -->
+    <div class="glass-card ambient-card">
+        <h3>Ambient Sounds</h3>
+        <p class="ambient-sub">Select background noise to stay in the zone</p>
+        
+        <div class="ambient-grid">
+            <button class="ambient-btn" onclick="toggleAudio('rain')">
+                <span class="ambient-icon">🌧️</span>
+                <span>Rain</span>
+            </button>
+            <button class="ambient-btn" onclick="toggleAudio('lofi')">
+                <span class="ambient-icon">🎧</span>
+                <span>Lo-Fi</span>
+            </button>
+            <button class="ambient-btn" onclick="toggleAudio('waves')">
+                <span class="ambient-icon">🌊</span>
+                <span>Ocean</span>
+            </button>
+        </div>
+
+        <!-- Hidden Audio Elements -->
+        <audio id="audioRain" loop src="https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3"></audio>
+        <audio id="audioLofi" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
+        <audio id="audioWaves" loop src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_88c75e2b47.mp3"></audio>
+    </div>
+</section>
+    
 <script src="{{ url_for('static', filename='study.js') }}"></script>
 </body>
 </html>
