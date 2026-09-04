@@ -1,4 +1,5 @@
-from datetime import timedelta, datetime, date
+from datetime import datetime, timedelta, date
+import os
 import re
 import sqlite3
 
@@ -20,7 +21,7 @@ import planner
 import streaks
 
 app = Flask(__name__)
-app.secret_key = "long_secure_secret_key"
+app.secret_key = os.environ.get("SECRET_KEY", "fallback_dev_key_only_for_local")
 app.permanent_session_lifetime = timedelta(days=30)
 
 db.init_db()
@@ -40,7 +41,7 @@ def validate_task_date(date_str):
 
     return True, task_date.strftime("%Y-%m-%d")
 
-# Fix 15: Validate due_time format (HH:MM)
+
 def validate_task_time(time_str):
     if not time_str:
         return True, ""
@@ -107,13 +108,12 @@ def dashboard():
 def study():
     username = session.get("user")
     if not username:
-        return redirect("/login")
+        return redirect(url_for("login"))
 
     conn = db.get_db()
     cursor = conn.cursor()
 
     try:
-        # Fetch active/incomplete tasks for the current user
         cursor.execute("""
             SELECT title, subject 
             FROM tasks 
@@ -125,6 +125,7 @@ def study():
         conn.close()
 
     return render_template("study_2.html", tasks=tasks)
+
 
 @app.route("/save_study_session", methods=["POST"])
 def save_study_session():
@@ -152,13 +153,11 @@ def save_study_session():
     finally:
         conn.close()
 
-    return jsonify({"success": True})
-
-
-    # Fix 29: Execute achievement checks strictly isolated to active user
+    # Execute achievement check for the user
     achievements.check_achievements(username)
 
     return jsonify({"success": True, "message": "Study session saved successfully."}), 200
+
 
 @app.route("/get_study_stats")
 def get_study_stats():
@@ -168,7 +167,9 @@ def get_study_stats():
             "today_minutes": 0,
             "weekly_minutes": 0,
             "total_sessions": 0,
-            "total_minutes": 0
+            "total_minutes": 0,
+            "current_streak": 0,
+            "best_streak": 0
         }), 401
 
     conn = db.get_db()
@@ -210,12 +211,47 @@ def get_study_stats():
     finally:
         conn.close()
 
+    streak_data = streaks.get_streak_data(username) or {}
+
     return jsonify({
         "today_minutes": today_minutes,
         "weekly_minutes": weekly_minutes,
         "total_sessions": total_sessions,
-        "total_minutes": total_minutes
+        "total_minutes": total_minutes,
+        "current_streak": streak_data.get("current_streak", 0),
+        "best_streak": streak_data.get("best_streak", 0)
     })
+
+
+@app.route("/get_recent_sessions")
+def get_recent_sessions():
+    username = session.get("user")
+    if not username:
+        return jsonify([]), 401
+
+    conn = db.get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT task, mode, minutes, completed_at
+            FROM study_sessions
+            WHERE username = ?
+            ORDER BY completed_at DESC
+            LIMIT 5
+        """, (username,))
+        rows = cursor.fetchall()
+
+        history = [
+            {"task": r[0], "mode": r[1], "minutes": r[2], "completed_at": r[3]}
+            for r in rows
+        ]
+    finally:
+        conn.close()
+
+    return jsonify(history)
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if "user" in session:
@@ -259,7 +295,6 @@ def signup():
     return render_template("signup.html")
 
 
-# Fix 20: Explicit flash error messages on login failure
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "user" in session:
@@ -342,14 +377,12 @@ def add_planner_task_route():
 
     priority = raw_priority if raw_priority in ["Low", "Medium", "High"] else "Medium"
 
-    # Date validation
     if due_date:
         valid_date, date_or_msg = validate_task_date(due_date)
         if not valid_date:
             return jsonify({"status": "error", "message": date_or_msg}), 400
         due_date = date_or_msg
 
-    # Fix 15: Time validation
     if due_time:
         valid_time, time_or_msg = validate_task_time(due_time)
         if not valid_time:
@@ -368,7 +401,7 @@ def add_planner_task_route():
 
     if success:
         return jsonify({"status": "success", "message": "Task added successfully"}), 200
-    
+
     return jsonify({"status": "error", "message": "Database insertion failed"}), 500
 
 
@@ -438,7 +471,6 @@ def planner_delete(task_id):
     return jsonify({"success": False, "error": "Task not found"}), 404
 
 
-# Fix 22: Clean month boundary wrap-around logic for calendar navigation
 @app.route("/calendar")
 def calendar_view():
     username = session.get("user")
@@ -446,20 +478,19 @@ def calendar_view():
         return redirect(url_for("login"))
 
     user_tasks = planner.get_planner_tasks(username)
-    
+
     today = date.today()
     selected_year = request.args.get("year", default=today.year, type=int)
     selected_month = request.args.get("month", default=today.month, type=int)
 
-    # Normalize month boundaries (1-12)
-    if selected_month > 12:
-        selected_year += (selected_month - 1) // 12
-        selected_month = ((selected_month - 1) % 12) + 1
-    elif selected_month < 1:
-        selected_year -= abs(selected_month) // 12 + 1
-        selected_month = 12 - (abs(selected_month) % 12)
+    # Normalize month wrap-around boundaries
+    while selected_month < 1:
+        selected_month += 12
+        selected_year -= 1
+    while selected_month > 12:
+        selected_month -= 12
+        selected_year += 1
 
-    # Calculate previous and next month/year values for template controls
     prev_month = 12 if selected_month == 1 else selected_month - 1
     prev_year = selected_year - 1 if selected_month == 1 else selected_year
     next_month = 1 if selected_month == 12 else selected_month + 1
@@ -477,48 +508,11 @@ def calendar_view():
         today_date=today.strftime("%Y-%m-%d"),
     )
 
-@app.route("/get_recent_sessions")
-def get_recent_sessions():
-    username = session.get("user")
-    if not username:
-        return jsonify([]), 401
 
-    conn = db.get_db()
-    cursor = conn.cursor()
-    
-    try:
-        cursor.execute("""
-            SELECT task, mode, minutes, completed_at
-            FROM study_sessions
-            WHERE username = ?
-            ORDER BY completed_at DESC
-            LIMIT 5
-        """, (username,))
-        rows = cursor.fetchall()
-        
-        history = [
-            {"task": r[0], "mode": r[1], "minutes": r[2], "completed_at": r[3]}
-            for r in rows
-        ]
-    finally:
-        conn.close()
-
-    return jsonify(history)
-    
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template("404.html"), 404
 
-def build_response(success, message="", data=None, status_code=200):
-    payload = {
-        "success": success,
-        "message": message,
-        "status": "success" if success else "error"
-    }
-    if data is not None:
-        payload["data"] = data
-    return jsonify(payload), status_code
-    
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000, debug=True)
