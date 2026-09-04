@@ -145,6 +145,90 @@ async function loadStats() {
     }
 }
 
+// TAB SWITCHING
+function switchTab(tabName) {
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+
+    if (tabName === 'history') {
+        document.querySelectorAll(".tab-btn")[0].classList.add("active");
+        document.getElementById("tabHistory").classList.add("active");
+    } else {
+        document.querySelectorAll(".tab-btn")[1].classList.add("active");
+        document.getElementById("tabNotes").classList.add("active");
+    }
+}
+
+// BRAIN DUMP LOCALSTORAGE
+const notesElem = document.getElementById("brainDumpNotes");
+if (notesElem) {
+    notesElem.value = localStorage.getItem("focus_notes") || "";
+    notesElem.addEventListener("input", () => {
+        localStorage.setItem("focus_notes", notesElem.value);
+    });
+}
+
+// AMBIENT AUDIO CONTROLLER
+let activeAudio = null;
+let activeBtn = null;
+
+function toggleAudio(type) {
+    const soundMap = {
+        rain: { audio: document.getElementById("audioRain"), btn: event.currentTarget },
+        lofi: { audio: document.getElementById("audioLofi"), btn: event.currentTarget },
+        waves: { audio: document.getElementById("audioWaves"), btn: event.currentTarget }
+    };
+
+    const target = soundMap[type];
+
+    if (activeAudio === target.audio) {
+        activeAudio.pause();
+        activeBtn.classList.remove("playing");
+        activeAudio = null;
+        activeBtn = null;
+        return;
+    }
+
+    if (activeAudio) {
+        activeAudio.pause();
+        activeBtn.classList.remove("playing");
+    }
+
+    target.audio.play();
+    target.btn.classList.add("playing");
+    activeAudio = target.audio;
+    activeBtn = target.btn;
+}
+
+// FETCH RECENT HISTORY
+async function loadHistory() {
+    try {
+        const res = await fetch("/get_recent_sessions");
+        if (!res.ok) return;
+        const sessions = await res.json();
+        
+        const tbody = document.getElementById("sessionHistoryBody");
+        if (sessions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-msg">No recent sessions found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = sessions.map(s => `
+            <tr>
+                <td>${s.task || 'General Focus'}</td>
+                <td style="text-transform: capitalize;">${s.mode}</td>
+                <td>${s.minutes} mins</td>
+                <td>${new Date(s.completed_at).toLocaleDateString()}</td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error("Could not fetch session history", err);
+    }
+}
+
+// Hook into initial load
+loadHistory();
+
 document.getElementById("modeSelect").addEventListener("change", loadMode);
 document.getElementById("customFocus").addEventListener("change", loadMode);
 
