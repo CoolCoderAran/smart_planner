@@ -236,3 +236,17 @@ function closeCalendarModal() {
     const modal = document.getElementById("calendarTaskModal");
     if (modal) modal.style.display = "none";
 }
+
+function filterCalendarTasks() {
+    const selected = document.getElementById("subjectFilter").value;
+    const chips = document.querySelectorAll(".task-chip");
+
+    chips.forEach(chip => {
+        const chipSubject = chip.getAttribute("data-subject");
+        if (selected === "ALL" || chipSubject === selected) {
+            chip.style.display = "flex";
+        } else {
+            chip.style.display = "none";
+        }
+    });
+}
