@@ -294,3 +294,133 @@ async function deleteCalendarTask(taskId) {
         alert(data.error || 'Failed to delete task.');
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Set current date string
+    const dateDisplay = document.getElementById("current-date");
+    if (dateDisplay) {
+        const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+        dateDisplay.textContent = new Date().toLocaleDateString(undefined, options);
+    }
+
+    // Attach search event
+    const searchInput = document.getElementById("search");
+    if (searchInput) {
+        searchInput.addEventListener("input", filterTasks);
+    }
+
+    // Attach filter tab events
+    document.querySelectorAll(".filter-btn, .sidebar-filter-link").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const filter = e.currentTarget.dataset.filter;
+            setActiveFilter(filter);
+        });
+    });
+
+    // Close modal on Escape key
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeModal();
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar && sidebar.classList.contains("open")) {
+                toggleSidebar();
+            }
+        }
+    });
+});
+
+/* SIDEBAR TOGGLE */
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+    if (sidebar && overlay) {
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("active");
+    }
+}
+
+/* MODAL CONTROLS */
+function openModal() {
+    const modal = document.getElementById("taskModal");
+    const form = document.getElementById("addTaskForm");
+    const headerTitle = document.getElementById("modalHeaderTitle");
+    
+    if (form) form.reset();
+    document.getElementById("modalTaskId").value = "";
+    if (headerTitle) headerTitle.textContent = "Add New Task";
+    
+    if (modal) modal.style.display = "flex";
+}
+
+function closeModal() {
+    const modal = document.getElementById("taskModal");
+    if (modal) modal.style.display = "none";
+}
+
+function editTask(id, title, subject, estMinutes, priority, dueDate) {
+    openModal();
+    document.getElementById("modalHeaderTitle").textContent = "Edit Task";
+    document.getElementById("modalTaskId").value = id;
+    document.getElementById("modalTaskName").value = title;
+    document.getElementById("modalSubject").value = subject;
+    document.getElementById("modalEstMinutes").value = estMinutes;
+    document.getElementById("modalPriority").value = priority;
+    document.getElementById("modalDueDate").value = dueDate || "";
+}
+
+/* TASK ACTIONS (ASYNC CALLS) */
+async function completeTask(taskId) {
+    try {
+        const response = await fetch(`/planner/toggle/${taskId}`, { method: 'POST' });
+        if (response.ok) {
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error("Failed to toggle task:", err);
+    }
+}
+
+async function deleteTask(taskId) {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    try {
+        const response = await fetch(`/planner/delete/${taskId}`, { method: 'POST' });
+        if (response.ok) {
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error("Failed to delete task:", err);
+    }
+}
+
+/* FILTER & SEARCH LOGIC */
+function setActiveFilter(filter) {
+    document.querySelectorAll(".filter-btn, .sidebar-filter-link").forEach(el => {
+        el.classList.toggle("active", el.dataset.filter === filter);
+    });
+
+    const sections = document.querySelectorAll(".task-section");
+    sections.forEach(section => {
+        const secName = section.dataset.section;
+        if (filter === "all") {
+            section.style.display = "block";
+        } else {
+            section.style.display = (secName === filter) ? "block" : "none";
+        }
+    });
+}
+
+function filterTasks() {
+    const query = document.getElementById("search").value.toLowerCase();
+    const cards = document.querySelectorAll(".task-card");
+
+    cards.forEach(card => {
+        const title = card.querySelector(".task-title").textContent.toLowerCase();
+        const subject = card.querySelector(".task-subject").textContent.toLowerCase();
+        
+        if (title.includes(query) || subject.includes(query)) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
