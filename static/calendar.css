@@ -20,7 +20,7 @@
     padding: 0 20px;
 }
 
-/* CALENDAR TOOLBAR & HEADER (Restored Previous Glass Card Layout) */
+/* CALENDAR TOOLBAR & HEADER (Restored Original Glassmorphism) */
 
 .calendar-header {
     background: var(--glass-bg);
@@ -86,7 +86,9 @@
 }
 
 .glass-select {
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
     padding: 8px 14px;
@@ -97,11 +99,11 @@
 }
 
 .glass-select option {
-    background: #0f172a;
+    background: #1e1b4b;
     color: var(--text-main);
 }
 
-/* CALENDAR GRID (Restored Glass Card Container) */
+/* CALENDAR GRID (Restored Original Glass Container & Transparent Grid) */
 
 .calendar-grid {
     background: var(--glass-bg);
@@ -112,7 +114,6 @@
     border-radius: 16px;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
     overflow: hidden;
 }
 
@@ -126,30 +127,41 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--glass-border);
+    border-right: 1px solid var(--glass-border);
 }
 
-/* DAY CELL & TASK CHIPS */
+.day-header:last-child {
+    border-right: none;
+}
+
+/* DAY CELL & TASK CHIPS (Restored Original Aesthetics) */
 
 .cal-day {
-    background: rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.02);
     min-height: 120px;
     padding: 10px;
     display: flex;
     flex-direction: column;
+    border-bottom: 1px solid var(--glass-border);
+    border-right: 1px solid var(--glass-border);
     transition: background 0.2s ease;
 }
 
+.cal-day:nth-child(7n) {
+    border-right: none;
+}
+
 .cal-day:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .cal-day.other-month {
-    opacity: 0.35;
-    background: rgba(0, 0, 0, 0.25);
+    opacity: 0.3;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .cal-day.is-today {
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(139, 92, 246, 0.2);
     border: 1px solid var(--accent);
 }
 
@@ -172,7 +184,8 @@
     font-size: 0.75rem;
     padding: 4px 8px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -187,17 +200,17 @@
 
 .task-chip.priority-high {
     border-left-color: #ef4444;
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.2);
 }
 
 .task-chip.priority-medium {
     border-left-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(245, 158, 11, 0.2);
 }
 
 .task-chip.priority-low {
     border-left-color: #10b981;
-    background: rgba(16, 185, 129, 0.15);
+    background: rgba(16, 185, 129, 0.2);
 }
 
 .task-chip.overdue-chip {
@@ -222,7 +235,7 @@
     font-size: 0.7rem;
 }
 
-/* WORKLOAD DENSITY & FOCUS OVERVIEW CARD */
+/* WORKLOAD DENSITY & FOCUS OVERVIEW CARD (Unchanged New Addition) */
 
 .workload-card {
     margin-top: 24px;
