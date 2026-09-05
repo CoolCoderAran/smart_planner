@@ -3,37 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligent Task Organizer</title>
+    <title>Planner • Smart Planner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='planner.css') }}">
 </head>
-<body>
+<body class="planner-body">
 
     <!-- NAVBAR -->
-    <nav class="navbar">
+    <nav class="navbar glass-card">
         <div class="nav-left">
             <a href="/" class="logo">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Smart Planner Logo">
             </a>
             <ul class="nav-links">
-                <li><a href="/planner">Planner</a></li>
+                <li><a href="/planner" class="active">Planner</a></li>
                 <li><a href="/calendar">Calendar</a></li>
-                <li><a href="/about">About</a></li>
+                <li><a href="/study">Focus Mode</a></li>
             </ul>
         </div>
 
         <div class="nav-right">
             {% if session.get("user") %}
             <div class="account-menu">
-                <button class="account-btn">
-                    <span class="account-avatar">
-                        {{ session["user"][0].upper() }}
-                    </span>
-                    <span class="account-name">
-                        {{ session["user"] }}
-                    </span>
-                    ▾
+                <button class="account-btn glass-btn">
+                    <span class="account-avatar">{{ session["user"][0].upper() }}</span>
+                    <span class="account-name">{{ session["user"] }}</span>
                 </button>
-                <div class="account-dropdown">
+                <div class="account-dropdown glass-card">
                     <a href="/dashboard">Dashboard</a>
                     <a href="/logout">Logout</a>
                 </div>
@@ -43,37 +38,37 @@
             <a href="/signup" class="nav-signup">Get Started</a>
             {% endif %}
         </div>
-    </nav>    
-
-    <!-- TOPBAR -->
-    <nav class="topbar">
-        <h1>Intelligent Task Planner</h1>
     </nav>
 
-    <!-- SIDEBAR -->
-    <div id="sidebar" class="sidebar">
-        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
-        <a href="#" class="sidebar-filter-link active" data-filter="all">📋 Dashboard</a>
-        <a href="#" class="sidebar-filter-link" data-filter="today">📅 Today's Tasks</a>
-        <a href="#" class="sidebar-filter-link" data-filter="upcoming">⏳ Upcoming</a>
-        <a href="#" class="sidebar-filter-link" data-filter="completed">✅ Completed</a>
-        <a href="/logout">🚪 Logout</a>
-    </div>
+    <!-- SIDEBAR BACKDROP & SIDEBAR -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="sidebar glass-card">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button class="close-btn" onclick="toggleSidebar()" aria-label="Close menu">&times;</button>
+        </div>
+        <div class="sidebar-nav">
+            <a href="#" class="sidebar-filter-link active" data-filter="all">📋 All Tasks</a>
+            <a href="#" class="sidebar-filter-link" data-filter="today">📅 Today's Tasks</a>
+            <a href="#" class="sidebar-filter-link" data-filter="upcoming">⏳ Upcoming</a>
+            <a href="#" class="sidebar-filter-link" data-filter="completed">✅ Completed</a>
+            <a href="/logout" class="sidebar-logout">🚪 Logout</a>
+        </div>
+    </aside>
 
     <!-- MAIN PAGE CONTENT -->
-    <div id="mainContent" class="main-content">
+    <div id="mainContent" class="main-container">
         
-        <!-- HEADER / CONTROLS -->
-        <header class="planner-header">
-            <div class="search-wrapper">
-                <button class="open-btn" onclick="toggleSidebar()">&#9776; Menu</button>
+        <!-- HEADER & TOOLBAR CARD -->
+        <header class="planner-header glass-card">
+            <div class="toolbar-row">
+                <button class="open-btn glass-btn" onclick="toggleSidebar()">&#9776; Menu</button>
                 <div class="search-bar">
-                    <input id="search" type="search" placeholder="&#x1F50D; Start typing to search..." />
+                    <input id="search" type="search" class="glass-input" placeholder="🔍 Search tasks by title or subject..." />
                 </div>
-                <button class="add-task-btn" onclick="openModal()">+ Add Task</button>
+                <button class="add-task-btn glass-btn primary" onclick="openModal()">+ Add Task</button>
             </div>
 
-            <!-- Filter Tabs -->
             <div class="filter-bar">
                 <button class="filter-btn active" data-filter="all">All</button>
                 <button class="filter-btn" data-filter="today">Today</button>
@@ -82,18 +77,19 @@
             </div>
         </header>
 
-        <main class="container">
-            <p class="date-display">Today's Date: <span id="current-date"></span></p>
+        <main class="task-grid-container">
+            <p class="date-display">Today: <span id="current-date"></span></p>
 
             <!-- TODAY TASKS SECTION -->
             <section class="task-section" data-section="today">
                 <h2>Today</h2>
                 <div id="today-tasks" class="task-list">
                     {% for task in tasks if not task.completed and (task.due_date == 'Today' or task.due_date == today_date) %}
-                    <div class="task-card" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="today">
+                    <div class="task-card glass-card priority-{{ task.priority|lower }}" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="today">
                         <div class="task-info">
                             <div class="task-title">
-                                {% if task.priority|lower == 'high' %}🔴{% elif task.priority|lower == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
+                                <span class="priority-dot"></span>
+                                {{ task.title }}
                             </div>
                             <div class="task-subject">{{ task.subject }}</div>
                             <div class="task-meta">
@@ -105,13 +101,13 @@
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
-                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', '{{ task.subject|replace('\'', '\\\'') }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
-                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
+                            <button class="task-button complete-button glass-btn primary" onclick="completeTask({{ task.id }})">✓ Complete</button>
+                            <button class="task-button edit-button glass-btn" onclick="editTask({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', '{{ task.subject|replace('\'', '\\\'') }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
+                            <button class="task-button delete-button glass-btn danger" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
                         </div>
                     </div>
                     {% else %}
-                    <p class="no-tasks">No tasks scheduled for today!</p>
+                    <p class="no-tasks glass-card">No tasks scheduled for today!</p>
                     {% endfor %}
                 </div>
             </section>
@@ -121,10 +117,11 @@
                 <h2>Upcoming</h2>
                 <div id="upcoming-tasks" class="task-list">
                     {% for task in tasks if not task.completed and task.due_date != 'Today' and task.due_date != today_date %}
-                    <div class="task-card" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="upcoming">
+                    <div class="task-card glass-card priority-{{ task.priority|lower }}" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="false" data-category="upcoming">
                         <div class="task-info">
                             <div class="task-title">
-                                {% if task.priority|lower == 'high' %}🔴{% elif task.priority|lower == 'medium' %}🟡{% else %}🟢{% endif %} {{ task.title }}
+                                <span class="priority-dot"></span>
+                                {{ task.title }}
                             </div>
                             <div class="task-subject">{{ task.subject }}</div>
                             <div class="task-meta">
@@ -136,13 +133,13 @@
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">✓ Complete</button>
-                            <button class="task-button edit-button" onclick="editTask({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', '{{ task.subject|replace('\'', '\\\'') }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
-                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
+                            <button class="task-button complete-button glass-btn primary" onclick="completeTask({{ task.id }})">✓ Complete</button>
+                            <button class="task-button edit-button glass-btn" onclick="editTask({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', '{{ task.subject|replace('\'', '\\\'') }}', {{ task.estimated_minutes }}, '{{ task.priority }}', '{{ task.due_date }}')">✏ Edit</button>
+                            <button class="task-button delete-button glass-btn danger" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
                         </div>
                     </div>
                     {% else %}
-                    <p class="no-tasks">No upcoming tasks!</p>
+                    <p class="no-tasks glass-card">No upcoming tasks!</p>
                     {% endfor %}
                 </div>
             </section>
@@ -152,7 +149,7 @@
                 <h2>Completed</h2>
                 <div id="completed-tasks" class="task-list">
                     {% for task in tasks if task.completed %}
-                    <div class="task-card completed" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="true" data-category="completed">
+                    <div class="task-card glass-card completed" data-priority="{{ task.priority }}" data-due="{{ task.due_date }}" data-completed="true" data-category="completed">
                         <div class="task-info">
                             <div class="task-title">
                                 <s>{{ task.title }}</s>
@@ -167,12 +164,12 @@
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="task-button complete-button" onclick="completeTask({{ task.id }})">↩ Undo</button>
-                            <button class="task-button delete-button" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
+                            <button class="task-button complete-button glass-btn" onclick="completeTask({{ task.id }})">↩ Undo</button>
+                            <button class="task-button delete-button glass-btn danger" onclick="deleteTask({{ task.id }})">🗑 Delete</button>
                         </div>
                     </div>
                     {% else %}
-                    <p class="no-tasks">No completed tasks yet!</p>
+                    <p class="no-tasks glass-card">No completed tasks yet!</p>
                     {% endfor %}
                 </div>
             </section>
@@ -180,49 +177,47 @@
 
         <!-- MODAL OVERLAY & WINDOW -->
         <div id="taskModal" class="modal-overlay">
-            <div class="modal-content">
-                <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-content glass-card">
+                <button class="modal-close" onclick="closeModal()" aria-label="Close modal">&times;</button>
                 <h2 id="modalHeaderTitle">Add New Task</h2>
                 
-                <form id="addTaskForm">
+                <form id="addTaskForm" method="POST" action="/add_task">
                     <input type="hidden" id="modalTaskId" name="task_id" value="">
 
                     <div class="form-group">
                         <label for="modalTaskName">Task Name</label>
-                        <input type="text" id="modalTaskName" name="title" pattern=".*\S.*" title="Title cannot be empty or just spaces" placeholder="e.g., Read Chapter 4 & take notes" required />
+                        <input type="text" id="modalTaskName" class="glass-input" name="title" pattern=".*\S.*" title="Title cannot be empty" placeholder="e.g., Read Chapter 4 & take notes" required />
                     </div>
 
                     <div class="form-group">
                         <label for="modalSubject">Subject / Course</label>
-                        <input type="text" id="modalSubject" name="subject" pattern=".*\S.*" title="Subject cannot be empty or just spaces" placeholder="e.g., AP Computer Science / MATH 101" required />
+                        <input type="text" id="modalSubject" class="glass-input" name="subject" pattern=".*\S.*" title="Subject cannot be empty" placeholder="e.g., AP Computer Science" required />
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="modalDueDate">Due Date</label>
-                            <input type="date" id="modalDueDate" name="due_date" />
+                            <input type="date" id="modalDueDate" class="glass-input" name="due_date" />
                         </div>
 
                         <div class="form-group">
                             <label for="modalEstMinutes">Est. Minutes</label>
-                            <input type="number" id="modalEstMinutes" name="estimated_minutes" min="5" step="5" placeholder="30" required />
+                            <input type="number" id="modalEstMinutes" class="glass-input" name="estimated_minutes" min="5" step="5" placeholder="30" required />
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="modalPriority">Priority</label>
-                            <select id="modalPriority" name="priority" required>
-                                <option value="Low">Low</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="High">High</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="modalPriority">Priority</label>
+                        <select id="modalPriority" class="glass-input" name="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
                     </div>
 
                     <div class="modal-actions">
-                        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                        <button type="submit" class="btn-submit">Save Task</button>
+                        <button type="button" class="glass-btn" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="glass-btn primary">Save Task</button>
                     </div>
                 </form>
             </div>
