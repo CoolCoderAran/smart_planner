@@ -39,32 +39,84 @@
         </header>
 
         <!-- CALENDAR GRID CONTAINER -->
-        <main class="calendar-container">
-            <div class="calendar-weekdays">
-                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-            </div>
-            <div id="calendarGrid" class="calendar-grid"></div>
-        </main>
+       <div class="calendar-container">
+    <!-- CALENDAR TOOLBAR -->
+    <div class="calendar-header glass-card">
+        <div class="cal-nav">
+            <a href="{{ url_for('calendar_view', year=prev_year, month=prev_month) }}" class="cal-btn">&larr; Prev</a>
+            <h2>{{ month_name }} {{ year }}</h2>
+            <a href="{{ url_for('calendar_view', year=next_year, month=next_month) }}" class="cal-btn">Next &rarr;</a>
+            <a href="{{ url_for('calendar_view') }}" class="cal-btn today-btn">Today</a>
+        </div>
+        
+        <!-- SUBJECT FILTER CHIPS -->
+        <div class="filter-wrapper">
+            <select id="subjectFilter" onchange="filterCalendarTasks()" class="glass-select">
+                <option value="ALL">All Subjects</option>
+                {% for sub in subjects %}
+                    <option value="{{ sub }}">{{ sub }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 
-    <!-- Calendar Task Details Modal -->
-    <div id="calendarTaskModal" class="modal-overlay" style="display:none;">
-      <div class="modal-content">
-        <button class="modal-close" onclick="closeCalendarModal()">&times;</button>
-        <h3 id="calModalTitle">Task Details</h3>
-        <p><strong>Subject:</strong> <span id="calModalSubject"></span></p>
-        <p><strong>Due Date:</strong> <span id="calModalDueDate"></span></p>
-        <p><strong>Priority:</strong> <span id="calModalPriority"></span></p>
-        <p><strong>Est. Time:</strong> <span id="calModalEst"></span> mins</p>
-        <p><strong>Status:</strong> <span id="calModalStatus"></span></p>
-        
-        <div class="modal-actions">
-            <button id="calToggleBtn" class="task-button complete-button">Toggle Complete</button>
-            <button id="calEditBtn" class="task-button edit-button">Edit</button>
-            <button id="calDeleteBtn" class="task-button delete-button">Delete</button>
-        </div>
-      </div>
+    <!-- MAIN CALENDAR GRID -->
+    <div class="calendar-grid glass-card">
+        <div class="day-header">Sun</div>
+        <div class="day-header">Mon</div>
+        <div class="day-header">Tue</div>
+        <div class="day-header">Wed</div>
+        <div class="day-header">Thu</div>
+        <div class="day-header">Fri</div>
+        <div class="day-header">Sat</div>
+
+        {% for cell in month_days %}
+            <div class="cal-day {% if not cell.in_month %}other-month{% endif %} {% if cell.is_today %}is-today{% endif %}">
+                <span class="day-number">{{ cell.day }}</span>
+                
+                <div class="day-tasks">
+                    {% for task in cell.tasks %}
+                        <div class="task-chip priority-{{ task.priority | lower }} {% if task.is_overdue %}overdue-chip{% endif %}"
+                             data-subject="{{ task.subject }}">
+                            <span class="task-time">{{ task.due_time or '' }}</span>
+                            <span class="task-title">{{ task.title }}</span>
+                            {% if task.is_overdue %}
+                                <span class="overdue-badge" title="Overdue Task">⚠️</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
     </div>
+
+    <!-- BOTTOM WORKLOAD DENSITY & FOCUS CARD -->
+    <div class="glass-card workload-card">
+        <div class="workload-header">
+            <h3>Monthly Workload & Density Overview</h3>
+            <span class="workload-sub">Calculated directly from active Planner tasks</span>
+        </div>
+
+        <div class="workload-metrics">
+            <div class="metric-box">
+                <span class="metric-val">{{ total_scheduled_hours }} hrs</span>
+                <span class="metric-lbl">Total Scheduled</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-val">{{ high_priority_count }}</span>
+                <span class="metric-lbl">High Priority Tasks</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-val">{{ peak_day or 'None' }}</span>
+                <span class="metric-lbl">Peak Workload Day</span>
+            </div>
+            <div class="metric-box warning">
+                <span class="metric-val">{{ overdue_count }}</span>
+                <span class="metric-lbl">Overdue Items</span>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Edit Task Modal (Needed by editTask in planner.js) -->
     <div id="taskModal" class="modal-overlay" style="display:none;">
