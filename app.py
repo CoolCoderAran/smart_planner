@@ -14,6 +14,7 @@ from flask import (
     url_for,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
+import calendar as cal_module
 
 import achievements
 import db
@@ -477,13 +478,11 @@ def calendar_view():
     if not username:
         return redirect(url_for("login"))
 
-    user_tasks = planner.get_planner_tasks(username)
-
     today = date.today()
     selected_year = request.args.get("year", default=today.year, type=int)
     selected_month = request.args.get("month", default=today.month, type=int)
 
-    # Normalize month wrap-around boundaries
+    # Normalize month boundaries
     while selected_month < 1:
         selected_month += 12
         selected_year -= 1
@@ -496,16 +495,81 @@ def calendar_view():
     next_month = 1 if selected_month == 12 else selected_month + 1
     next_year = selected_year + 1 if selected_month == 12 else selected_year
 
+    # Fetch planner tasks
+    user_tasks = planner.get_planner_tasks(username)
+
+    # Calculate workload & analytics
+    total_est_minutes = 0
+    high_priority_count = 0
+    overdue_count = 0
+    day_workload_map = {}
+    subjects = set()
+
+    formatted_tasks_by_date = {}
+
+    for t in user_tasks:
+        if t.get("subject"):
+            subjects.add(t["subject"])
+
+        due_date_str = t.get("due_date")
+        if due_date_str:
+            if due_date_str not in formatted_tasks_by_date:
+                formatted_tasks_by_date[due_date_str] = []
+
+            is_overdue = (due_date_str < today.strftime("%Y-%m-%d")) and not t.get("is_completed")
+            if is_overdue:
+                overdue_count += 1
+
+            if t.get("priority") == "High":
+                high_priority_count += 1
+
+            est_mins = t.get("estimated_minutes", 30)
+            total_est_minutes += est_mins
+            day_workload_map[due_date_str] = day_workload_map.get(due_date_str, 0) + est_mins
+
+            formatted_tasks_by_date[due_date_str].append({
+                "title": t["title"],
+                "subject": t.get("subject", ""),
+                "priority": t.get("priority", "Medium"),
+                "due_time": t.get("due_time", ""),
+                "is_overdue": is_overdue
+            })
+
+    # Find peak day
+    peak_day = None
+    if day_workload_map:
+        peak_day = max(day_workload_map, key=day_workload_map.get)
+
+    # Generate calendar grid matrix
+    month_calendar = cal_module.Calendar(firstweekday=6).monthdatescalendar(selected_year, selected_month)
+    month_days = []
+
+    for week in month_calendar:
+        for d in week:
+            date_key = d.strftime("%Y-%m-%d")
+            month_days.append({
+                "day": d.day,
+                "date_str": date_key,
+                "in_month": d.month == selected_month,
+                "is_today": d == today,
+                "tasks": formatted_tasks_by_date.get(date_key, [])
+            })
+
     return render_template(
         "calendar.html",
-        tasks=user_tasks,
+        month_days=month_days,
         year=selected_year,
         month=selected_month,
+        month_name=cal_module.month_name[selected_month],
         prev_month=prev_month,
         prev_year=prev_year,
         next_month=next_month,
         next_year=next_year,
-        today_date=today.strftime("%Y-%m-%d"),
+        subjects=sorted(list(subjects)),
+        total_scheduled_hours=round(total_est_minutes / 60, 1),
+        high_priority_count=high_priority_count,
+        overdue_count=overdue_count,
+        peak_day=peak_day
     )
 
 
