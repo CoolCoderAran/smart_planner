@@ -1,15 +1,27 @@
-/* =========================
-   CALENDAR STYLES
-========================= */
+/* ==========================================================================
+   UPDATED CALENDAR STYLES (WITH EXTRACTED TOP HEADER)
+   ========================================================================== */
 
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.07);
-    --glass-border: rgba(255, 255, 255, 0.15);
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-bg-hover: rgba(255, 255, 255, 0.09);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-light: rgba(255, 255, 255, 0.2);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    --accent: #8b5cf6;
-    --accent-hover: #7c3aed;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --blur-strength: blur(16px);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --accent-blue: #38bdf8;
+    --accent-purple: #c084fc;
+    
+    --priority-high: #ff4d6d;
+    --priority-medium: #ffb703;
+    --priority-low: #06d6a0;
+    --completed: rgba(255, 255, 255, 0.25);
 }
 
 /* LAYOUT & CONTAINER */
@@ -20,64 +32,76 @@
     padding: 0 20px;
 }
 
-/* CALENDAR TOOLBAR & HEADER */
+/* ==========================================================================
+   INTEGRATED EXTRACTED HEADER & NAVBAR STYLES
+   ========================================================================== */
 
 .calendar-header {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    box-shadow: var(--glass-shadow);
-    padding: 16px 24px;
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-strength);
+    -webkit-backdrop-filter: var(--blur-strength);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--glass-shadow);
     flex-wrap: wrap;
     gap: 16px;
 }
 
+.calendar-nav-controls,
 .cal-nav {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 1rem;
 }
 
+.calendar-nav-controls h2,
 .cal-nav h2 {
     font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text-main);
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
     min-width: 180px;
     text-align: center;
     margin: 0;
 }
 
+/* Extracted Glass Buttons */
+.nav-btn, 
+.today-btn, 
+.view-btn, 
 .cal-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    padding: 8px 16px;
+    color: var(--text-primary);
+    padding: 0.55rem 1.1rem;
     border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
 }
 
+.nav-btn:hover, 
+.today-btn:hover, 
+.view-btn:hover, 
 .cal-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-light);
     transform: translateY(-1px);
 }
 
-.today-btn {
-    background: rgba(139, 92, 246, 0.3);
-    border-color: var(--accent);
-}
-
-.today-btn:hover {
-    background: var(--accent);
+.view-btn.active {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(192, 132, 252, 0.25));
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
 
 .filter-wrapper {
@@ -86,29 +110,37 @@
 }
 
 .glass-select {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    padding: 8px 14px;
-    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 0.55rem 1.1rem;
+    border-radius: 10px;
     outline: none;
     font-size: 0.9rem;
     cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.glass-select:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-light);
 }
 
 .glass-select option {
     background: #1e1b4b;
-    color: var(--text-main);
+    color: var(--text-primary);
 }
 
-/* CALENDAR GRID */
+/* ==========================================================================
+   CALENDAR GRID
+   ========================================================================== */
 
 .calendar-grid {
     background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: var(--blur-strength);
+    -webkit-backdrop-filter: var(--blur-strength);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
     border-radius: 16px;
@@ -123,7 +155,7 @@
     text-align: center;
     font-weight: 700;
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--glass-border);
@@ -161,14 +193,14 @@
 }
 
 .cal-day.is-today {
-    background: rgba(139, 92, 246, 0.2);
-    border: 1px solid var(--accent);
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid var(--accent-blue);
 }
 
 .day-number {
     font-weight: 700;
     font-size: 0.9rem;
-    color: var(--text-main);
+    color: var(--text-primary);
     margin-bottom: 6px;
 }
 
@@ -189,8 +221,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    border-left: 3px solid #94a3b8;
-    color: var(--text-main);
+    border-left: 3px solid var(--text-secondary);
+    color: var(--text-primary);
     transition: transform 0.15s ease;
 }
 
@@ -199,27 +231,27 @@
 }
 
 .task-chip.priority-high {
-    border-left-color: #ef4444;
-    background: rgba(239, 68, 68, 0.2);
+    border-left-color: var(--priority-high);
+    background: rgba(255, 77, 109, 0.2);
 }
 
 .task-chip.priority-medium {
-    border-left-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.2);
+    border-left-color: var(--priority-medium);
+    background: rgba(255, 183, 3, 0.2);
 }
 
 .task-chip.priority-low {
-    border-left-color: #10b981;
-    background: rgba(16, 185, 129, 0.2);
+    border-left-color: var(--priority-low);
+    background: rgba(6, 214, 160, 0.2);
 }
 
 .task-chip.overdue-chip {
-    border: 1px solid #ef4444;
+    border: 1px solid var(--priority-high);
 }
 
 .task-time {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
@@ -235,12 +267,14 @@
     font-size: 0.7rem;
 }
 
-/* WORKLOAD DENSITY & FOCUS OVERVIEW CARD (New Features Maintained) */
+/* ==========================================================================
+   WORKLOAD DENSITY & FOCUS OVERVIEW CARD (NEW ADDITIONS MAINTAINED)
+   ========================================================================== */
 
 .workload-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: var(--blur-strength);
+    -webkit-backdrop-filter: var(--blur-strength);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
     border-radius: 16px;
@@ -251,12 +285,12 @@
 .workload-header h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: var(--text-main);
+    color: var(--text-primary);
 }
 
 .workload-sub {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .workload-metrics {
@@ -278,17 +312,17 @@
 .metric-val {
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--text-primary);
 }
 
 .metric-lbl {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin-top: 4px;
 }
 
 .metric-box.warning .metric-val {
-    color: #ef4444;
+    color: var(--priority-high);
 }
 
 /* RESPONSIVE DESIGN */
@@ -299,16 +333,26 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .calendar-header {
         flex-direction: column;
+        gap: 1rem;
         align-items: stretch;
     }
-    
+
+    .calendar-nav-controls,
     .cal-nav {
         justify-content: space-between;
     }
 
+    .calendar-view-picker {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
     .workload-metrics {
         grid-template-columns: 1fr;
     }
