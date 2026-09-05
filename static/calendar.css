@@ -1,4 +1,4 @@
-/* ========================================================================== 
+/* ==========================================================================
    GLASSMORPHISM THEME VARIABLES
    ========================================================================== */
 :root {
@@ -23,7 +23,7 @@
     --completed: rgba(255, 255, 255, 0.25);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    GLOBAL RESET & BODY
    ========================================================================== */
 * {
@@ -41,7 +41,7 @@ body {
     padding-bottom: 40px;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    NAVBAR GLASS STYLING
    ========================================================================== */
 .navbar {
@@ -84,7 +84,7 @@ body {
     border: 1px solid var(--glass-border-light);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    MAIN CONTAINER & HEADER
    ========================================================================== */
 .main-content {
@@ -93,119 +93,18 @@ body {
     padding: 0 1.5rem;
 }
 
-/* CALENDAR TOOLBAR & CHIPS */
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 24px;
-    margin-bottom: 20px;
-}
-
-.today-btn {
-    background: rgba(139, 92, 246, 0.3) !important;
-    border-color: var(--accent) !important;
-}
-
-.glass-select {
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-strength);
+    -webkit-backdrop-filter: var(--blur-strength);
     border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    padding: 8px 14px;
-    border-radius: 8px;
-    outline: none;
-}
-
-/* DAY CELL & TASK CHIPS */
-.cal-day {
-    min-height: 100px;
-    padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    position: relative;
-}
-
-.cal-day.is-today {
-    background: rgba(139, 92, 246, 0.15);
-    border: 1px solid var(--accent);
-}
-
-.day-tasks {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 6px;
-}
-
-.task-chip {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border-left: 3px solid #94a3b8;
-}
-
-.task-chip.priority-high { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
-.task-chip.priority-medium { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
-.task-chip.priority-low { border-left-color: #10b981; background: rgba(16, 185, 129, 0.15); }
-
-.task-chip.overdue-chip {
-    border: 1px solid #ef4444;
-}
-
-.overdue-badge {
-    margin-left: auto;
-    font-size: 0.7rem;
-}
-
-/* WORKLOAD CARD */
-.workload-card {
-    margin-top: 24px;
-    padding: 24px;
-}
-
-.workload-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.workload-sub {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
-.workload-metrics {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-top: 16px;
-}
-
-.metric-box {
-    background: rgba(15, 23, 42, 0.4);
-    border: 1px solid var(--glass-border);
-    padding: 16px;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-}
-
-.metric-val {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.metric-lbl {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 4px;
-}
-
-.metric-box.warning .metric-val {
-    color: #ef4444;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--glass-shadow);
 }
 
 .calendar-nav-controls {
@@ -247,7 +146,7 @@ body {
     box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    CALENDAR GRID
    ========================================================================== */
 .calendar-container {
@@ -365,7 +264,7 @@ body {
     cursor: pointer;
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    GLASS MODALS
    ========================================================================== */
 .modal-overlay {
